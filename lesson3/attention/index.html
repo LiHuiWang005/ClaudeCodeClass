@@ -1,0 +1,2867 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>注意力 · 这是你余生最贵的货币</title>
+  <meta name="description" content="一份关于注意力的单页交互式论证。神经规律、心理体验、价值意义、死亡视角——拿回你的注意力主权。">
+  <meta property="og:title" content="注意力 · 这是你余生最贵的货币">
+  <meta property="og:description" content="你以为你在使用注意力，其实是它在使用你。">
+  <meta property="og:type" content="website">
+  <style>
+    /* ============================================================
+       注意力 · index.html
+       Apple 浅色 (Apple.com Light) · v0.3 spec / v1.2 task
+       单文件 · 无依赖 · 双击可开
+       ============================================================ */
+
+    /* ---------- CSS 变量 (P2-1) ---------- */
+    :root {
+      /* 色板 - Apple 浅色 */
+      --bg: #ffffff;
+      --bg-secondary: #fbfbfd;
+      --bg-card: #f5f5f7;
+      --border: rgba(0, 0, 0, 0.08);
+      --text: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --text-tertiary: #86868b;
+      --accent-blue: #0071e3;
+      --accent-red: #ff3b30;
+      --accent-green: #30d158;
+      --accent-purple: #bf5af2;
+      --accent-orange: #ff9f0a;
+      --accent-orange-warm: #f56300;
+
+      /* 间距阶梯 */
+      --space-xs: 8px;
+      --space-sm: 16px;
+      --space-md: 32px;
+      --space-lg: 64px;
+      --space-xl: 120px;
+
+      /* 圆角 */
+      --radius-card: 18px;
+      --radius-input: 12px;
+      --radius-pill: 9999px;
+
+      /* 字号 - Apple 风梯度 */
+      --fs-hero: clamp(56px, 9vw, 112px);
+      --fs-h2: clamp(40px, 5vw, 64px);
+      --fs-h3: clamp(24px, 3vw, 32px);
+      --fs-quote: clamp(28px, 3.5vw, 44px);
+      --fs-body: 19px;
+      --fs-small: 17px;
+      --fs-caption: 14px;
+
+      /* 字体 */
+      --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", "Noto Sans SC", sans-serif;
+      --font-mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+
+      /* 缓动 */
+      --ease-apple: cubic-bezier(0.4, 0, 0.2, 1);
+      --duration-fast: 250ms;
+      --duration-base: 400ms;
+
+      /* 阴影 */
+      --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04);
+      --shadow-elevated: 0 4px 24px rgba(0, 0, 0, 0.06);
+
+      /* 内容宽度 */
+      --content-width: 980px;
+    }
+
+    /* ---------- 重置 + 字体栈 (P2-2) ---------- */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-stack);
+      font-size: var(--fs-body);
+      line-height: 1.47;
+      font-weight: 400;
+      color: var(--text);
+      background: var(--bg);
+      font-feature-settings: "tnum";
+    }
+    img, svg { display: block; max-width: 100%; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; padding: 0; color: inherit; }
+    input { font-family: inherit; }
+    a { color: var(--accent-blue); text-decoration: none; transition: opacity var(--duration-fast) var(--ease-apple); }
+    a:hover { text-decoration: underline; }
+
+    /* 数字等宽 */
+    .num, .num * { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+    /* 强制浅色 (本站不做暗色版) */
+    @media (prefers-color-scheme: dark) {
+      :root { color-scheme: light; }
+    }
+
+    /* ---------- Hero (P1-2 + P2-3) ---------- */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: var(--space-xl) var(--space-md);
+      position: relative;
+    }
+    .hero-spotlight {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: radial-gradient(circle, #1d1d1f 0%, var(--accent-blue) 70%, transparent 100%);
+      margin-bottom: var(--space-lg);
+      animation: breathe 4s ease-in-out infinite;
+      opacity: 0.85;
+    }
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 0.85; }
+      50% { transform: scale(1.4); opacity: 1; }
+    }
+    .hero-title {
+      font-size: var(--fs-hero);
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin: 0 0 var(--space-md);
+      color: var(--text);
+    }
+    .hero-lead {
+      font-size: clamp(28px, 3.6vw, 48px);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin: 0 0 var(--space-sm);
+      color: var(--text);
+    }
+    .hero-meta {
+      font-size: clamp(20px, 2.2vw, 28px);
+      font-weight: 400;
+      color: var(--text-secondary);
+      margin: 0 0 var(--space-lg);
+    }
+    .hero-hint {
+      font-size: var(--fs-small);
+      color: var(--text-tertiary);
+      margin: 0;
+    }
+
+    /* ---------- TOC 浮动目录 (P1-3) ---------- */
+    .toc {
+      position: fixed;
+      right: var(--space-md);
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .toc a {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+      opacity: 0.3;
+      transition: all var(--duration-fast) var(--ease-apple);
+      position: relative;
+    }
+    .toc a::after {
+      content: attr(data-label);
+      position: absolute;
+      right: 16px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--duration-fast) var(--ease-apple);
+    }
+    .toc a:hover { opacity: 1; transform: scale(1.3); }
+    .toc a:hover::after { opacity: 1; }
+    .toc a.active { opacity: 1; background: var(--accent-blue); }
+
+    /* ---------- 章节过渡卡 (P1-4) ---------- */
+    .chapter-transition {
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: var(--space-xl) var(--space-md);
+      background: var(--bg-secondary);
+    }
+    .chapter-num {
+      font-family: var(--font-mono);
+      font-size: var(--fs-caption);
+      color: var(--text-tertiary);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin: 0 0 var(--space-sm);
+    }
+    .chapter-thesis {
+      font-size: var(--fs-h3);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+      max-width: 720px;
+      margin: 0;
+      color: var(--text);
+    }
+
+    /* ---------- 模块通用 (P2-4) ---------- */
+    .module {
+      padding: var(--space-xl) var(--space-md);
+      max-width: var(--content-width);
+      margin: 0 auto;
+    }
+    .module-meta {
+      font-family: var(--font-mono);
+      font-size: var(--fs-caption);
+      color: var(--text-tertiary);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin: 0 0 var(--space-sm);
+    }
+    .module-title {
+      font-size: var(--fs-h2);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin: 0 0 var(--space-md);
+      color: var(--text);
+    }
+    .module-thesis {
+      font-size: var(--fs-h3);
+      font-weight: 400;
+      line-height: 1.4;
+      color: var(--text-secondary);
+      margin: 0 0 var(--space-lg);
+      max-width: 720px;
+    }
+
+    /* 互动占位区 */
+    .interaction {
+      background: var(--bg-card);
+      border-radius: var(--radius-card);
+      padding: var(--space-lg) var(--space-md);
+      margin: 0 0 var(--space-lg);
+      box-shadow: var(--shadow-card);
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .interaction-hint {
+      font-size: var(--fs-caption);
+      color: var(--text-tertiary);
+      margin: var(--space-md) 0 0;
+      font-family: var(--font-mono);
+    }
+
+    /* 金句 (P2-6) */
+    blockquote.quote {
+      margin: var(--space-lg) auto;
+      padding: 0;
+      max-width: 720px;
+      text-align: center;
+      font-size: var(--fs-quote);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+      color: var(--text);
+    }
+    blockquote.quote p { margin: 0 0 var(--space-sm); }
+    blockquote.quote cite {
+      display: block;
+      font-size: var(--fs-small);
+      font-weight: 400;
+      font-style: normal;
+      color: var(--text-secondary);
+      margin-top: var(--space-sm);
+    }
+    blockquote.quote .alt {
+      font-size: var(--fs-body);
+      font-weight: 400;
+      color: var(--text-secondary);
+      margin-top: var(--space-sm);
+    }
+
+    /* 思维模型卡 (P2-5) */
+    .model-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-card);
+      padding: var(--space-md);
+      margin: var(--space-lg) 0;
+    }
+    .model-name {
+      font-size: var(--fs-h3);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin: 0 0 var(--space-sm);
+      color: var(--text);
+    }
+    .model-name .en {
+      font-size: 0.7em;
+      font-weight: 400;
+      color: var(--text-secondary);
+      letter-spacing: 0;
+      display: block;
+      margin-top: 4px;
+    }
+    .model-def {
+      font-size: var(--fs-body);
+      color: var(--text);
+      margin: 0 0 var(--space-sm);
+      line-height: 1.5;
+    }
+    .model-when {
+      font-size: var(--fs-small);
+      color: var(--text-secondary);
+      margin: 0;
+      line-height: 1.5;
+    }
+    .model-when strong { color: var(--text); font-weight: 600; }
+
+    /* 长论证 */
+    .long-argument {
+      max-width: 720px;
+      margin: var(--space-lg) auto 0;
+    }
+    .long-argument p {
+      font-size: var(--fs-body);
+      color: var(--text);
+      margin: 0 0 var(--space-md);
+      line-height: 1.6;
+    }
+    .long-argument p:last-child { margin-bottom: 0; }
+
+    /* ---------- 模块 6 对比表格 ---------- */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--space-md) 0 0;
+      font-size: var(--fs-small);
+    }
+    .compare-table th, .compare-table td {
+      padding: var(--space-sm) var(--space-md);
+      text-align: left;
+      border: none;
+    }
+    .compare-table thead th {
+      font-weight: 600;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+    }
+    .compare-table tbody tr:nth-child(odd) { background: var(--bg-secondary); }
+    .compare-table tbody td:first-child { color: var(--text-secondary); }
+
+    /* ---------- 终章守则卡 (P1-9) ---------- */
+    #manifesto {
+      padding: var(--space-xl) var(--space-md);
+      background: var(--bg-secondary);
+    }
+    .manifesto-card {
+      max-width: 640px;
+      margin: 0 auto;
+      background: var(--bg);
+      border-radius: var(--radius-card);
+      padding: var(--space-lg) var(--space-md);
+      box-shadow: var(--shadow-elevated);
+      text-align: center;
+    }
+    .manifesto-card h2 {
+      font-size: var(--fs-h3);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin: 0 0 var(--space-md);
+    }
+    .manifesto-card .divider {
+      width: 60px; height: 2px;
+      background: var(--text-tertiary);
+      margin: var(--space-md) auto;
+      opacity: 0.3;
+    }
+    .manifesto-card ol {
+      list-style: none;
+      counter-reset: rule;
+      padding: 0;
+      margin: var(--space-md) 0 0;
+      text-align: left;
+    }
+    .manifesto-card ol li {
+      counter-increment: rule;
+      padding: var(--space-sm) 0;
+      font-size: var(--fs-body);
+      line-height: 1.5;
+      position: relative;
+      padding-left: 36px;
+    }
+    .manifesto-card ol li::before {
+      content: counter(rule);
+      position: absolute;
+      left: 0; top: var(--space-sm);
+      font-family: var(--font-mono);
+      font-size: var(--fs-small);
+      color: var(--text-tertiary);
+      font-weight: 600;
+    }
+    .save-btn {
+      margin-top: var(--space-md);
+      padding: 12px 28px;
+      background: var(--accent-blue);
+      color: white;
+      border-radius: var(--radius-pill);
+      font-size: var(--fs-small);
+      font-weight: 500;
+      transition: opacity var(--duration-fast) var(--ease-apple);
+    }
+    .save-btn:hover { opacity: 0.85; }
+
+    /* ---------- 幕后页 (P1-9 占位 / P6 实现) ---------- */
+    #behind {
+      padding: var(--space-xl) var(--space-md);
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+    }
+    .behind-inner { max-width: var(--content-width); margin: 0 auto; }
+    .behind-prologue {
+      max-width: 720px;
+      margin: 0 auto var(--space-lg);
+      text-align: center;
+    }
+    .behind-prologue h2 {
+      font-size: var(--fs-h2);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0 0 var(--space-md);
+    }
+    .behind-prologue p {
+      font-size: var(--fs-body);
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin: 0 0 var(--space-sm);
+    }
+    .behind-prologue strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* Apple Segmented Control (P6-2 占位) */
+    .segmented {
+      display: flex;
+      gap: 4px;
+      max-width: 320px;
+      margin: 0 auto var(--space-lg);
+      padding: 4px;
+      background: var(--bg-card);
+      border-radius: var(--radius-pill);
+    }
+    .segmented button {
+      flex: 1;
+      padding: 8px 16px;
+      border-radius: var(--radius-pill);
+      font-size: var(--fs-small);
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: all var(--duration-fast) var(--ease-apple);
+    }
+    .segmented button.active {
+      background: var(--bg);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    .behind-doc {
+      max-width: 720px;
+      margin: 0 auto;
+      font-size: var(--fs-small);
+      line-height: 1.6;
+    }
+    .behind-doc-pending {
+      text-align: center;
+      padding: var(--space-lg);
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+      font-size: var(--fs-caption);
+    }
+
+    /* ---------- 页脚 ---------- */
+    footer {
+      padding: var(--space-lg) var(--space-md);
+      text-align: center;
+      color: var(--text-tertiary);
+      font-size: var(--fs-caption);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ---------- 响应式 (P2-7) ---------- */
+    @media (max-width: 768px) {
+      :root {
+        --space-xl: 80px;
+        --space-lg: 48px;
+      }
+      .toc { display: none; }
+      .module, .chapter-transition, #hero, #manifesto, #behind {
+        padding-left: var(--space-sm);
+        padding-right: var(--space-sm);
+      }
+      .compare-table th, .compare-table td {
+        padding: var(--space-xs) var(--space-sm);
+        font-size: var(--fs-caption);
+      }
+      .m1-stage { min-height: 240px !important; }
+      .m1-seesaw { width: 320px !important; }
+    }
+
+    /* ---------- 模块 1 · 跷跷板 (P3-1) ---------- */
+    .m1-stage {
+      min-height: 320px;
+      gap: var(--space-md);
+      user-select: none;
+      -webkit-user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+    .m1-seesaw {
+      width: 480px;
+      max-width: 88%;
+      height: 120px;
+      position: relative;
+      cursor: grab;
+      touch-action: none;
+    }
+    .m1-seesaw.is-dragging { cursor: grabbing; }
+    .m1-pivot {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      width: 0;
+      height: 0;
+      transform: translateX(-50%);
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-bottom: 28px solid #d2d2d7;
+      z-index: 1;
+    }
+    .m1-bar {
+      position: absolute;
+      left: 50%;
+      bottom: 28px;
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(90deg, #0071e3 0%, #0071e3 45%, #d2d2d7 45%, #d2d2d7 55%, #f56300 55%, #f56300 100%);
+      border-radius: 3px;
+      transform: translateX(-50%) rotate(8deg);
+      transform-origin: 50% 100%;
+      transition: transform 400ms var(--ease-apple);
+      will-change: transform;
+      z-index: 2;
+    }
+    .m1-seesaw.is-dragging .m1-bar { transition: none; }
+    .m1-end {
+      position: absolute;
+      top: -22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+    }
+    .m1-focus { left: -8px; }
+    .m1-default { right: -8px; }
+    .m1-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      box-shadow: 0 0 18px currentColor;
+    }
+    .m1-focus .m1-dot { background: #0071e3; color: #0071e3; }
+    .m1-default .m1-dot { background: #f56300; color: #f56300; }
+    .m1-label {
+      font-size: var(--fs-caption);
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .m1-meter {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .m1-meter-num {
+      font-size: clamp(40px, 5.5vw, 64px);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      line-height: 1;
+      transition: color 200ms var(--ease-apple);
+    }
+    .m1-stage.is-focusing .m1-meter-num { color: var(--accent-blue); }
+    .m1-meter-unit {
+      font-size: var(--fs-caption);
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+    }
+    .m1-feedback {
+      font-size: var(--fs-small);
+      color: var(--text-secondary);
+      margin: 0;
+      max-width: 520px;
+      min-height: 1.5em;
+      transition: color 200ms var(--ease-apple);
+    }
+    .m1-feedback.is-fatigue { color: var(--accent-orange-warm); }
+    .m1-feedback.is-released { color: var(--text-tertiary); font-style: italic; }
+    @media (prefers-reduced-motion: reduce) {
+      .m1-bar { transition: none; }
+    }
+
+    /* ---------- 模块 2 · 多巴胺循环 (P3-2) ---------- */
+    .m2-stage {
+      gap: var(--space-md);
+      min-height: 360px;
+      position: relative;
+    }
+    .m2-btn {
+      position: relative;
+      width: 132px;
+      height: 132px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(160deg, #0071e3 0%, #0058b8 100%);
+      color: #fff;
+      cursor: pointer;
+      font: 600 var(--fs-small) / 1 var(--font-stack);
+      letter-spacing: 0.02em;
+      box-shadow: 0 8px 24px rgba(0, 113, 227, 0.32);
+      transition: transform 180ms var(--ease-apple), box-shadow 180ms var(--ease-apple);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .m2-btn:active { transform: scale(0.94); box-shadow: 0 4px 12px rgba(0, 113, 227, 0.28); }
+    .m2-btn:focus-visible { outline: 3px solid rgba(0, 113, 227, 0.4); outline-offset: 4px; }
+    .m2-btn-text { position: relative; z-index: 2; }
+    .m2-btn-ring {
+      position: absolute;
+      inset: -10px;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 113, 227, 0.28);
+      pointer-events: none;
+      animation: m2-ring-pulse 2.4s var(--ease-apple) infinite;
+    }
+    @keyframes m2-ring-pulse {
+      0%   { transform: scale(0.92); opacity: 0; }
+      30%  { opacity: 1; }
+      100% { transform: scale(1.25); opacity: 0; }
+    }
+
+    .m2-card {
+      width: min(520px, 92%);
+      min-height: 132px;
+      border-radius: var(--radius-card);
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-md) var(--space-sm);
+      text-align: center;
+      transition: transform 260ms var(--ease-apple), box-shadow 260ms var(--ease-apple), background 260ms var(--ease-apple);
+      position: relative;
+      overflow: hidden;
+    }
+    .m2-card-empty {
+      color: var(--text-tertiary);
+      font-size: var(--fs-small);
+    }
+    .m2-card.is-flash {
+      animation: m2-card-pop 320ms var(--ease-apple);
+    }
+    @keyframes m2-card-pop {
+      0%   { transform: scale(0.92); opacity: 0; }
+      60%  { transform: scale(1.02); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .m2-card-icon {
+      font-size: 36px;
+      line-height: 1;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .m2-card-text {
+      font-size: var(--fs-body);
+      font-weight: 500;
+      color: var(--text);
+      max-width: 420px;
+      line-height: 1.4;
+    }
+    .m2-card.is-super {
+      background: linear-gradient(135deg, #fff8e1 0%, #ffe082 100%);
+      box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.25), 0 8px 32px rgba(245, 158, 11, 0.22);
+    }
+    .m2-card.is-super::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.7), transparent 60%);
+      pointer-events: none;
+    }
+    .m2-card.is-super .m2-card-text {
+      color: #6b3a00;
+    }
+    .m2-card.is-super .m2-card-sub {
+      display: block;
+      font-size: var(--fs-small);
+      font-weight: 400;
+      color: #6b3a00;
+      opacity: 0.78;
+      margin-top: 8px;
+    }
+
+    .m2-counter {
+      font-size: var(--fs-small);
+      color: var(--text-secondary);
+      margin: 0;
+      max-width: 520px;
+      min-height: 1.5em;
+      transition: color 200ms var(--ease-apple);
+    }
+    .m2-counter.is-hijacked {
+      color: var(--accent-orange-warm);
+      font-weight: 500;
+    }
+
+    .m2-stop {
+      appearance: none;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-tertiary);
+      font: 400 var(--fs-caption) / 1 var(--font-stack);
+      padding: 10px 18px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: color 220ms var(--ease-apple), border-color 220ms var(--ease-apple), background 220ms var(--ease-apple), transform 220ms var(--ease-apple);
+    }
+    .m2-stop:hover { color: var(--text-secondary); }
+    .m2-stop.is-highlighted {
+      color: #fff;
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+      font-weight: 600;
+      font-size: var(--fs-small);
+      padding: 12px 24px;
+      box-shadow: 0 6px 18px rgba(0, 113, 227, 0.28);
+    }
+    .m2-stop.is-highlighted:hover { transform: translateY(-1px); }
+
+    .m2-punchline {
+      font-size: var(--fs-body);
+      font-weight: 500;
+      color: var(--text);
+      text-align: center;
+      margin: 0;
+      max-width: 520px;
+      line-height: 1.45;
+      animation: m2-punchline-in 600ms var(--ease-apple);
+    }
+    @keyframes m2-punchline-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .m2-btn-ring { animation: none; opacity: 0; }
+      .m2-card.is-flash, .m2-punchline { animation: none; }
+    }
+
+    /* ---------- 模块 3 · 管窥效应 (P3-3) ---------- */
+    .m3-stage {
+      gap: var(--space-md);
+      min-height: 460px;
+      padding-top: var(--space-md);
+      padding-bottom: var(--space-md);
+    }
+    .m3-panorama {
+      position: relative;
+      width: min(640px, 92%);
+      height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .m3-panorama-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px 56px;
+      width: 100%;
+      text-align: center;
+      font-size: clamp(22px, 2.6vw, 30px);
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      transition:
+        filter 320ms var(--ease-apple),
+        -webkit-mask-image 320ms var(--ease-apple),
+                mask-image 320ms var(--ease-apple),
+        opacity 320ms var(--ease-apple);
+      will-change: filter;
+    }
+    /* 各等级三层叠加：blur + grayscale + radial mask 缩小可视区 */
+    .m3-panorama[data-level="1"] .m3-panorama-grid {
+      filter: blur(2px) grayscale(33%);
+      -webkit-mask-image: radial-gradient(circle at center, #000 60%, transparent 92%);
+              mask-image: radial-gradient(circle at center, #000 60%, transparent 92%);
+    }
+    .m3-panorama[data-level="2"] .m3-panorama-grid {
+      filter: blur(4px) grayscale(66%);
+      -webkit-mask-image: radial-gradient(circle at center, #000 40%, transparent 78%);
+              mask-image: radial-gradient(circle at center, #000 40%, transparent 78%);
+    }
+    .m3-panorama[data-level="3"] .m3-panorama-grid {
+      filter: blur(6px) grayscale(100%);
+      -webkit-mask-image: radial-gradient(circle at center, #000 22%, transparent 60%);
+              mask-image: radial-gradient(circle at center, #000 22%, transparent 60%);
+    }
+    .m3-panorama[data-level="4"] .m3-panorama-grid {
+      filter: blur(8px) grayscale(100%);
+      opacity: 0.18;
+      -webkit-mask-image: radial-gradient(circle at center, #000 10%, transparent 42%);
+              mask-image: radial-gradient(circle at center, #000 10%, transparent 42%);
+    }
+    .m3-tunnel-words {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      padding: 0 var(--space-md);
+    }
+    .m3-tunnel-words span {
+      font-size: var(--fs-body);
+      font-weight: 600;
+      color: var(--accent-orange-warm);
+      opacity: 0;
+      transform: scale(0.85);
+      transition: opacity 280ms var(--ease-apple), transform 280ms var(--ease-apple);
+      background: rgba(255, 255, 255, 0.85);
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+    .m3-tunnel-words span.is-on {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .m3-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      max-width: 640px;
+    }
+    .m3-anxiety, .m3-clear {
+      appearance: none;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font: 500 var(--fs-small) / 1 var(--font-stack);
+      padding: 10px 18px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 220ms var(--ease-apple);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .m3-anxiety:hover:not(.is-on) {
+      border-color: var(--text-tertiary);
+      color: var(--text);
+    }
+    .m3-anxiety.is-on {
+      background: var(--accent-orange-warm);
+      border-color: var(--accent-orange-warm);
+      color: #fff;
+      font-weight: 600;
+    }
+    .m3-anxiety.is-on::before { content: "✓ "; }
+    .m3-anxiety:disabled { opacity: 0.45; cursor: not-allowed; }
+    .m3-clear {
+      background: var(--text);
+      border-color: var(--text);
+      color: #fff;
+      margin-left: 8px;
+    }
+    .m3-clear:hover { transform: translateY(-1px); }
+    .m3-clear:disabled {
+      background: var(--bg-card);
+      border-color: var(--border);
+      color: var(--text-tertiary);
+      cursor: not-allowed;
+      transform: none;
+    }
+    .m3-narration {
+      font-size: var(--fs-small);
+      color: var(--text-secondary);
+      margin: 0;
+      max-width: 560px;
+      text-align: center;
+      min-height: 1.5em;
+      transition: color 220ms var(--ease-apple);
+    }
+    .m3-narration.is-tunneled {
+      color: var(--accent-orange-warm);
+      font-weight: 500;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .m3-panorama-grid, .m3-tunnel-words span { transition: none; }
+    }
+    @media (max-width: 768px) {
+      .m3-panorama { height: 220px; }
+      .m3-panorama-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px 24px;
+      }
+      /* 移动端简化：取消 mask 渐变（性能 + 可读性），保留 blur + grayscale */
+      .m3-panorama[data-level="3"] .m3-panorama-grid,
+      .m3-panorama[data-level="4"] .m3-panorama-grid {
+        -webkit-mask-image: none;
+                mask-image: none;
+      }
+    }
+
+    /* ---------- 模块 4 · 心流通道（双滑块）(P3-4) ---------- */
+    .m4-stage {
+      gap: var(--space-md);
+      min-height: 380px;
+      padding-left: var(--space-md);
+      padding-right: var(--space-md);
+    }
+    .m4-knob {
+      width: min(560px, 92%);
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      column-gap: 20px;
+      row-gap: 6px;
+      align-items: center;
+    }
+    .m4-knob label {
+      font-size: var(--fs-small);
+      font-weight: 500;
+      color: var(--text);
+      text-align: right;
+      letter-spacing: -0.01em;
+    }
+    .m4-knob input[type="range"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #d2d2d7, #d2d2d7);
+      outline: none;
+      margin: 0;
+      cursor: pointer;
+      transition: background 220ms var(--ease-apple);
+    }
+    .m4-knob input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06);
+      cursor: grab;
+      transition: transform 160ms var(--ease-apple);
+    }
+    .m4-knob input[type="range"]::-webkit-slider-thumb:active {
+      transform: scale(1.1);
+      cursor: grabbing;
+    }
+    .m4-knob input[type="range"]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #fff;
+      border: none;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06);
+      cursor: grab;
+    }
+    .m4-knob input[type="range"]:focus-visible {
+      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.32);
+    }
+    .m4-scale {
+      grid-column: 2 / 3;
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--fs-caption);
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+      margin-top: 2px;
+    }
+
+    .m4-zone {
+      width: min(560px, 92%);
+      padding: var(--space-md);
+      border-radius: var(--radius-card);
+      background: var(--bg);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      text-align: center;
+      border-left: 4px solid transparent;
+      transition: all 280ms var(--ease-apple);
+    }
+    .m4-zone[data-zone="apathy"]  { border-left-color: #86868b; }
+    .m4-zone[data-zone="anxiety"] { border-left-color: var(--accent-red); }
+    .m4-zone[data-zone="boredom"] { border-left-color: var(--accent-purple); }
+    .m4-zone[data-zone="flow"] {
+      border-left-color: var(--accent-green);
+      box-shadow: 0 0 0 1px rgba(48, 209, 88, 0.32), 0 8px 28px rgba(48, 209, 88, 0.18);
+      background: linear-gradient(180deg, #f4fbf6 0%, #ffffff 100%);
+    }
+    .m4-zone-name {
+      font-size: var(--fs-h3);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin: 0 0 6px;
+      color: var(--text);
+      transition: color 280ms var(--ease-apple), font-size 280ms var(--ease-apple);
+    }
+    .m4-zone[data-zone="apathy"]  .m4-zone-name { color: #86868b; }
+    .m4-zone[data-zone="anxiety"] .m4-zone-name { color: var(--accent-red); }
+    .m4-zone[data-zone="boredom"] .m4-zone-name { color: var(--accent-purple); }
+    .m4-zone[data-zone="flow"]    .m4-zone-name { color: var(--accent-green); font-size: calc(var(--fs-h3) * 1.2); }
+    .m4-zone-text {
+      font-size: var(--fs-body);
+      color: var(--text);
+      margin: 0;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.45;
+    }
+    .m4-zone[data-zone="flow"] .m4-zone-text {
+      font-weight: 500;
+    }
+    .m4-prompt {
+      font-size: var(--fs-small);
+      color: var(--text-secondary);
+      margin: 0;
+      text-align: center;
+    }
+    @media (max-width: 768px) {
+      .m4-knob {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      .m4-knob label { text-align: left; }
+      .m4-scale { grid-column: 1 / -1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .m4-zone, .m4-zone-name { transition: none; }
+    }
+
+    /* ---------- 模块 5 · 注意力损益表（单滑块）(P3-5) ---------- */
+    .m5-stage {
+      gap: var(--space-md);
+      min-height: 420px;
+      padding-left: var(--space-md);
+      padding-right: var(--space-md);
+    }
+    .m5-prompt {
+      font-size: var(--fs-h3);
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      margin: 0;
+      text-align: center;
+      color: var(--text);
+    }
+    .m5-prompt strong {
+      color: var(--accent-blue);
+      font-weight: 600;
+    }
+    .m5-bar-wrap {
+      width: min(620px, 92%);
+      position: relative;
+    }
+    .m5-bar {
+      position: relative;
+      width: 100%;
+      height: 16px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg-card);
+      box-shadow: inset 0 0 0 1px var(--border);
+      display: flex;
+    }
+    .m5-bar-green {
+      height: 100%;
+      background: linear-gradient(90deg, #34c759 0%, #30d158 100%);
+      transition: width 120ms var(--ease-apple);
+    }
+    .m5-bar-red {
+      height: 100%;
+      background: linear-gradient(90deg, #ff3b30 0%, #ff453a 100%);
+      transition: width 120ms var(--ease-apple);
+    }
+    .m5-bar-wrap input[type="range"] {
+      appearance: none;
+      -webkit-appearance: none;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      cursor: pointer;
+      margin: 0;
+    }
+    .m5-bar-wrap input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.08);
+      cursor: grab;
+    }
+    .m5-bar-wrap input[type="range"]::-moz-range-thumb {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #fff;
+      border: none;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.08);
+      cursor: grab;
+    }
+    .m5-bar-wrap input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; }
+    .m5-bar-wrap input[type="range"]:focus-visible {
+      outline: 3px solid rgba(0, 113, 227, 0.4);
+      outline-offset: 4px;
+      border-radius: 8px;
+    }
+
+    .m5-legend {
+      display: flex;
+      width: min(620px, 92%);
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+    .m5-leg {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .m5-leg-red { flex-direction: row-reverse; text-align: right; }
+    .m5-leg-pct {
+      font-size: clamp(32px, 4.5vw, 48px);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .m5-leg-green .m5-leg-pct { color: var(--accent-green); }
+    .m5-leg-red .m5-leg-pct { color: var(--accent-red); }
+    .m5-leg-pct::after {
+      content: "%";
+      font-size: 0.5em;
+      font-weight: 500;
+      margin-left: 2px;
+      color: var(--text-tertiary);
+    }
+    .m5-leg-label {
+      font-size: var(--fs-small);
+      color: var(--text);
+      line-height: 1.35;
+    }
+    .m5-leg-label small {
+      display: block;
+      font-size: var(--fs-caption);
+      color: var(--text-tertiary);
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    .m5-stats {
+      display: flex;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: var(--fs-small);
+      color: var(--text-secondary);
+    }
+    .m5-stats em {
+      font-style: normal;
+      font-weight: 600;
+      color: var(--text);
+      margin-left: 6px;
+    }
+    .m5-out-green { color: var(--accent-green) !important; }
+    .m5-out-red { color: var(--accent-red) !important; }
+    #m5-net {
+      transition: color 220ms var(--ease-apple);
+    }
+    .m5-stats[data-net="positive"] #m5-net { color: var(--accent-green); }
+    .m5-stats[data-net="negative"] #m5-net { color: var(--accent-red); }
+    .m5-stats[data-net="zero"] #m5-net { color: var(--text-tertiary); }
+
+    .m5-anchor {
+      font-size: var(--fs-small);
+      color: var(--text-tertiary);
+      margin: 0;
+      text-align: center;
+      font-style: italic;
+    }
+    .m5-feedback {
+      font-size: var(--fs-h3);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      text-align: center;
+      max-width: 620px;
+      margin: 0;
+      line-height: 1.3;
+      transition: color 280ms var(--ease-apple);
+    }
+    .m5-feedback[data-tone="positive"] { color: var(--accent-green); }
+    .m5-feedback[data-tone="negative"] { color: var(--accent-red); }
+    .m5-feedback[data-tone="zero"] { color: var(--text-secondary); }
+    @media (max-width: 768px) {
+      .m5-legend { flex-direction: column; gap: var(--space-sm); }
+      .m5-leg-red { flex-direction: row; text-align: left; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .m5-bar-green, .m5-bar-red, #m5-net, .m5-feedback { transition: none; }
+    }
+
+    /* ---------- 动效原则 ---------- */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+
+    /* 滚动 reveal 默认隐藏（P4-5 阶段会用 IntersectionObserver 触发）*/
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 600ms var(--ease-apple), transform 600ms var(--ease-apple);
+    }
+    .reveal.in-view { opacity: 1; transform: translateY(0); }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== 浮动目录 (P1-3) ===== -->
+<nav class="toc" aria-label="模块导航">
+  <a href="#m1" data-label="01 跷跷板"></a>
+  <a href="#m2" data-label="02 多巴胺"></a>
+  <a href="#m3" data-label="03 管窥"></a>
+  <a href="#m4" data-label="04 心流"></a>
+  <a href="#m5" data-label="05 损益表"></a>
+  <a href="#m6" data-label="06 复利"></a>
+  <a href="#m7" data-label="07 清零"></a>
+  <a href="#manifesto" data-label="守则"></a>
+</nav>
+
+<!-- ===== Hero (P1-2) ===== -->
+<section id="hero">
+  <div class="hero-spotlight" aria-hidden="true"></div>
+  <h1 class="hero-title">注意力</h1>
+  <p class="hero-lead">这是你余生最贵的货币。</p>
+  <p class="hero-meta">在你读完这句话时，已经少了三秒。</p>
+  <p class="hero-hint">↓ 向下滚动，重新拿回你的注意力主权。</p>
+</section>
+
+<!-- ===== 章节 01 过渡 (P1-4) ===== -->
+<section class="chapter-transition" aria-label="第一章">
+  <p class="chapter-num">Chapter 01 · Neural</p>
+  <h2 class="chapter-thesis">先理解你为什么会被劫持。<br>这不是意志薄弱，是大脑的物理学。</h2>
+</section>
+
+<!-- ===== 模块 1 · 跷跷板 (P1-5) ===== -->
+<section id="m1" class="module reveal">
+  <p class="module-meta">Module 01</p>
+  <h2 class="module-title">注意力跷跷板</h2>
+  <p class="module-thesis">论点：专注网络与默认模式网络是拮抗关系，分心是大脑的默认省电模式。</p>
+
+  <div class="interaction m1-stage" data-interaction="m1" aria-label="跷跷板互动">
+    <div class="m1-seesaw" id="m1-seesaw">
+      <div class="m1-pivot"></div>
+      <div class="m1-bar">
+        <span class="m1-end m1-focus" aria-label="专注端">
+          <span class="m1-dot"></span>
+          <span class="m1-label">专注</span>
+        </span>
+        <span class="m1-end m1-default" aria-label="默认端">
+          <span class="m1-dot"></span>
+          <span class="m1-label">默认</span>
+        </span>
+      </div>
+    </div>
+    <div class="m1-meter num">
+      <span class="m1-meter-num" id="m1-num">0.00</span>
+      <span class="m1-meter-unit">卡路里 / 秒 · 葡萄糖消耗</span>
+    </div>
+    <p class="m1-feedback" id="m1-feedback">↑ 按住跷跷板向左拖动（或长按倾斜），看专注的真实成本。</p>
+  </div>
+
+  <blockquote class="quote">
+    <p>专注是逆水行舟，分心是顺流而下。</p>
+  </blockquote>
+
+  <div class="model-card">
+    <h3 class="model-name">双网络拮抗模型<span class="en">Task-Positive Network ↔ Default Mode Network</span></h3>
+    <p class="model-def">大脑两套网络此消彼长：专注网络主动耗能、默认网络省电待机。</p>
+    <p class="model-when"><strong>何时调用：</strong>当你"忍不住打开手机"时，提醒自己——这不是意志薄弱，这是默认网络在生效。</p>
+  </div>
+
+  <div class="long-argument">
+    <p>想象你在专心读一本书。30 分钟后你已经累了——这不是矫情，前额叶皮质在主动工作时持续消耗葡萄糖。</p>
+    <p>你松懈的瞬间，默认模式网络（DMN）接管。它是大脑的"省电模式"——胡思乱想、白日梦、刷手机、记起某条没回的微信。它消耗的能量只有专注的几分之一。</p>
+    <p>所以分心不是你的错，是物理学。但能不能坚持专注，是设计的事。</p>
+  </div>
+</section>
+
+<!-- ===== 模块 2 · 多巴胺 (P1-6) ===== -->
+<section id="m2" class="module reveal">
+  <p class="module-meta">Module 02</p>
+  <h2 class="module-title">多巴胺劫持循环</h2>
+  <p class="module-thesis">论点：注意力被劫持的不是奖励本身，而是"不确定的预期"。</p>
+
+  <div class="interaction m2-stage" data-interaction="m2" aria-label="多巴胺循环">
+    <button type="button" class="m2-btn" id="m2-btn" aria-label="刷一下">
+      <span class="m2-btn-ring" aria-hidden="true"></span>
+      <span class="m2-btn-text">刷一下</span>
+    </button>
+    <div class="m2-card" id="m2-card" aria-live="polite">
+      <span class="m2-card-empty">↑ 试试看，会发生什么</span>
+    </div>
+    <p class="m2-counter" id="m2-counter"></p>
+    <button type="button" class="m2-stop" id="m2-stop">我看明白了，停。</button>
+    <p class="m2-punchline" id="m2-punchline" hidden>你停下来了。<br>这是这一整天里你为自己做的最重要的决定。</p>
+  </div>
+
+  <blockquote class="quote">
+    <p>你追逐的是预期，不是奖励本身。</p>
+    <p class="alt">多巴胺贩卖的是"下一个会更好"的幻觉。</p>
+  </blockquote>
+
+  <div class="model-card">
+    <h3 class="model-name">奖励预测误差陷阱<span class="en">Reward Prediction Error Trap</span></h3>
+    <p class="model-def">公式：<code style="font-family:var(--font-mono);background:var(--bg);padding:2px 6px;border-radius:4px">触发 → 渴望 → 不确定反馈 → 更强渴望</code>。<strong>不确定性</strong>是劫持的终极武器。</p>
+    <p class="model-when"><strong>何时调用：</strong>任何"忍不住再刷一下"的产品（短视频/直播/抽卡/邮箱通知/股票 App），其商业模式都嵌入了这个公式。</p>
+  </div>
+
+  <div class="long-argument">
+    <p>赌博机不是一直让你赢钱才上瘾的。它让你<strong>有时候</strong>赢钱。</p>
+    <p>不确定的奖励比确定的奖励刺激强 3-5 倍——大脑分泌多巴胺的不是反馈本身，是"反馈即将到来"的预期。</p>
+    <p>抖音、小红书、邮箱、微信通知、股票 App、淘宝推荐——所有让你"忍不住再看一眼"的东西，都嵌入了这个公式。它们不是在卖内容，是在卖预期。</p>
+  </div>
+</section>
+
+<!-- ===== 模块 3 · 管窥 (P1-7) ===== -->
+<section id="m3" class="module reveal">
+  <p class="module-meta">Module 03</p>
+  <h2 class="module-title">管窥效应</h2>
+  <p class="module-thesis">论点：贫穷与忙碌通过"占用工作记忆"来掠夺注意力，强迫人做短视决策。</p>
+
+  <div class="interaction m3-stage" data-interaction="m3" aria-label="管窥效应">
+    <div class="m3-panorama" id="m3-panorama" data-level="0">
+      <div class="m3-panorama-grid">
+        <span>远方的山</span><span>家人</span><span>书架</span>
+        <span>健身房</span><span>夕阳</span><span>长期目标</span>
+      </div>
+      <div class="m3-tunnel-words" aria-hidden="true">
+        <span>房贷</span><span>工作邮件</span><span>父母身体</span><span>截止日期</span>
+      </div>
+    </div>
+    <div class="m3-controls">
+      <button type="button" class="m3-anxiety" data-id="rent">+ 房贷</button>
+      <button type="button" class="m3-anxiety" data-id="email">+ 工作邮件</button>
+      <button type="button" class="m3-anxiety" data-id="parents">+ 父母身体</button>
+      <button type="button" class="m3-anxiety" data-id="deadline">+ 截止日期</button>
+      <button type="button" class="m3-clear" id="m3-clear">清空管窥</button>
+    </div>
+    <p class="m3-narration" id="m3-narration">点亮焦虑事件，看你的世界如何被压缩。</p>
+  </div>
+
+  <blockquote class="quote">
+    <p>贫穷不始于口袋的空虚，<br>而始于注意力的溃散。</p>
+  </blockquote>
+
+  <div class="model-card">
+    <h3 class="model-name">认知带宽税<span class="en">Cognitive Bandwidth Tax · Mullainathan & Shafir, 《Scarcity》</span></h3>
+    <p class="model-def">缺钱 / 缺时间不直接致命，但会引发"管窥心态 (Tunneling)"：管内极清晰、管外漆黑，工作记忆被紧急事务占满，无余裕做长期决策。</p>
+    <p class="model-when"><strong>何时调用：</strong>当自己或他人在做"明显短视的决定"时，先检查 Ta 的认知带宽是否被占满，而非苛责"为什么不长远思考"。</p>
+  </div>
+
+  <div class="long-argument">
+    <p>《Scarcity》一书的实验：让两组人玩游戏，"富人"每轮有充足时间，"穷人"每轮时间紧张。</p>
+    <p>"穷人"在自己擅长的关卡上表现更好——管窥让他们极度聚焦。但他们在所有需要长期规划的关卡上表现糟糕。</p>
+    <p>管窥不是道德缺陷，是认知带宽被占满时的必然反应。当你或别人做出"明显短视"的决定，先问：Ta 的工作记忆里塞了多少紧急事？</p>
+  </div>
+</section>
+
+<!-- ===== 章节 02 过渡 ===== -->
+<section class="chapter-transition" aria-label="第二章">
+  <p class="chapter-num">Chapter 02 · Phenomenology</p>
+  <h2 class="chapter-thesis">注意力是有质感的。<br>它不是开关，是可以被设计的环境。</h2>
+</section>
+
+<!-- ===== 模块 4 · 心流通道 (P1-8) ===== -->
+<section id="m4" class="module reveal">
+  <p class="module-meta">Module 04</p>
+  <h2 class="module-title">心流通道</h2>
+  <p class="module-thesis">论点：心流不是被动等来的灵感，而是可以被主动设计的环境——只需调两个旋钮。</p>
+
+  <div class="interaction m4-stage" data-interaction="m4" aria-label="心流通道">
+    <div class="m4-knob">
+      <label for="m4-challenge">挑战难度</label>
+      <input type="range" id="m4-challenge" min="0" max="100" value="40" step="1">
+      <div class="m4-scale"><span>低</span><span>高</span></div>
+    </div>
+    <div class="m4-knob">
+      <label for="m4-skill">当前技能</label>
+      <input type="range" id="m4-skill" min="0" max="100" value="35" step="1">
+      <div class="m4-scale"><span>低</span><span>高</span></div>
+    </div>
+    <div class="m4-zone" id="m4-zone" data-zone="apathy">
+      <p class="m4-zone-name">冷漠区</p>
+      <p class="m4-zone-text">两个旋钮都需要往上拨。</p>
+    </div>
+    <p class="m4-prompt">你今天的工作处在哪个区？</p>
+  </div>
+
+  <blockquote class="quote">
+    <p>心流不是等来的灵感，<br>是设计出来的环境。</p>
+    <p class="alt">心流是精神熵的反面 —— 让混乱的意识变得高度有序。</p>
+  </blockquote>
+
+  <div class="model-card">
+    <h3 class="model-name">心流通道<span class="en">Csikszentmihalyi Flow Channel</span></h3>
+    <p class="model-def">心流发生在挑战与技能<strong>都处于高位</strong>且挑战略微超出舒适区的狭长通道。</p>
+    <p class="model-when"><strong>何时调用：</strong>当你做事感到"焦虑"或"无聊"时，先调整<strong>两个旋钮</strong>——挑战难度、当前技能——而不是责怪自己"不够自律"。</p>
+  </div>
+
+  <div class="long-argument">
+    <p>米哈里·契克森米哈伊用 30 年访问了几千个进入心流的人——艺术家、运动员、外科医生、流水线工人。他发现规律：</p>
+    <p>心流不是性格，不是天赋，不是运气。是当下任务的挑战和你当前的技能匹配，且<strong>挑战略微高于技能</strong>。</p>
+    <p>这意味着你可以<strong>主动调出心流</strong>：把工作切到合适的难度，把环境清掉分心源，启动一个仪式（音乐、咖啡、固定时间）。心流不会自己来。</p>
+  </div>
+</section>
+
+<!-- ===== 章节 03 过渡 ===== -->
+<section class="chapter-transition" aria-label="第三章">
+  <p class="chapter-num">Chapter 03 · Value</p>
+  <h2 class="chapter-thesis">你注意过的一切的总和，就是你。<br>注意力不仅是工具，是你本身。</h2>
+</section>
+
+<!-- ===== 模块 5 · 损益表 (P1-9) ===== -->
+<section id="m5" class="module reveal">
+  <p class="module-meta">Module 05</p>
+  <h2 class="module-title">注意力损益表</h2>
+  <p class="module-thesis">论点：每一次注意力选择都是一次微小的自我定义。投向决定你是谁。</p>
+
+  <div class="interaction m5-stage" data-interaction="m5" aria-label="注意力损益表">
+    <p class="m5-prompt">你今天有 <strong>100 颗</strong> 注意力豆。</p>
+    <div class="m5-bar-wrap">
+      <div class="m5-bar">
+        <div class="m5-bar-green" id="m5-green" style="width: 60%"></div>
+        <div class="m5-bar-red" id="m5-red" style="width: 40%"></div>
+      </div>
+      <input type="range" id="m5-slider" min="0" max="100" value="60" step="1" aria-label="复利投向比例">
+    </div>
+    <div class="m5-legend">
+      <div class="m5-leg m5-leg-green">
+        <span class="m5-leg-pct num" id="m5-green-pct">60</span>
+        <span class="m5-leg-label">复利投向<br><small>自我成长 / 真爱 / 创造</small></span>
+      </div>
+      <div class="m5-leg m5-leg-red">
+        <span class="m5-leg-pct num" id="m5-red-pct">40</span>
+        <span class="m5-leg-label">收割陷阱<br><small>外部劫持 / 内部消耗 / 执行幻觉</small></span>
+      </div>
+    </div>
+    <div class="m5-stats num">
+      <span>复利产出 <em class="m5-out-green" id="m5-out-green">+60</em></span>
+      <span>被收割值 <em class="m5-out-red" id="m5-out-red">-40</em></span>
+      <span>净值 <em id="m5-net">+20</em></span>
+    </div>
+    <p class="m5-anchor">这个比例和你真实的今天像吗？</p>
+    <p class="m5-feedback" id="m5-feedback">你今天在塑造一个值得成为的自己。</p>
+  </div>
+
+  <blockquote class="quote">
+    <p>我的经验就是，<br>我同意去注意的东西。</p>
+    <cite>—— 威廉·詹姆斯</cite>
+    <p class="alt">你注意过的一切的总和，构成了你的自我。</p>
+  </blockquote>
+
+  <div class="model-card">
+    <h3 class="model-name">注意力损益表<span class="en">Attention P&amp;L Statement</span></h3>
+    <p class="model-def">注意力是有限资源，每天的支出有正向（复利）和负向（被收割）之分。把每天结束当作一次"日结"。</p>
+    <p class="model-when"><strong>何时调用：</strong>一天结束前花 30 秒回想"今天的 100 颗豆撒在哪了？"——比任何 To-Do 工具都更接近本质。</p>
+  </div>
+
+  <div class="long-argument">
+    <p>哲学家威廉·詹姆斯写道："我的经验就是，我同意去注意的东西。"</p>
+    <p>你今天注意了什么？吵架的新闻？同事的八卦？同行的成就？你伴侣的眼神？你正在读的一本书？这些不是琐事——这些<strong>就是你今天</strong>。</p>
+    <p>明天的你，是今天注意力撒下的种子长出来的。一颗一颗豆子的事。</p>
+  </div>
+</section>
+
+<!-- ===== 模块 6 · 财富复利 ===== -->
+<section id="m6" class="module reveal">
+  <p class="module-meta">Module 06 · 新增</p>
+  <h2 class="module-title">注意力即财富</h2>
+  <p class="module-thesis">论点：注意力是比时间更根本的原始资本；不守护它，等于把生命无偿让人变现。</p>
+
+  <div class="interaction m6-stage" data-interaction="m6" aria-label="注意力复利曲线">
+    <svg class="m6-chart" viewBox="0 0 600 280" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <line x1="40" y1="240" x2="580" y2="240" stroke="rgba(0,0,0,0.15)" stroke-width="1"/>
+      <line x1="40" y1="40" x2="40" y2="240" stroke="rgba(0,0,0,0.15)" stroke-width="1"/>
+      <text x="50" y="35" font-size="11" fill="#86868b">能力 / 产出</text>
+      <text x="555" y="258" font-size="11" fill="#86868b">时间</text>
+      <!-- 复利曲线 (green, exponential) -->
+      <path id="m6-line-green" d="M 40 230 Q 200 225 320 200 T 580 50" fill="none" stroke="#30d158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- 被收割曲线 (red, flat/decline) -->
+      <path id="m6-line-red" d="M 40 230 L 200 232 L 320 235 L 460 240 L 580 245" fill="none" stroke="#ff3b30" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 4"/>
+      <!-- 时间标签 -->
+      <g font-size="10" fill="#86868b">
+        <text x="40" y="258" text-anchor="middle">1天</text>
+        <text x="175" y="258" text-anchor="middle">1月</text>
+        <text x="310" y="258" text-anchor="middle">1年</text>
+        <text x="445" y="258" text-anchor="middle">5年</text>
+        <text x="580" y="258" text-anchor="middle">10年</text>
+      </g>
+      <!-- 时间高亮指示 -->
+      <line id="m6-cursor" x1="310" y1="40" x2="310" y2="240" stroke="#0071e3" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.5"/>
+      <!-- 端点标签 -->
+      <circle id="m6-pt-green" cx="310" cy="200" r="5" fill="#30d158"/>
+      <circle id="m6-pt-red" cx="310" cy="235" r="5" fill="#ff3b30"/>
+      <text x="588" y="55" font-size="11" fill="#30d158" font-weight="600">复利</text>
+      <text x="588" y="252" font-size="11" fill="#ff3b30" font-weight="600">被收割</text>
+    </svg>
+    <div class="m6-controls">
+      <input type="range" id="m6-slider" min="0" max="4" value="2" step="1" aria-label="时间档位">
+      <div class="m6-scale"><span>1天</span><span>1月</span><span>1年</span><span>5年</span><span>10年</span></div>
+    </div>
+    <div class="m6-stats num" id="m6-stats">
+      <p><strong>1 年后</strong></p>
+      <p>复利路径产出：约 <span id="m6-out-green">365</span> 次深度工作</p>
+      <p>被收割路径产出：约 <span id="m6-out-red">365</span> 次刷屏</p>
+      <p>能力差距：约 <span id="m6-gap">3</span> 倍</p>
+    </div>
+    <p class="m6-callout" id="m6-callout" hidden>时间一样长，注意力的去向决定了你站在哪里。</p>
+  </div>
+
+  <blockquote class="quote">
+    <p>贫穷不始于口袋的空虚，<br>而始于注意力的溃散。</p>
+    <p class="alt">时间是载体，注意力才是装在里面的黄金。</p>
+  </blockquote>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>维度</th><th style="color: var(--accent-green)">复利路径</th><th style="color: var(--accent-red)">被收割路径</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>深度工作能力</td><td>越来越强</td><td>退化到无法忍受无聊</td></tr>
+      <tr><td>产出独特性</td><td>不可替代</td><td>随时可被替换</td></tr>
+      <tr><td>时间杠杆</td><td>一份投入持续产出</td><td>一份投入一次性消耗</td></tr>
+      <tr><td>选择权</td><td>越来越多</td><td>越来越少</td></tr>
+    </tbody>
+  </table>
+
+  <div class="model-card">
+    <h3 class="model-name">注意力资本论<span class="en">Attention as Primary Capital</span></h3>
+    <p class="model-def">三层因果链：注意力 = 比时间更根本的原始资本 → 注意力变现 = 现代商业核心模式 → 财富 = 长期专注的复利产物。</p>
+    <p class="model-when"><strong>何时调用：</strong>每次想下载一个"很爽但没用"的 App 之前；每次评估一份工作 / 一段关系 / 一个项目时——问"它会让我注意力复利还是损耗？"</p>
+  </div>
+
+  <div class="long-argument">
+    <p>巴菲特的合伙人芒格说："我没见过不读书的人活得有意思。"这不是傲慢，是数学——专注阅读 30 年和刷短视频 30 年，是两种完全不同的物种。</p>
+    <p>表格里那四个维度，每一项都是复利。深度工作能力越用越强，刷屏能力越用越没用。10 年后差距不是 2 倍，是 100 倍。</p>
+    <p>这就是为什么"有人 35 岁就达到了人生巅峰，有人 35 岁刚意识到自己浪费了 15 年"——不是天赋差，是注意力撒在了哪里。</p>
+  </div>
+</section>
+
+<!-- ===== 章节 04 过渡 ===== -->
+<section class="chapter-transition" aria-label="第四章">
+  <p class="chapter-num">Chapter 04 · Mortality</p>
+  <h2 class="chapter-thesis">死亡的必然性，<br>赋予每一个当下选择以重量。</h2>
+</section>
+
+<!-- ===== 模块 7 · 账户清零 ===== -->
+<section id="m7" class="module reveal">
+  <p class="module-meta">Module 07</p>
+  <h2 class="module-title">注意力账户清零</h2>
+  <p class="module-thesis">论点：死亡的必然性赋予每一个当下选择以重量。</p>
+
+  <div class="interaction" data-interaction="m7">
+    <div style="font-size: 64px; opacity: 0.2; font-family: var(--font-mono);">⏳</div>
+    <p class="interaction-hint">[ 互动版即将到来：输入年龄，看你还剩多少个清醒小时 ]</p>
+  </div>
+
+  <blockquote class="quote">
+    <p>正因为终将归零，<br>每一个当下才有重量。</p>
+    <p class="alt">死亡必然将我们的注意力账户清零。 —— 海德格尔式注脚</p>
+  </blockquote>
+
+  <div class="model-card">
+    <h3 class="model-name">向死而生的注意力分配<span class="en">Being-Toward-Death Attention Allocation</span></h3>
+    <p class="model-def">把每一天的注意力当作"生命结束前的最后一笔投资"来分配，自动过滤掉"操别人的心""凑热闹""习惯性反驳"等浮沫。</p>
+    <p class="model-when"><strong>何时调用：</strong>在每个"反正还有时间"的拖延瞬间——提醒自己账户是绝对有限且单向递减的。</p>
+  </div>
+
+  <div class="long-argument">
+    <p>乔布斯在斯坦福毕业典礼说："死亡是生命最好的发明。它让旧的让位给新的，让你不会陷在某个角色里出不来。"</p>
+    <p>计算很简单：80 - 你的年龄 = 剩余年数。但这不是日历，是注意力账户。每一秒都在递减，且<strong>绝对单向</strong>。</p>
+    <p>看着数字流走，你会自动过滤掉很多事——"凑热闹"、"操别人的心"、"习惯性反驳"。它们突然变得太贵。</p>
+    <p>这不是倒计时，是邀请函。</p>
+  </div>
+</section>
+
+<!-- ===== 终章守则卡 (P4-2) ===== -->
+<section id="manifesto" aria-label="注意力守则">
+  <div class="manifesto-card">
+    <h2>注意力守则 · 7 条</h2>
+    <div class="divider"></div>
+    <ol>
+      <li>专注是逆水行舟，分心是顺流而下。</li>
+      <li>你追逐的是预期，不是奖励本身。</li>
+      <li>贫穷不始于口袋的空虚，而始于注意力的溃散。</li>
+      <li>心流不是等来的灵感，是设计出来的环境。</li>
+      <li>你注意过的一切的总和，构成了你的自我。</li>
+      <li>时间是载体，注意力才是装在里面的黄金。</li>
+      <li>正因为终将归零，每一个当下才有重量。</li>
+    </ol>
+    <button class="save-btn" type="button" disabled title="P4-2 阶段实现">另存为 PNG</button>
+  </div>
+</section>
+
+<!-- ===== 幕后页 (P6 占位) ===== -->
+<section id="behind" aria-label="幕后页">
+  <div class="behind-inner">
+    <div class="behind-prologue">
+      <h2>附 · 这一切是怎么做出来的</h2>
+      <p>一个讲注意力的网站，公开它的设计稿和待办清单，是想说：</p>
+      <p><strong>你刚才滚动过的每一帧体验，都是被设计出来的。</strong></p>
+      <p>商业产品不会让你看到这一层，因为看到了，就难再被劫持。</p>
+    </div>
+
+    <div class="segmented" role="tablist">
+      <button type="button" class="active" data-tab="spec" disabled>设计原则</button>
+      <button type="button" data-tab="task" disabled>制作进度</button>
+    </div>
+
+    <div class="behind-doc">
+      <p class="behind-doc-pending">[ P6 阶段实现 · 此处将渲染 spec.md / task.md 的 markdown 内容 ]</p>
+    </div>
+
+    <!-- 构建期会被 build.sh 替换 -->
+    <script type="text/markdown" id="spec-source"><!-- BUILD:SPEC -->
+# 注意力 · 单页交互网页 设计 Spec
+
+> 版本 v0.3 · 2026-05-10
+> 路径: `/Users/wenfengzhu/ClaudeProjects/attention/index.html`
+> 形态: 单文件 HTML（自包含、可双击打开、可上传任意静态托管）
+> 风格谱系: **Apple 浅色（Apple.com Light）**——纯白/近白底、SF Pro 字体、克制留白、巨型衬托标题、Apple 系统语义色作为强调点。整体观感对标 apple.com 产品页与 Apple Human Interface Guidelines（Light Appearance）。
+>
+> v0.3 改动: CEO Review 后逐模块内容优化（M1-M7 互动机制 + 反馈文案 + 视觉提案细化）。叙事弧不变，论点全部保留。
+
+---
+
+## 0. 设计原则（贯穿所有模块）
+
+1. **每个互动都必须承载概念本身**，不是装饰。可视化超过 4-5 处就开始干扰阅读，违反"克制注意力"的主题。本网页严格控制在 7 个核心交互模块。
+2. **三层结构强制**：每个模块都有「**互动 → 金句 → 思维模型**」三层。
+   - 互动 = 让你**体验到**
+   - 金句 = 让你**记得住**
+   - 思维模型 = 让你**用得上**
+3. **金句优先用原文**。原作者的话已经够锋利，再造反而稀释。需要替换时给"朋友圈传播版"做备选。
+4. **思维模型固定格式**：每个模块底部固定区块，三行：
+   - `【模型名】中文 / 英文`
+   - 一句话定义
+   - 何时调用 / 适用场景
+5. **不要后端、不要构建工具、不要 npm**。纯 HTML + 原生 CSS + 原生 JS。所有依赖内联。
+6. **移动端必须可读**。互动元素在窄屏自动降级为静态示意 + 解释文字。
+7. **Apple 浅色克制美学**：大面积留白、巨型轻量级标题、单色照片级插画、零阴影或极淡阴影（`0 1px 2px rgba(0,0,0,0.04)`）、圆角统一 12-18px。"少即是多"——任何元素必须先通过"删掉它会怎样"的检验。
+
+---
+
+## 1. 全站结构（叙事骨架）
+
+```
+00 封面 (Hero)         "这是你余生最贵的货币。
+                        在你读完这句话时，已经少了三秒。"
+                       ↓
+01 神经基础            模块 1: 注意力跷跷板（专注 vs 默认网络）
+                       模块 2: 多巴胺劫持循环
+                       模块 3: 管窥效应（认知带宽收割）
+                       ↓
+02 心理体验            模块 4: 心流通道（两个旋钮 · 双滑块）
+                       ↓
+03 价值与意义          模块 5: 注意力损益表（四投向 vs 三陷阱）
+                       模块 6: 注意力即财富（复利 vs 被收割）★新增
+                       ↓
+04 终章                模块 7: 注意力账户清零（向死而生）
+                       ↓
+05 行动卡 (Call-out)   一页可截图、可保存、可分享的"注意力守则"
+                       ↓
+06 幕后页 (附录)        spec / task 内嵌展示——"你刚才滚动的一切都是被设计的"
+```
+
+**叙事弧**: 神经规律（你为什么会被劫持）→ 心理体验（注意力的主观质感）→ 价值意义（注意力即自我即财富）→ 死亡视角（终极赋权）→ **元揭示（暴露设计层，赋权第八根柱子）**。
+
+---
+
+## 2. 七大核心模块详细设计
+
+### 模块 1 — 注意力跷跷板
+
+**论点**: 专注网络与默认模式网络是拮抗关系，分心是大脑的默认省电模式。
+
+**互动设计**:
+- 屏幕中央一个**水平跷跷板**，左端"专注"（Apple 蓝 `#0071e3` 光斑），右端"默认/分心"（Apple 橙 `#f56300` 光斑）。
+- 用户**按住鼠标拖动跷跷板向左**（往专注侧倾斜）。
+- 拖动时显示一个**单一数字计量**：`+0.30 卡路里 / 秒`（葡萄糖消耗，神经科学引用——专注时前额叶能耗）。数字实时累加，等宽字体 `tabular-nums`，避免跳动。
+- 拖动持续 5 秒后，数字增速**自动减半**（每秒 +0.05 卡路里），下方一行小字浮出：`专注是会累的。`——加一层"长时间专注的真实感"体感。
+- **松手瞬间**，跷跷板自动回弹到右侧（默认模式），配合一行冷感陈述：`松手 0.4 秒后，自动回到默认模式。`（不说教，让数字承载感受）
+- 桌面端拖动 / 移动端长按。
+- 静态降级（无 JS 或窄屏）: 直接展示左右对比插图 + 文案。
+
+**金句**:
+> **"专注是逆水行舟，分心是顺流而下。"**
+
+**思维模型**:
+- 【双网络拮抗模型】Task-Positive Network ↔ Default Mode Network
+- 大脑两套网络此消彼长：专注网络主动耗能、默认网络省电待机。
+- 何时调用: 当你"忍不住打开手机"时，提醒自己——这不是意志薄弱，这是默认网络在生效。
+
+---
+
+### 模块 2 — 多巴胺劫持循环
+
+**论点**: 注意力被劫持的不是奖励本身，而是"不确定的预期"。
+
+**互动设计**:
+- 一个圆形按钮"刷一下"，外圈是循环动画：`触发 → 渴望 → 反馈 → 渴望加倍`。无音效（违反主题）。
+- 用户每次点击：
+  - **70% 概率** 出现普通卡片，从 5 类内容轮播：
+    - 🐈 一张猫照片（SVG 几何插画，非真实图）
+    - 📜 一句鸡汤（如"努力就有回报"）
+    - 📰 一条假新闻（如"研究显示喝水能延寿"）
+    - 😂 一个表情包文字版（如"打工人，加油"）
+    - 🌅 一张风景图（SVG 简笔山/海/夕阳）
+  - **30% 概率** 出现"超级奖励"卡片：金色闪光 + 一句**反讽文案**（这是整页爆点）：
+    > "🎉 恭喜你！获得 +1 颗多巴胺。
+    > 这条文案就是为了让你再点一次而写的。"
+- 后台计数器记录**点击间隔时间**。当**连续 5 次点击间隔 < 1.5 秒**时（即真正进入劫持节奏），下方浮出一行小字：
+  > "你已经在这个循环里点了 N 次，每次间隔 < 1.5 秒。这就是抖音、小红书、邮箱、微信对你做的事。"
+- "我看明白了，停。"按钮**始终在场**：
+  - 默认状态：弱视灰色 `#86868b`，字号小一号
+  - 第 5 次点击后：变成 Apple 蓝 `#0071e3` 高亮（"等你回过神"的瞬间视觉反馈）
+- **关闭后不消失**——按钮位置变为一行小字：
+  > "你停下来了。这是这一整天里你为自己做的最重要的决定。"
+  这是模块结束前的 punchline。
+
+**金句**:
+> **"你追逐的是预期，不是奖励本身。"**
+> 备选 / 朋友圈版: "多巴胺贩卖的是'下一个会更好'的幻觉。"
+
+**思维模型**:
+- 【奖励预测误差陷阱】Reward Prediction Error Trap
+- 公式: `触发 → 渴望 → 不确定反馈 → 更强渴望`。**不确定性**是劫持的终极武器。
+- 何时调用: 任何"忍不住再刷一下"的产品（短视频/直播/游戏抽卡/邮箱通知/股票 App），其商业模式都嵌入了这个公式。
+
+---
+
+### 模块 3 — 管窥效应（认知带宽收割）
+
+**论点**: 贫穷与忙碌通过"占用工作记忆"来掠夺注意力，强迫人做短视决策。
+
+**互动设计**:
+- 屏幕中央一张**纯文字平铺的生活全景**——大字号（28-32px）等距排布 6 个词：
+  ```
+  远方的山    家人    书架
+  健身房     夕阳    长期目标
+  ```
+  Apple 风「克制美学」：不用图，纯文字 + 大留白，每个词都是 `#1d1d1f` 主文字色。
+- 下方一排"焦虑事件按钮"——**砍到 4 个**最普世的：`房贷 / 工作邮件 / 父母身体 / 截止日期`。
+- 用户**每点亮一个按钮**，全景区域受三层视觉叠加：
+  1. **模糊**：CSS `filter: blur(2px → 4px → 6px → 8px)`（每点一个 +2px）
+  2. **灰度**：`grayscale(0% → 33% → 66% → 100%)`
+  3. **缩小裁切**：可视区从 100% 缩到 25%，外圈用 `mask-image: radial-gradient(...)` 渐变到 `#fbfbfd` 次级背景
+  6 个词逐个变灰、逐个被裁出视野。
+- 点到第 4 个（全部点亮）时，画面只剩中间一个小光圈，里面只剩「房贷 工作邮件 父母身体 截止日期」四个**焦虑词**清晰可见。下方一行：
+  > "这就是你现在能看到的世界。长远规划、个人成长、真正重要的人，都在管子之外。"
+- 一个"清空管窥"按钮，瞬间还原全景（300ms Apple 缓动），对比强烈。
+- 静态降级：直接展示「全景态」和「管窥态」两张并置图 + 文案。
+
+**金句**:
+> **"贫穷不始于口袋的空虚，而始于注意力的溃散。"**
+
+**思维模型**:
+- 【认知带宽税】Cognitive Bandwidth Tax (Mullainathan & Shafir, 《Scarcity》)
+- 缺钱 / 缺时间不直接致命，但会引发"管窥心态 (Tunneling)"：管内极清晰、管外漆黑，工作记忆被紧急事务占满，无余裕做长期决策。
+- 何时调用: 当自己或他人在做"明显短视的决定"时，先检查 Ta 的认知带宽是否被占满，而非苛责"为什么不长远思考"。
+
+---
+
+### 模块 4 — 心流通道（两个旋钮）
+
+**论点**: 心流不是被动等来的灵感，而是可以被主动设计的环境——只需调两个旋钮。
+
+**互动设计**（**v0.3 重设计**：从 2D 图拖光点 → 双滑块，与思维模型「两个旋钮」原文呼应）:
+- 两根水平滑块，左右刻度都是「低 ··· 高」：
+  ```
+  挑战难度  [────●────]    低 ─────────── 高
+  当前技能  [──●──────]    低 ─────────── 高
+  ```
+- 滑块下方一段实时反馈区，根据两根滑块的相对位置切换文案 + Apple 语义色：
+  - 挑战 >> 技能（差值 > 30%）→ Apple 红 `#ff3b30` ：
+    > "你在**焦虑区**。任务超出能力，皮质醇飙升，注意力溃散。"
+  - 技能 >> 挑战（差值 > 30%）→ Apple 紫 `#bf5af2` ：
+    > "你在**无聊区**。技能溢出，多巴胺寻求外部刺激——开始想刷手机。"
+  - 二者匹配 + 都在低位 → 中灰 `#86868b` ：
+    > "你在**冷漠区**。两个旋钮都需要往上拨。"
+  - 二者匹配 + 都在高位（且挑战略 > 技能 5-15%）→ Apple 绿 `#30d158` + 字号 +20% ：
+    > **"你在心流。这就是你寻找的状态。"**
+    （金句直接在互动里浮出，整页最强体感时刻）
+- 滑块下方加一句小字提示，让读者自我代入：
+  > "你今天的工作处在哪个区？"
+- 移动端降级：保留双滑块（原生 `<input type="range">` 就支持）。无 JS 时降级为 4 个区的静态网格 + 文案。
+- 下方"如何主动进入心流通道"折叠面板保留，含三条原则: 跳一跳够得着的目标 / 消除分心 / 启动仪式。
+
+**金句**:
+> **"心流不是等来的灵感，是设计出来的环境。"**
+> 备选: "心流是精神熵的反面 —— 让混乱的意识变得高度有序。"
+
+**思维模型**:
+- 【心流通道】Csikszentmihalyi Flow Channel
+- 心流发生在挑战与技能**都处于高位**且挑战略微超出舒适区的狭长通道。
+- 何时调用: 当你做事感到"焦虑"或"无聊"时，先调整**两个旋钮**——挑战难度、当前技能——而不是责怪自己"不够自律"。
+
+---
+
+### 模块 5 — 注意力损益表（四投向 vs 三陷阱）
+
+**论点**: 每一次注意力选择都是一次微小的自我定义。投向决定你是谁。
+
+**互动设计**（**v0.3 简化**：100 颗豆拖拽 → 单滑块百分比分配。论点不变，操作量从 100 次降到 1 次）:
+- 屏幕顶部一行: **"你今天有 100 颗注意力豆。"**
+- 中间一根单滑块，两端分别是复利投向与收割陷阱：
+  ```
+  [复利投向 ●──────── 收割陷阱]
+      60%                  40%
+  ```
+  - **左端（Apple 绿）复利投向**: 自我成长 / 复利技能 / 真爱与意义 / 创造价值
+  - **右端（Apple 红）收割陷阱**: 外部劫持（凑热闹/随大流/操别人的心） / 内部消耗（内在反刍/习惯性反驳） / 执行幻觉（伪生产/即时满足）
+- 滑块实时计算（`tabular-nums` 数字）:
+  ```
+  今日复利产出: +60
+  今日被收割值: -40
+  净值: +20
+  ```
+- 滑块下方加一行小字锚定现实：
+  > "这个比例和你真实的今天像吗？"
+- 底部根据净值出对应反馈（v0.3 文案加狠）:
+  - 净值 > 0（绿多）: **"你今天在塑造一个值得成为的自己。"**
+  - 净值 < 0（红多）: **"你今天为别人的算法做了一天免费工。"**
+  - 净值 = 0 ±5: **"你留在了原地。明天还有一次机会。"**
+- 移动端降级：原生 `<input type="range">` 就能跨端工作。无 JS 时显示静态对比两栏文案。
+
+**金句**:
+> **"我的经验就是，我同意去注意的东西。"** —— 威廉·詹姆斯
+> 备选: "你注意过的一切的总和，构成了你的自我。"
+
+**思维模型**:
+- 【注意力损益表】Attention P&L Statement
+- 注意力是有限资源，每天的支出有正向（复利）和负向（被收割）之分。把每天结束当作一次"日结"。
+- 何时调用: 一天结束前花 30 秒回想"今天的 100 颗豆撒在哪了？"——比任何 To-Do 工具都更接近本质。
+
+---
+
+### 模块 6 — 注意力即财富（复利 vs 被收割）★新增
+
+**论点**: 注意力是比时间更根本的原始资本；不守护它，等于把生命无偿让人变现。
+
+**互动设计**（**v0.3 重设计**：双轨小人动画 → 单柱状图能力曲线。收紧互动焦点，与模块 5 论点区分——M5 讲「一天的分配」，M6 讲「十年的复利差」）:
+- 一个**双线柱状图 / 折线图**（纯 SVG inline，CSS keyframes 动画），X 轴 = 时间，Y 轴 = 能力 / 产出：
+  ```
+    能力 ▲
+         │                                    ╱── 复利（绿）
+         │                          ╱╱╱
+         │                ╱╱╱
+         │       ╱╱╱                      ─── 被收割（红）
+         │ ══════════════════════════════
+         └───────────────────────▶ 时间
+           1天    1月    1年   5年   10年
+  ```
+- 两条曲线视觉对比：
+  - **复利曲线（Apple 绿 `#30d158`）**：指数上升。第 1 天几乎平，第 1 月微翘，第 1 年明显上升，第 10 年陡峭。
+  - **被收割曲线（Apple 红 `#ff3b30`）**：始终平或微降。10 年后与复利曲线的差距触目惊心。
+- 用户拖动**时间滑块**（1 天 / 1 月 / 1 年 / 5 年 / 10 年五档），图表高亮对应时间点，下方数字同步更新：
+  ```
+  时间：10 年后
+  复利路径产出：~ 3,650 次深度工作
+  被收割路径产出：~ 3,650 次刷屏
+  能力差距：约 100 倍
+  ```
+- 滑到 10 年时，下方浮出金句：
+  > **"时间一样长，注意力的去向决定了你站在哪里。"**
+- 互动区下方保留**对比表格**（论点收尾，不再和动画并置）:
+  | 维度 | 复利路径 | 被收割路径 |
+  |---|---|---|
+  | 深度工作能力 | 越来越强 | 退化到无法忍受无聊 |
+  | 产出独特性 | 不可替代 | 随时可被替换 |
+  | 时间杠杆 | 一份投入持续产出 | 一份投入一次性消耗 |
+  | 选择权 | 越来越多 | 越来越少 |
+- 移动端降级：滑块保留（原生 range），图表用响应式 SVG `viewBox` 自动缩放。无 JS 时显示"10 年态"静态 SVG + 对比表格。
+
+**金句**:
+> **"贫穷不始于口袋的空虚，而始于注意力的溃散。"**
+> 备选 1: "时间是载体，注意力才是装在里面的黄金。"
+> 备选 2 (传播版): "你不守护注意力，就要付费让别人收割你。"
+
+> 注: 此金句与模块 3 同源。模块 3 的"贫穷"指向**当下的认知贫困**（管窥），模块 6 的"贫穷"指向**长期的生产性贫困**（无法深度产出）。两处都用，是有意的回声结构 —— 第二次出现时读者会理解得更深。
+
+**思维模型**:
+- 【注意力资本论】Attention as Primary Capital
+- 三层因果链：
+  1. 注意力 = 比时间更根本的原始资本（时间是载体，注意力是黄金）
+  2. 注意力变现 = 现代商业核心模式（你不投资自己，就被别人投资，赚你的钱）
+  3. 财富 = 长期专注的复利产物（深度工作 → 独特产出 → 不可替代价值 → 自由）
+- 何时调用:
+  - 每次想下载一个"很爽但没用"的 App 之前
+  - 每次评估一份工作 / 一段关系 / 一个项目时——问"它会让我注意力复利还是注意力损耗？"
+  - 当你觉得"我已经很努力了为什么没结果"时——大概率是注意力撒在了浅层、易替代的事上
+
+---
+
+### 模块 7 — 注意力账户清零（向死而生）
+
+**论点**: 死亡的必然性赋予每一个当下选择以重量。
+
+**互动设计**:
+- 一个**输入框**: "你的年龄是 ____ 岁"
+- 计算并显示（假设寿命 80 岁，扣除睡眠按 1/3 计）:
+  - **主显示（冷感克制）**: 用 `tabular-nums` 等宽数字呈现
+    ```
+    你还有约 18,250 天
+    ≈ 292,000 个清醒小时
+    ```
+    （默认不跳动，静态大字）
+  - **副显示（秒级倒计时）**: 右下角小字
+    ```
+    3,650,000,000 秒 ↓
+    ```
+    数字每秒 -1 秒。因基数巨大，视觉"在流走"但不刺激。
+  - **开关**: 主显示旁一个小切换按钮「以小时显示 / 以秒显示」让读者自选体感强度。建议默认"以小时显示"（较冷）。
+- 数字下方一行小字滚动:
+  > "假设这是你最后一天的注意力配额，你还会把它投在那条让你愤怒的评论区吗？"
+- 配一个"我决定把今天的注意力投在……"的输入框，用户可以打字写下。写完后给一个**保存为图片 / 复制到剪贴板**的按钮（仅本地处理，不上传）。
+- **生成的图片自动加一行自传播文案**（卡片底部居中小字）：
+  > "{年龄}岁的我，决定今天的注意力投在 {投向}。
+  > 剩余约 {小时数} 个清醒小时。"
+  这使卡片成为自传播单元——读者会想发朋友圈/Twitter，整页最强传播触点。
+- 一行最终落地句（v0.3 改）：
+  > **"这不是倒计时，是邀请函。"**
+
+**金句**:
+> **"正因为终将归零，每一个当下才有重量。"**
+> 备选: "死亡必然将我们的注意力账户清零。" —— 海德格尔式注脚
+
+**思维模型**:
+- 【向死而生的注意力分配】Being-Toward-Death Attention Allocation
+- 把每一天的注意力当作"生命结束前的最后一笔投资"来分配，自动过滤掉"操别人的心""凑热闹""习惯性反驳"等浮沫。
+- 何时调用: 在每个"反正还有时间"的拖延瞬间——提醒自己账户是绝对有限且单向递减的。
+
+---
+
+## 3. 全站附属组件
+
+### 3.1 顶部封面 (Hero)
+- 一行大标题：**"注意力"**（SF Pro Display，超大字号 96-120px，字重 600，纯黑 `#1d1d1f`）
+- 主副标题（立论点）：**"这是你余生最贵的货币。"**（字重 600，字号 36-48px，纯黑 `#1d1d1f`）
+- 次副标题（元戏剧 · 制造此刻体验）：**"在你读完这句话时，已经少了三秒。"**（中等灰 `#6e6e73`，字重 400，字号 22-28px）
+- 一行引导：**"向下滚动，重新拿回你的注意力主权。"**（弱文字 `#86868b`，字号 17px）
+- 视觉：纯白底上，一个缓慢呼吸的**深色光点**（`#1d1d1f` 渐变到 Apple 蓝 `#0071e3` 微光），暗示"专注的烛火"。鼠标移近会被四周淡灰色"分心粒子"吸走，移开后回归中央。整体保持苹果产品页的"巨幅留白 + 单一焦点"语感。
+- **节奏**：三行文案各占一屏的纵向 1/4，模仿 apple.com 产品页"陈述事实 + 制造此刻体验"的双段式 hero 停顿。
+
+### 3.2 模块间过渡卡片
+- 每个章节切换处（神经→心理→意义→死亡），出现一张全屏卡片，只显示该章节的**核心论点 + 章节序号**，给读者一个"换气"的节奏。
+- 这是保留"长文论证质感"的妥协设计——即便选了交互可视化路线，章节断点仍以文字承载叙事弧。
+
+### 3.3 终章「注意力守则」(Call-out 卡)
+- 网页最底部一张可截图、可保存、可分享的卡片，浓缩全站结论:
+  ```
+  注意力守则 · 7 条
+  ─────────────────────────────
+  1. 专注是逆水行舟，分心是顺流而下。
+  2. 你追逐的是预期，不是奖励本身。
+  3. 贫穷不始于口袋的空虚，而始于注意力的溃散。
+  4. 心流不是等来的灵感，是设计出来的环境。
+  5. 你注意过的一切的总和，构成了你的自我。
+  6. 时间是载体，注意力才是装在里面的黄金。
+  7. 正因为终将归零，每一个当下才有重量。
+  ─────────────────────────────
+  ```
+- 提供"另存为 PNG"按钮（用 canvas 把 DOM 渲染下来）。
+
+### 3.4 浮动目录 (Sticky TOC)
+- 桌面端右侧固定，列出 7 个模块名 + 当前阅读进度高亮。
+- 移动端: 顶部 sticky bar，缩成模块编号点。
+
+### 3.5 幕后页（附 · 这一切是怎么做出来的）
+
+**位置**: 终章「注意力守则」之后、页脚之前。视觉上明确与主线断开（一道 1px 极淡分割线 `rgba(0,0,0,0.08)` + 整节切换到次级背景 `#fbfbfd`）。
+
+**论点绑定**（关键）: 暴露 spec/task 不是装饰，而是全站论点的**第八根柱子**。开场白固定文案：
+
+> ## 附 · 这一切是怎么做出来的
+>
+> 一个讲注意力的网站，公开它的设计稿和待办清单，是想说：
+> **你刚才滚动过的每一帧体验，都是被设计出来的。**
+> 商业产品不会让你看到这一层，因为看到了，就难再被劫持。
+
+**结构**:
+- 开场白（如上）
+- **Apple Segmented Control**（双 tab 切换）:
+  ```
+  ┌─────────────────────────────┐
+  │  设计原则  │  制作进度       │
+  └─────────────────────────────┘
+  ```
+  - Tab 1「设计原则」 → 渲染 `spec.md` 内容
+  - Tab 2「制作进度」 → 渲染 `task.md` 内容
+  - 默认选中 Tab 1
+
+**Segmented Control 视觉规范**（Apple iOS/macOS 标准控件）:
+- 容器底色 `#f5f5f7`，圆角 `9999px`（pill），内边距 `4px`
+- Active tab：底色 `#ffffff`，阴影 `0 1px 3px rgba(0,0,0,0.08)`
+- Inactive tab：透明底，文字色 `#6e6e73`
+- 切换缓动：`cubic-bezier(0.4, 0, 0.2, 1)` 250ms
+- 容器最大宽度 `320px`，居中
+
+**内嵌文档源策略**: markdown 原文以内联 script 注入：
+```html
+<script type="text/markdown" id="spec-source">...spec.md 全文...</script>
+<script type="text/markdown" id="task-source">...task.md 全文...</script>
+```
+两份文件由 `build.sh`（10 行 bash + sed，非构建工具链）在每次更新时拷贝注入，开发期辅助脚本，运行时无任何依赖。
+
+**Mini Markdown 渲染器**（约 60 行原生 JS，覆盖以下语法）:
+| Markdown | HTML | 备注 |
+|---|---|---|
+| `# / ## / ###` | `<h1> / <h2> / <h3>` | 沿用全站 Apple 排版（`letter-spacing:-0.02em`） |
+| `**x**` / `*x*` | `<strong>` / `<em>` | — |
+| `` `x` `` | `<code>` | 等宽字体 + `#f5f5f7` 底色 + 4px padding |
+| ` ```...``` ` | `<pre><code>` | 整块等宽 + `#fbfbfd` 底色 |
+| `> x` | `<blockquote>` | 左侧 4px Apple 蓝 `#0071e3` 竖条 |
+| `- x` / `1. x` | `<ul>` / `<ol>` | 标准缩进 |
+| `\| a \| b \|` | `<table>` | 无边框，仅用 `#f5f5f7` 隔行底色 |
+| `[text](url)` | `<a>` | 颜色 `#0071e3`，无下划线，hover 下划线 |
+
+**渲染输出排版规则**: spec/task 进入网页后必须**仍是一份 Apple 设计稿**，不是 GitHub README。所有 h2/h3/表格/引用沿用全站 4.2、4.3 节排版规范。
+
+**降级**:
+- 无 JS：直接显示两份 markdown 原文于 `<details>` 折叠块内（`<pre>` 等宽显示）
+- 移动端：segmented control 撑满宽度，文档区单栏滚动
+
+---
+
+## 4. 视觉与交互规范
+
+### 4.1 色板（Apple 浅色 · Light Appearance）
+
+参考 Apple Human Interface Guidelines (Light) 与 apple.com 产品页系统色。
+
+| 用途 | 色值 | 含义 |
+|---|---|---|
+| 主背景 | `#ffffff` | 纯白（apple.com 主背景） |
+| 次级背景 | `#fbfbfd` | 区块/分节背景（苹果官网经典淡灰白） |
+| 表面/卡片 | `#f5f5f7` | 卡片底色（System Gray 6 浅色） |
+| 边框/分隔 | `rgba(0,0,0,0.08)` | 极淡边框，仅在必要时使用 |
+| 主文字 | `#1d1d1f` | 接近纯黑（apple.com 标题色） |
+| 次文字 | `#6e6e73` | 中灰（副标题、说明文字） |
+| 弱文字 | `#86868b` | 浅灰（注释、metadata） |
+| 主强调（链接/CTA） | `#0071e3` | Apple Blue（系统蓝，链接、主按钮） |
+| 警示红 | `#ff3b30` | Apple Red（陷阱 / 收割 / 焦虑区） |
+| 心流绿 | `#30d158` | Apple Green（心流通道 / 复利投向） |
+| 多巴胺紫 | `#bf5af2` | Apple Purple（不确定奖励 / 多巴胺） |
+| 暖橙（默认网络） | `#ff9f0a` | Apple Orange（跷跷板分心端） |
+
+**强调色使用克制**：所有彩色都仅出现在「数据/状态/语义」位置，不用于装饰。文字 99% 是 `#1d1d1f` 或 `#6e6e73`。
+
+### 4.2 字体
+
+- 全局字体栈：`-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", "Noto Sans SC", sans-serif`
+- 等宽（数字与代码）：`"SF Mono", ui-monospace, Menlo, Consolas, monospace`
+- 字重梯度（Apple 风：大字偏轻，小字偏重）：
+  - Hero 巨标题：`font-weight: 600`，字号 `clamp(56px, 9vw, 112px)`，`letter-spacing: -0.04em`
+  - 章节标题（H2）：`font-weight: 600`，字号 48-64px，`letter-spacing: -0.02em`
+  - 模块小标题（H3）：`font-weight: 600`，字号 28-32px
+  - 正文：`font-weight: 400`，字号 17-19px，`line-height: 1.47`
+  - 金句：`font-weight: 600`，字号 +30%，颜色 `#1d1d1f`，无引号装饰，居中大字呈现
+  - 说明/弱文字：`font-weight: 400`，色 `#6e6e73`
+- **数字使用 `tabular-nums`**（如倒计时、剩余小时数），避免跳动。
+
+### 4.3 排版与节奏
+
+- 内容最大宽度 `980px`（与 apple.com 产品文章页对齐），居中。
+- 模块间垂直留白至少 `120px`（桌面）/ `80px`（移动）。
+- 每个模块固定结构：`小标题 → 引文 → 互动区 → 金句 → 思维模型 → 长论证文字`。
+- 长论证文字保持**克制**：每段不超过 4 行，避免与互动区视觉打架。
+- **零边框为默认**：用空白和背景色对比（`#ffffff` ↔ `#fbfbfd` ↔ `#f5f5f7`）来分隔区块，而不是用线条。
+- 圆角统一：卡片 `18px`、按钮 `980px`（pill 圆角，Apple 经典）、输入框 `12px`。
+- 阴影极淡或无：仅在浮起卡片时使用 `0 4px 24px rgba(0,0,0,0.06)`。
+
+### 4.4 动效原则
+
+- 所有动效**默认就绪、不抢夺**。仅在用户主动操作时（拖、点、滚）激活。
+- 缓动曲线统一使用 Apple 系：`cubic-bezier(0.4, 0, 0.2, 1)`，时长 `300-500ms`。
+- 自动循环动画（如多巴胺循环）必须有"暂停 / 我看够了"按钮——本网页主题不允许劫持读者注意力。
+- 滚动时章节标题以 Apple 风格的"渐入上移"出现（`translateY(20px) → 0` + `opacity 0 → 1`）。
+- 尊重 `prefers-reduced-motion`，关闭所有非必要动画。
+
+---
+
+## 5. 移动端降级策略
+
+| 模块 | 桌面端 | 移动端 |
+|---|---|---|
+| 1 跷跷板 | 鼠标拖动 | 长按拖动；或简化为"点击切换"二态 |
+| 2 多巴胺 | 完整循环动画 + 反讽超级奖励 | 保留点击+随机奖励，去掉外圈复杂动画 |
+| 3 管窥 | 点击按钮三层视觉叠加（模糊+灰度+缩放） | 同左 |
+| 4 心流通道 | 双滑块（原生 range） | 同左（range 跨端原生） |
+| 5 损益表 | 单滑块百分比（原生 range） | 同左（range 跨端原生） |
+| 6 财富复利 | 时间滑块 + SVG 双线图 | 切换按钮 (1天/1年/10年) + SVG `viewBox` 自动缩放 |
+| 7 账户清零 | 完整输入+保存+秒级倒计时切换 | 同左（输入更轻量） |
+
+无 JS 环境：所有互动模块降级为**静态插画 + 文字解释 + 思维模型卡**，叙事完整不破。
+
+---
+
+## 6. 性能与体积预算
+- 单文件 ≤ 200 KB（参考 emotion 项目 658 行规模）。
+- 不引入任何外部 CDN（字体、图标、JS 库全部内联或用系统默认）。
+- 图标使用纯 SVG inline；动画用 CSS keyframes + 轻量 JS。
+- 首屏 First Paint < 1s（任意设备）。
+
+---
+
+## 7. 文件交付清单
+```
+attention/
+├── spec.md             ← 本文件
+└── index.html          ← 待生成（单文件、自包含）
+```
+
+可选后续：
+- `attention/notes.md` — 取舍备忘（哪些素材没用上，为什么）
+- `attention/preview.png` — 自动截图，供分享卡使用
+
+---
+
+## 8. 制作里程碑（顺序执行）
+
+1. **骨架阶段**: HTML 结构 + 7 个模块的占位区 + 全部文字（含金句、思维模型卡、长论证文字）。验收标准——关掉 JS 也能读完整内容。
+2. **样式阶段**: 套入 Apple 浅色色板 + 排版规范（SF Pro 字体栈、纯白背景、巨型轻量标题、Apple 系统语义色）。验收标准——视觉气质对标 apple.com 产品页：纯白底、克制留白、零多余边框、单焦点叙事。
+3. **交互阶段**: 按模块编号 1→7 逐个加交互。每加完一个，自测移动端降级。
+4. **细节阶段**: 顶部封面呼吸光点 + 章节过渡卡片 + 注意力守则卡 + 另存为 PNG。
+5. **审阅阶段**: 通读一遍，砍掉任何"装饰但不承载论点"的元素。再次提醒：本网页主题不允许劫持读者注意力。
+
+---
+
+## 9. 待你决策的开放问题
+
+1. **金句是否全部沿用原文？**
+   - 默认：是（已在每个模块标注）。
+   - 若需替换为更短传播版，请逐条指定。
+2. **是否需要"分享卡 / 海报版"导出？**
+   - 默认：是（仅终章守则卡 + 模块 7 的"今日投向"）。
+   - 若需每个模块都做导出图，工作量 +30%。
+3. **是否做配音 / 背景白噪音？**
+   - 默认：否（自动播放声音违反主题）。
+4. **是否加"正念呼吸"小工具作为彩蛋？**
+   - 默认：否（保持模块克制；如要加，放在终章后作为附录）。
+5. **是否需要中英双语切换？**
+   - 默认：否（中文为主，思维模型保留英文术语作辅助）。
+
+---
+
+> 本 spec 完成后，下一步动作：
+> 收到你"OK 开干"指令 → 生成 `index.html` 第一版（骨架 + 文字 + 样式，不含交互）。
+> 然后逐模块迭代加交互，每完成一个我会请你验收。
+
+<!-- BUILD:/SPEC --></script>
+    <script type="text/markdown" id="task-source"><!-- BUILD:TASK -->
+# 注意力 · 项目任务计划
+
+> 版本 v1.2 · 2026-05-10
+> 关联 spec: `/Users/wenfengzhu/ClaudeProjects/attention/spec.md` (v0.3 · CEO Review 后逐模块优化)
+> 交付目标: `/Users/wenfengzhu/ClaudeProjects/attention/index.html`（单文件、Apple 浅色风、7 模块交互 + 幕后页）
+
+---
+
+## 进度总览
+
+| 阶段 | 任务数 | 完成 | 进行中 | 未开始 | 状态 |
+|---|---|---|---|---|---|
+| P0 准备 | 6 | 6 | 0 | 0 | ✅ 完成 |
+| P1 骨架 | 9 | 0 | 0 | 9 | ⬜ 待启动 |
+| P2 样式 | 7 | 0 | 0 | 7 | ⬜ 待启动 |
+| P3 交互 | 9 | 0 | 0 | 9 | ⬜ 待启动 |
+| P4 细节 | 6 | 0 | 0 | 6 | ⬜ 待启动 |
+| P5 审阅交付 | 5 | 0 | 0 | 5 | ⬜ 待启动 |
+| P6 幕后页 | 5 | 0 | 0 | 5 | ⬜ 待启动 |
+| **合计** | **47** | **6** | **0** | **41** | **13%** |
+
+**当前阶段**: P0 完成（含 CEO Review 内容优化），等待 "OK 开干" 指令进入 P1。
+
+**状态图例**:
+- ⬜ 未开始
+- 🟡 进行中
+- ✅ 完成
+- ⛔ 阻塞 / 等待决策
+- ⏭️ 跳过（理由必须记录）
+
+---
+
+## P0 · 准备阶段（已完成）
+
+| ID | 任务 | 状态 | 备注 |
+|---|---|---|---|
+| P0-1 | 写 spec v0.1（深色 + 金色高亮） | ✅ | 2026-05-10 |
+| P0-2 | spec 整体改 Apple 浅色（v0.2） | ✅ | 色板/字体/排版全替换 |
+| P0-3 | 模块 7 金句换 "正因为终将归零，每一个当下才有重量。" | ✅ | 同步更新守则卡第 7 条 |
+| P0-4 | Hero 文案换双段式（"这是你余生最贵的货币。/ 在你读完这句话时，已经少了三秒。"） | ✅ | 第 1 节骨架图 + 3.1 节同步 |
+| P0-5 | spec 加 3.5 节「幕后页」+ 叙事骨架加 06 附录 | ✅ | 论点绑定 + segmented control + mini md 渲染规范 |
+| P0-6 | CEO Review：spec v0.2 → v0.3，逐模块内容优化（M1-M7） | ✅ | M1 单一卡路里数字；M2 反讽爆点 + 5 类卡内容；M3 纯文字平铺 + 4 焦虑词 + 三层视觉叠加；M4 重设计为双滑块（呼应"两个旋钮"）；M5 100 豆 → 单滑块百分比；M6 双轨小人 → 单 SVG 柱状图；M7 倒计时主显示改"天+小时"+ 自传播文案 + 落地句"这不是倒计时，是邀请函" |
+
+---
+
+## P1 · 骨架阶段（HTML 结构 + 全部文字）
+
+**验收标准**: 关掉 JS 与 CSS，仍能从上到下读完整内容。所有金句、思维模型卡、长论证文字到位。
+
+| ID | 任务 | 文件位置 | 依赖 | 状态 |
+|---|---|---|---|---|
+| P1-1 | `<head>` 元数据：charset / viewport / title "注意力" / meta description | `index.html` 1-15 行 | — | ⬜ |
+| P1-2 | Hero 区块（`<section id="hero">`）：标题 + 双段副标题 + 引导文字 | hero | P1-1 | ⬜ |
+| P1-3 | 浮动 TOC 占位（7 模块名 + 序号） | `<nav>` | P1-1 | ⬜ |
+| P1-4 | 章节过渡卡占位 4 张（神经/心理/价值/死亡） | section dividers | P1-1 | ⬜ |
+| P1-5 | 模块 1 结构：跷跷板 · 互动占位 + 金句 + 思维模型卡 + 长论证 | `<section id="m1">` | P1-1 | ⬜ |
+| P1-6 | 模块 2 结构：多巴胺循环 · 同上 | `<section id="m2">` | P1-1 | ⬜ |
+| P1-7 | 模块 3 结构：管窥效应 · 同上 | `<section id="m3">` | P1-1 | ⬜ |
+| P1-8 | 模块 4 结构：心流通道 · 同上 | `<section id="m4">` | P1-1 | ⬜ |
+| P1-9 | 模块 5/6/7 结构 + 终章守则卡 + 幕后页占位 + 页脚 | `<section id="m5..m7,#manifesto,#behind">` | P1-1 | ⬜ |
+
+**验收检查清单**:
+- [ ] 7 个模块每个都有「互动占位 → 金句 → 思维模型 → 长论证」四块
+- [ ] 金句使用 `<blockquote>` 语义化标签
+- [ ] 思维模型卡固定三行结构（模型名 / 定义 / 何时调用）
+- [ ] 关 JS 仍可读，关 CSS 仍可读
+- [ ] 全文中英文混排无错字（重点检查模块 6 的对比表格）
+
+---
+
+## P2 · 样式阶段（Apple 浅色）
+
+**验收标准**: 视觉气质对标 apple.com 产品页：纯白底、SF Pro 字体、巨型轻量标题、零多余边框、单焦点叙事。
+
+| ID | 任务 | 关键代码 | 依赖 | 状态 |
+|---|---|---|---|---|
+| P2-1 | CSS 变量定义（11 色 + 字号阶梯 + 圆角 + 间距） | `:root { --bg: #ffffff; ... }` | P1 完成 | ⬜ |
+| P2-2 | 全局重置 + 字体栈（SF Pro + PingFang SC） | `*, body, html` | P2-1 | ⬜ |
+| P2-3 | Hero 排版：`clamp(56px,9vw,112px)` + `letter-spacing:-0.04em` + 三行节奏 | `#hero h1, h2, p` | P2-2 | ⬜ |
+| P2-4 | 模块通用排版：980px max-width / 120px 间距 / 段落不超 4 行 | `section, .module` | P2-2 | ⬜ |
+| P2-5 | 卡片样式：`#f5f5f7` 底 / 18px 圆角 / 极淡阴影 / 零边框 | `.card, .model-card` | P2-1 | ⬜ |
+| P2-6 | 金句样式：居中、字号 +30%、纯黑、无引号装饰 | `blockquote` | P2-2 | ⬜ |
+| P2-7 | 响应式：移动端 ≤ 768px 字号缩放 + 间距压缩 80px | `@media` | P2-3, P2-4 | ⬜ |
+
+**验收检查清单**:
+- [ ] 桌面端在 1440px 宽度下与 apple.com 产品页观感一致
+- [ ] 移动端（375px）所有文字可读，互动区降级为静态示意
+- [ ] `prefers-color-scheme: dark` 下保持浅色（本站不做暗色版）
+- [ ] 数字使用 `tabular-nums`
+- [ ] 无任何外部 CDN（`grep -i "cdn\|googleapis\|http://" index.html` 应无结果）
+
+---
+
+## P3 · 交互阶段（按模块顺序逐个实现）
+
+**验收标准**: 每加完一个模块，立即在 1440px 桌面 + 375px 移动端各跑一次；移动端必须有降级。
+
+| ID | 模块 | 核心交互 | 难度 | 状态 |
+|---|---|---|---|---|
+| P3-1 | M1 跷跷板 | 鼠标拖动 → 单一卡路里数字累加（5 秒后增速减半）→ 松手回弹；移动端长按 | M | ⬜ |
+| P3-2 | M2 多巴胺循环 | 70/30 概率发卡（5 类普通 + 反讽超级奖励）+ "间隔<1.5s 连续 5 次"触发提示 + 渐进高亮停止按钮 + 关闭后 punchline | M | ⬜ |
+| P3-3 | M3 管窥效应 | 4 焦虑词按钮 → 全景文字三层视觉叠加（blur+grayscale+mask）+ 清空还原 | M | ⬜ |
+| P3-4 | M4 心流通道（双滑块） | 两根 `<input type="range">` → 实时根据差值切 4 区文案 + Apple 语义色高亮 | S | ⬜ |
+| P3-5 | M5 损益表（单滑块） | 一根滑块 → 百分比实时计算 + 净值反馈三档加狠文案 | S | ⬜ |
+| P3-6 | M6 财富复利（SVG 双线图） | 时间滑块 5 档 → SVG 双曲线高亮对应时间点 + 数字同步更新 + 对比表格保留 | M | ⬜ |
+| P3-7 | M7 账户清零 | 年龄输入 → 主显示"天+小时"+ 副显示秒级倒计时 + 单位切换开关 + 投向输入 + 保存图片（含自传播文案） | M | ⬜ |
+| P3-8 | Hero 呼吸光点 + 分心粒子吸引 | mousemove 监听 + canvas/CSS | S | ⬜ |
+| P3-9 | TOC 滚动联动当前模块高亮 | IntersectionObserver | S | ⬜ |
+
+**验收检查清单（每模块）**:
+- [ ] 桌面端互动流畅（< 16ms/frame）
+- [ ] 移动端有降级版本
+- [ ] `prefers-reduced-motion: reduce` 时关闭非必要动画
+- [ ] 自动循环类（M2）必须有"暂停/我看够了"按钮
+- [ ] 关 JS 时降级为静态插画 + 文字解释
+
+---
+
+## P4 · 细节阶段
+
+| ID | 任务 | 状态 |
+|---|---|---|
+| P4-1 | 章节过渡卡片（4 张全屏卡）渐入动画 | ⬜ |
+| P4-2 | 终章「注意力守则 7 条」卡片 + 另存为 PNG（canvas DOM 渲染） | ⬜ |
+| P4-3 | 模块 7「今日投向」另存为图片（自动嵌入自传播文案：年龄+投向+剩余清醒小时数）/ 复制到剪贴板 | ⬜ |
+| P4-4 | TOC 桌面右侧 sticky / 移动顶部缩成编号点 | ⬜ |
+| P4-5 | 滚动 reveal 动画（章节标题 `translateY(20px) → 0` + Apple 缓动） | ⬜ |
+| P4-6 | 全局键盘可达性（Tab 顺序、focus 可见、ESC 关闭弹层） | ⬜ |
+
+---
+
+## P5 · 审阅与交付
+
+| ID | 任务 | 状态 |
+|---|---|---|
+| P5-1 | 通读全文，砍掉任何"装饰但不承载论点"的元素 | ⬜ |
+| P5-2 | 性能审查：单文件 ≤ 200 KB，首屏 First Paint < 1s | ⬜ |
+| P5-3 | 浏览器兼容：Safari / Chrome / Firefox 最新版各跑一遍 | ⬜ |
+| P5-4 | 无障碍审查：对比度（WCAG AA）/ 屏幕阅读器友好 / `prefers-reduced-motion` | ⬜ |
+| P5-5 | 双击 `index.html` 打开能直接运行（无需任何服务器） | ⬜ |
+
+---
+
+## P6 · 幕后页（spec / task 内嵌展示）
+
+**验收标准**: 幕后页与主线视觉断开但同页可达；spec/task 渲染后仍是 Apple 设计稿质感（不是 GitHub README）；元叙述开场白把"暴露设计层"绑定到全站论点。
+
+| ID | 任务 | 关键产物 | 依赖 | 状态 |
+|---|---|---|---|---|
+| P6-1 | 元叙述开场白 + 章节容器（次级背景 `#fbfbfd` + 1px 极淡分割线） | `<section id="behind">` | P1-9, P2 | ⬜ |
+| P6-2 | Apple Segmented Control（双 tab：设计原则 / 制作进度） | pill 容器 + active 态切换 | P6-1 | ⬜ |
+| P6-3 | Mini Markdown 渲染器（~60 行原生 JS，覆盖 9 类语法） | `renderMarkdown(src)` | P6-2 | ⬜ |
+| P6-4 | 渲染输出 Apple 排版（h2 紧字距 / 表格无边框 / 引用 4px 蓝竖条 / 链接无下划线） | CSS `.behind-doc *` | P6-3 | ⬜ |
+| P6-5 | `build.sh`（10 行 bash + sed）把 spec.md / task.md 内联到 `<script type="text/markdown">` | 开发期辅助脚本 | P6-3 | ⬜ |
+
+**验收检查清单**:
+- [ ] 幕后页底色与主线区分明显，但读者滚到这里不感到突兀
+- [ ] 元叙述开场白与正文连贯，让暴露 spec 这件事变成全站第八根论点
+- [ ] segmented control 切换流畅、active 态视觉与 iOS 一致
+- [ ] markdown 渲染后 h2/表格/引用/代码块视觉与主站统一（不是工程师味）
+- [ ] 关 JS 时降级为 `<details><pre>` 折叠原文
+- [ ] 移动端 segmented control 撑满宽度，文档单栏滚动
+- [ ] 运行 `bash build.sh` 后 `index.html` 中 `<script id="spec-source">` / `<script id="task-source">` 内容与磁盘 markdown 一致
+
+---
+
+## 风险登记 (Risk Log)
+
+| 风险 | 概率 | 影响 | 缓解策略 |
+|---|---|---|---|
+| 单文件 200KB 超标（v0.3 后已显著缓解：M5 100 豆 → 单滑块、M6 双轨小人 → 单 SVG 双线图、M3 全景图 → 纯文字平铺；spec/task 文本约 30KB） | 中 | 中 | 用 SVG inline + CSS keyframes；P5-2 阶段实测体积 |
+| 移动端 M5 拖拽体验差（v0.3 已解除：100 豆 → 原生 `<input type="range">` 跨端工作） | — | — | ✅ v0.3 已解除 |
+| M2 反讽超级奖励文案是否过分挑衅，部分读者反感 | 中 | 中 | 文案已经过 review 收紧；如果有用户 feedback 再调；punchline 类内容承担"被讨厌的少数"是创作必然 |
+| M3 全景文字 + 三层视觉叠加在低端 Android 浏览器上掉帧 | 中 | 低 | 用 CSS `will-change`；只在桌面端启用三层叠加，移动端简化为两层 |
+| 「保存为 PNG」在 Safari 上跨域问题 | 低 | 低 | 不引入外部资源即可避免；用 canvas drawImage from inline SVG |
+| 7 个模块视觉打架，违反"克制注意力"主题 | 中 | 高 | P5-1 阶段强制砍装饰；每模块只允许一个动态焦点；v0.3 互动收紧后已显著改善 |
+| 幕后页破坏主线节奏，让读者读到一半离场 | 中 | 中 | 视觉强断开（次级背景 + 分割线）；元叙述开场白把它绑定到论点而非附加；放在守则卡之后（读者已完成主线） |
+| Mini md 渲染器覆盖不全，spec/task 出现错误渲染 | 中 | 低 | P6-3 完成后用当前 spec.md / task.md 实跑测试；只覆盖实际用到的 9 类语法，不追求通用 |
+| `build.sh` 违反 spec 第 0 条第 5 款"不要构建工具" | 低 | 低 | 已界定为"开发期辅助脚本"（纯 bash + sed，零依赖），运行时无任何依赖 |
+| 项目无 git 版本控制，一次手滑可能毁掉两天工作 | 高 | 高 | **建议 P1 启动前先 `git init` + 首次 commit**；后续每完成一个 P 阶段强制 commit |
+
+---
+
+## 开放决策（来自 spec 第 9 节，需用户确认后才能进 P1）
+
+| ID | 决策点 | 默认值 | 待确认 |
+|---|---|---|---|
+| D-1 | 金句是否全部沿用原文？ | 是 | ⛔ |
+| D-2 | 分享卡 / 海报版导出？ | 仅终章守则卡 + 模块 7 投向 | ⛔ |
+| D-3 | 是否做配音 / 背景白噪音？ | 否 | ⛔ |
+| D-4 | 是否加正念呼吸彩蛋？ | 否 | ⛔ |
+| D-5 | 是否中英双语切换？ | 否（中文为主） | ⛔ |
+| D-6 | 幕后页文档源策略 | 构建期内联（`build.sh` + sed 拷贝 markdown 到 `<script type="text/markdown">`） | ⛔ |
+
+**默认走默认值**——如果你说「OK 开干」，我会按上述默认值进入 P1。任何决策点要修改，单独说一句即可。
+
+---
+
+## 操作约定
+
+1. **每完成一个 task，把对应行的 ⬜ 改为 ✅，并在右侧 "备注" 列写一行（日期 + 关键决定）。**
+2. **每完成一个阶段（P1/P2/P3/P4/P5），更新顶部"进度总览"表格。**
+3. **遇到阻塞，把状态改为 ⛔ 并在风险登记表追加一行。**
+4. **每个交互模块（P3-1 到 P3-7）完成后，请你验收一次再进下一个。**
+
+---
+
+## 下一步
+
+等待你说「OK 开干」 → 进入 **P1-1**（HTML head 元数据）。
+
+<!-- BUILD:/TASK --></script>
+  </div>
+</section>
+
+<!-- ===== 页脚 ===== -->
+<footer>
+  <p>注意力 · 单页交互论证 · 2026</p>
+  <p style="margin-top: 8px;">本页面零外部依赖，纯 HTML + CSS + JS。源码可读。</p>
+</footer>
+
+<script>
+  // ===== 模块 1 · 跷跷板 (P3-1) =====
+  // 拖动跷跷板向左 → 进入"专注模式"，每秒消耗葡萄糖累加
+  // 5 秒后增速减半（疲劳态），松手回弹 + 冷感陈述
+  (function() {
+    var seesaw = document.getElementById('m1-seesaw');
+    var bar = seesaw && seesaw.querySelector('.m1-bar');
+    var stage = document.querySelector('.m1-stage');
+    var numEl = document.getElementById('m1-num');
+    var feedback = document.getElementById('m1-feedback');
+    if (!seesaw || !bar || !stage || !numEl || !feedback) return;
+
+    var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var DEFAULT_TILT = 8;        // 默认右倾 8°
+    var FOCUS_TILT_MAX = -22;    // 最大左倾（专注极致）
+    var RATE_FAST = 0.30;        // 卡路里 / 秒（前 5s）
+    var RATE_SLOW = 0.05;        // 疲劳后
+    var FATIGUE_AT = 5000;       // ms
+
+    var dragging = false;
+    var calories = 0;
+    var lastTick = 0;
+    var focusStart = 0;
+    var rafId = 0;
+    var tilt = DEFAULT_TILT;
+
+    var DEFAULT_HINT = '↑ 按住跷跷板向左拖动（或长按倾斜），看专注的真实成本。';
+    var FATIGUE_HINT = '专注是会累的。';
+    var RELEASED_HINT = '松手 0.4 秒后，自动回到默认模式。';
+
+    function setTilt(deg) {
+      tilt = deg;
+      bar.style.transform = 'translateX(-50%) rotate(' + deg + 'deg)';
+    }
+
+    function tick(ts) {
+      if (!dragging) return;
+      if (!lastTick) lastTick = ts;
+      var dt = (ts - lastTick) / 1000;
+      lastTick = ts;
+      var elapsed = ts - focusStart;
+      var rate = elapsed > FATIGUE_AT ? RATE_SLOW : RATE_FAST;
+      // 倾斜越大耗能越多（线性 0.4-1.0）
+      var lean = Math.min(1, Math.abs(tilt - DEFAULT_TILT) / Math.abs(FOCUS_TILT_MAX - DEFAULT_TILT));
+      calories += rate * dt * (0.4 + 0.6 * lean);
+      numEl.textContent = calories.toFixed(2);
+      if (elapsed > FATIGUE_AT && !feedback.classList.contains('is-fatigue')) {
+        feedback.classList.add('is-fatigue');
+        feedback.classList.remove('is-released');
+        feedback.textContent = FATIGUE_HINT;
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function getX(ev) {
+      if (ev.touches && ev.touches[0]) return ev.touches[0].clientX;
+      return ev.clientX;
+    }
+
+    function onDown(ev) {
+      dragging = true;
+      seesaw.classList.add('is-dragging');
+      stage.classList.add('is-focusing');
+      focusStart = performance.now();
+      lastTick = 0;
+      feedback.classList.remove('is-released');
+      feedback.classList.remove('is-fatigue');
+      feedback.textContent = '专注网络在工作 · 葡萄糖正在被消耗';
+      onMove(ev);
+      if (!prefersReduced) rafId = requestAnimationFrame(tick);
+      ev.preventDefault();
+    }
+
+    function onMove(ev) {
+      if (!dragging) return;
+      var rect = seesaw.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var dx = getX(ev) - cx;
+      // 左拖（dx < 0）→ 角度从 +8° 向 -22° 推进
+      var range = rect.width / 2;
+      var ratio = Math.max(-1, Math.min(1, dx / range));
+      // ratio = -1 (最左) → -22°；ratio = +1 (最右) → +18°
+      var deg = ratio < 0
+        ? DEFAULT_TILT + ratio * (DEFAULT_TILT - FOCUS_TILT_MAX) // ratio<0 时向 -22 走
+        : DEFAULT_TILT + ratio * 10;
+      setTilt(deg);
+    }
+
+    function onUp() {
+      if (!dragging) return;
+      dragging = false;
+      cancelAnimationFrame(rafId);
+      seesaw.classList.remove('is-dragging');
+      stage.classList.remove('is-focusing');
+      feedback.classList.remove('is-fatigue');
+      feedback.classList.add('is-released');
+      feedback.textContent = RELEASED_HINT;
+      // 0.4s 后回到默认提示
+      setTimeout(function() {
+        if (!dragging) {
+          feedback.classList.remove('is-released');
+          feedback.textContent = DEFAULT_HINT;
+        }
+      }, 2200);
+      setTilt(DEFAULT_TILT);
+    }
+
+    // 鼠标
+    seesaw.addEventListener('mousedown', onDown);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    // 触摸
+    seesaw.addEventListener('touchstart', onDown, { passive: false });
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onUp);
+    window.addEventListener('touchcancel', onUp);
+    // 键盘可达：Space 模拟按住
+    seesaw.setAttribute('tabindex', '0');
+    seesaw.setAttribute('role', 'slider');
+    seesaw.setAttribute('aria-label', '注意力跷跷板，按住空格向专注侧倾斜');
+    var kbHeld = false;
+    seesaw.addEventListener('keydown', function(e) {
+      if ((e.key === ' ' || e.code === 'Space') && !kbHeld) {
+        kbHeld = true;
+        // 模拟一个左拖到底的事件
+        var rect = seesaw.getBoundingClientRect();
+        onDown({ clientX: rect.left, preventDefault: function(){} });
+      }
+    });
+    seesaw.addEventListener('keyup', function(e) {
+      if (e.key === ' ' || e.code === 'Space') {
+        kbHeld = false;
+        onUp();
+      }
+    });
+
+    // 初始化倾斜
+    setTilt(DEFAULT_TILT);
+  })();
+
+  // ===== 模块 2 · 多巴胺循环 (P3-2) =====
+  // 70% 普通卡片（5 类轮换）/ 30% 超级反讽卡片
+  // 连续 5 次 <1.5s 间隔触发"劫持中"提示 + 高亮停止按钮
+  // 停止后变 punchline
+  (function() {
+    var btn = document.getElementById('m2-btn');
+    var card = document.getElementById('m2-card');
+    var counter = document.getElementById('m2-counter');
+    var stopBtn = document.getElementById('m2-stop');
+    var punchline = document.getElementById('m2-punchline');
+    if (!btn || !card || !counter || !stopBtn || !punchline) return;
+
+    var NORMAL_CARDS = [
+      { icon: '🐈', text: '一张猫照片。' },
+      { icon: '📜', text: '"努力就有回报。"' },
+      { icon: '📰', text: '研究显示：喝水能延寿。' },
+      { icon: '😂', text: '打工人，加油。' },
+      { icon: '🌅', text: '一片夕阳，剪影山海。' }
+    ];
+    var SUPER_CARD = {
+      icon: '🎉',
+      text: '恭喜你！获得 +1 颗多巴胺。',
+      sub: '这条文案就是为了让你再点一次而写的。'
+    };
+
+    var totalClicks = 0;
+    var fastStreak = 0;       // 连续 <1.5s 的点击次数
+    var lastClickAt = 0;
+    var normalIdx = 0;
+    var stopped = false;
+
+    function render(cardData, isSuper) {
+      card.classList.remove('is-flash', 'is-super');
+      // 强制重排重启动画
+      void card.offsetWidth;
+      card.classList.add('is-flash');
+      if (isSuper) card.classList.add('is-super');
+      var sub = isSuper && cardData.sub
+        ? '<span class="m2-card-sub">' + cardData.sub + '</span>'
+        : '';
+      card.innerHTML =
+        '<div>' +
+          '<span class="m2-card-icon" aria-hidden="true">' + cardData.icon + '</span>' +
+          '<div class="m2-card-text">' + cardData.text + sub + '</div>' +
+        '</div>';
+    }
+
+    function updateCounter() {
+      if (fastStreak >= 5) {
+        counter.classList.add('is-hijacked');
+        counter.textContent =
+          '你已经在这个循环里点了 ' + totalClicks + ' 次，每次间隔 < 1.5 秒。' +
+          '这就是抖音、小红书、邮箱、微信对你做的事。';
+        stopBtn.classList.add('is-highlighted');
+      } else if (totalClicks > 0) {
+        counter.classList.remove('is-hijacked');
+        counter.textContent = '点击次数：' + totalClicks;
+      }
+    }
+
+    btn.addEventListener('click', function() {
+      if (stopped) return;
+      var now = performance.now();
+      var dt = lastClickAt ? (now - lastClickAt) : Infinity;
+      lastClickAt = now;
+      totalClicks += 1;
+      if (dt < 1500) fastStreak += 1; else fastStreak = 1;
+
+      // 70/30 概率
+      var isSuper = Math.random() < 0.30;
+      if (isSuper) {
+        render(SUPER_CARD, true);
+      } else {
+        render(NORMAL_CARDS[normalIdx % NORMAL_CARDS.length], false);
+        normalIdx += 1;
+      }
+      updateCounter();
+    });
+
+    stopBtn.addEventListener('click', function() {
+      stopped = true;
+      btn.disabled = true;
+      btn.style.opacity = '0.4';
+      btn.style.cursor = 'not-allowed';
+      stopBtn.hidden = true;
+      counter.textContent = '';
+      punchline.hidden = false;
+    });
+  })();
+
+  // ===== 模块 3 · 管窥效应 (P3-3) =====
+  // 4 焦虑词按钮逐个点亮 → 全景三层视觉叠加（blur + grayscale + radial mask）
+  // 点到第 4 个时：只剩中间小光圈，4 焦虑词浮现 + 旁白切到收紧文案
+  // "清空管窥"按钮一键还原
+  (function() {
+    var panorama = document.getElementById('m3-panorama');
+    if (!panorama) return;
+    var anxietyBtns = panorama.parentElement.querySelectorAll('.m3-anxiety');
+    var clearBtn = document.getElementById('m3-clear');
+    var narration = document.getElementById('m3-narration');
+    var tunnelWords = panorama.querySelectorAll('.m3-tunnel-words span');
+    if (!anxietyBtns.length || !clearBtn || !narration) return;
+
+    var DEFAULT_HINT = '点亮焦虑事件，看你的世界如何被压缩。';
+    var TUNNELED_HINT = '这就是你现在能看到的世界。长远规划、个人成长、真正重要的人，都在管子之外。';
+
+    function syncWords() {
+      var level = parseInt(panorama.getAttribute('data-level'), 10) || 0;
+      // 焦虑词随按钮按下顺序出现（与按钮 id 对应）
+      var order = ['rent', 'email', 'parents', 'deadline'];
+      var pressed = {};
+      anxietyBtns.forEach(function(b) {
+        if (b.classList.contains('is-on')) pressed[b.dataset.id] = true;
+      });
+      tunnelWords.forEach(function(span, i) {
+        if (pressed[order[i]]) span.classList.add('is-on');
+        else span.classList.remove('is-on');
+      });
+      // 旁白
+      if (level >= 4) {
+        narration.classList.add('is-tunneled');
+        narration.textContent = TUNNELED_HINT;
+      } else if (level === 0) {
+        narration.classList.remove('is-tunneled');
+        narration.textContent = DEFAULT_HINT;
+      } else {
+        narration.classList.remove('is-tunneled');
+        narration.textContent = '管子正在收紧 · 已点亮 ' + level + ' / 4';
+      }
+      clearBtn.disabled = level === 0;
+    }
+
+    anxietyBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if (btn.classList.contains('is-on')) return;
+        btn.classList.add('is-on');
+        var level = parseInt(panorama.getAttribute('data-level'), 10) || 0;
+        panorama.setAttribute('data-level', String(Math.min(4, level + 1)));
+        syncWords();
+      });
+    });
+
+    clearBtn.addEventListener('click', function() {
+      anxietyBtns.forEach(function(b) { b.classList.remove('is-on'); });
+      panorama.setAttribute('data-level', '0');
+      syncWords();
+    });
+
+    syncWords();
+  })();
+
+  // ===== 模块 4 · 心流通道双滑块 (P3-4) =====
+  // 挑战 - 技能 差值 + 绝对位置 → 4 区切换 + Apple 语义色
+  (function() {
+    var challenge = document.getElementById('m4-challenge');
+    var skill = document.getElementById('m4-skill');
+    var zone = document.getElementById('m4-zone');
+    if (!challenge || !skill || !zone) return;
+    var zoneName = zone.querySelector('.m4-zone-name');
+    var zoneText = zone.querySelector('.m4-zone-text');
+
+    var ZONES = {
+      apathy: {
+        name: '冷漠区',
+        text: '两个旋钮都需要往上拨。'
+      },
+      anxiety: {
+        name: '焦虑区',
+        text: '任务超出能力，皮质醇飙升，注意力溃散。'
+      },
+      boredom: {
+        name: '无聊区',
+        text: '技能溢出，多巴胺寻求外部刺激——开始想刷手机。'
+      },
+      flow: {
+        name: '你在心流',
+        text: '这就是你寻找的状态。'
+      }
+    };
+
+    function compute() {
+      var c = +challenge.value;
+      var s = +skill.value;
+      var diff = c - s;
+      var z;
+      // spec 规则：
+      // - 差值 > 30：焦虑（挑战 >> 技能）
+      // - 差值 < -30：无聊（技能 >> 挑战）
+      // - 二者都低（< 40）：冷漠
+      // - 二者都高（>= 60）且挑战略 > 技能（5..15）：心流
+      // - 其余 fallthrough：按差值方向倾向 apathy / boredom
+      if (diff > 30) {
+        z = 'anxiety';
+      } else if (diff < -30) {
+        z = 'boredom';
+      } else if (c >= 60 && s >= 60 && diff >= 5 && diff <= 15) {
+        z = 'flow';
+      } else if (c < 40 && s < 40) {
+        z = 'apathy';
+      } else if (diff >= 0) {
+        // 中段 + 挑战略大 → 趋近心流但还没到（不进心流文案）→ 显示冷漠 / 焦虑边界
+        z = c >= 60 ? 'flow' : 'apathy';
+        // 不在严格心流通道也不到焦虑：判定为冷漠（再调高一点就进心流）
+        if (z === 'flow' && (diff < 5 || diff > 15)) z = 'apathy';
+      } else {
+        z = 'apathy';
+      }
+
+      if (zone.getAttribute('data-zone') !== z) {
+        zone.setAttribute('data-zone', z);
+        zoneName.textContent = ZONES[z].name;
+        zoneText.textContent = ZONES[z].text;
+      }
+    }
+
+    challenge.addEventListener('input', compute);
+    skill.addEventListener('input', compute);
+    compute();
+  })();
+
+  // ===== 模块 5 · 注意力损益表（单滑块）(P3-5) =====
+  // 滑块 = 复利投向比例；右半自动 = 100 - 该比例 = 收割陷阱
+  // 净值反馈三档：>0 塑造 / <0 为算法做免费工 / ±5 留在原地
+  (function() {
+    var slider = document.getElementById('m5-slider');
+    var green = document.getElementById('m5-green');
+    var red = document.getElementById('m5-red');
+    var greenPct = document.getElementById('m5-green-pct');
+    var redPct = document.getElementById('m5-red-pct');
+    var outGreen = document.getElementById('m5-out-green');
+    var outRed = document.getElementById('m5-out-red');
+    var net = document.getElementById('m5-net');
+    var stats = document.querySelector('#m5 .m5-stats');
+    var feedback = document.getElementById('m5-feedback');
+    if (!slider || !green || !red || !greenPct || !redPct || !net || !stats || !feedback) return;
+
+    var POS = '你今天在塑造一个值得成为的自己。';
+    var NEG = '你今天为别人的算法做了一天免费工。';
+    var ZERO = '你留在了原地。明天还有一次机会。';
+
+    function compute() {
+      var g = +slider.value;
+      var r = 100 - g;
+      green.style.width = g + '%';
+      red.style.width = r + '%';
+      greenPct.textContent = g;
+      redPct.textContent = r;
+      outGreen.textContent = '+' + g;
+      outRed.textContent = '-' + r;
+      var nv = g - r;
+      net.textContent = (nv > 0 ? '+' : '') + nv;
+      var tone, netCat;
+      if (nv >= -5 && nv <= 5) { tone = 'zero'; netCat = 'zero'; feedback.textContent = ZERO; }
+      else if (nv > 5) { tone = 'positive'; netCat = 'positive'; feedback.textContent = POS; }
+      else { tone = 'negative'; netCat = 'negative'; feedback.textContent = NEG; }
+      feedback.setAttribute('data-tone', tone);
+      stats.setAttribute('data-net', netCat);
+    }
+    slider.addEventListener('input', compute);
+    compute();
+  })();
+
+  // ===== TOC 滚动联动 (P3-9) =====
+  (function() {
+    if (typeof IntersectionObserver === 'undefined') return;
+    var sections = document.querySelectorAll('section[id]');
+    var tocLinks = {};
+    document.querySelectorAll('.toc a').forEach(function(a) {
+      var href = a.getAttribute('href').replace('#', '');
+      tocLinks[href] = a;
+    });
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) {
+          Object.values(tocLinks).forEach(function(a) { a.classList.remove('active'); });
+          if (tocLinks[e.target.id]) tocLinks[e.target.id].classList.add('active');
+        }
+      });
+    }, { rootMargin: '-40% 0px -40% 0px' });
+    sections.forEach(function(s) { io.observe(s); });
+  })();
+
+  // ===== 滚动 reveal (P4-5) =====
+  (function() {
+    if (typeof IntersectionObserver === 'undefined') return;
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('in-view');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(function(el) { io.observe(el); });
+  })();
+</script>
+
+</body>
+</html>
