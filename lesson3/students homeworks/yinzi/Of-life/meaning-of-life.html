@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生命的意义 — 多维度交互式探索</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+:root {
+  --bg-deep: #0a0e14;
+  --bg-panel: #131820;
+  --bg-card: #1a1f2e;
+  --bg-hover: #222840;
+  --text-primary: #e0e0e0;
+  --text-secondary: #8899aa;
+  --text-muted: #556677;
+  --gold: #d4a853;
+  --gold-light: #e8c97a;
+  --gold-dim: #8b6f3a;
+  --blue: #5a8db6;
+  --blue-dim: #3a5f7a;
+  --red: #c05757;
+  --red-dim: #7a3a3a;
+  --green: #5a9e6f;
+  --green-dim: #3a6f4a;
+  --purple: #8b6faa;
+  --purple-dim: #5a3a7a;
+  --orange: #c0854a;
+  --orange-dim: #7a5530;
+  --teal: #4a9e9e;
+  --teal-dim: #306a6a;
+  --pink: #b85a8a;
+  --pink-dim: #7a3a5a;
+  --radius: 8px;
+  --radius-lg: 14px;
+  --transition: 0.25s ease;
+  --font-serif: 'Noto Serif SC', 'SimSun', serif;
+  --font-sans: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+}
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { font-size:16px; scroll-behavior:smooth; }
+body {
+  font-family:var(--font-sans);
+  background:var(--bg-deep);
+  color:var(--text-primary);
+  line-height:1.7;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+a { color:var(--gold); text-decoration:none; transition:var(--transition); }
+a:hover { color:var(--gold-light); }
+
+/* Layout */
+.app-header {
+  position:sticky; top:0; z-index:100;
+  background:var(--bg-deep); border-bottom:1px solid rgba(255,255,255,0.06);
+  backdrop-filter:blur(12px);
+  padding:0 24px; height:56px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.app-header .logo {
+  font-family:var(--font-serif);
+  font-size:1.25rem; font-weight:700;
+  color:var(--gold); cursor:pointer;
+  letter-spacing:0.05em;
+}
+.app-header nav { display:flex; gap:20px; align-items:center; }
+.app-header nav a {
+  font-size:0.875rem; color:var(--text-secondary);
+  padding:6px 0; position:relative;
+  white-space:nowrap;
+}
+.app-header nav a:hover, .app-header nav a.active { color:var(--gold); }
+.app-header nav a.active::after {
+  content:''; position:absolute; bottom:-1px; left:0; right:0;
+  height:2px; background:var(--gold); border-radius:1px;
+}
+.search-trigger {
+  background:var(--bg-card); border:1px solid rgba(255,255,255,0.08);
+  color:var(--text-secondary); padding:6px 14px; border-radius:20px;
+  font-size:0.8rem; cursor:pointer; transition:var(--transition);
+  display:flex; align-items:center; gap:6px;
+}
+.search-trigger:hover { border-color:var(--gold-dim); color:var(--text-primary); }
+.search-trigger kbd {
+  background:var(--bg-hover); padding:1px 6px; border-radius:3px;
+  font-size:0.7rem; font-family:inherit;
+}
+
+main { max-width:1200px; margin:0 auto; padding:24px; min-height:calc(100vh - 56px); }
+
+/* Sections */
+.page { display:none; }
+.page.active { display:block; animation:fadeIn 0.35s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* Hero */
+.hero {
+  text-align:center; padding:80px 20px 60px;
+  position:relative;
+}
+.hero h1 {
+  font-family:var(--font-serif);
+  font-size:2.8rem; font-weight:700;
+  color:var(--gold); margin-bottom:16px;
+  letter-spacing:0.08em;
+}
+.hero .subtitle {
+  font-size:1.1rem; color:var(--text-secondary);
+  max-width:520px; margin:0 auto 32px;
+  font-weight:300;
+}
+.hero .cta-row { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+
+.btn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:10px 22px; border-radius:24px; font-size:0.9rem;
+  cursor:pointer; transition:var(--transition);
+  border:none; font-family:inherit;
+}
+.btn-primary { background:var(--gold); color:#1a1a1a; font-weight:600; }
+.btn-primary:hover { background:var(--gold-light); transform:translateY(-1px); }
+.btn-outline {
+  background:transparent; color:var(--gold);
+  border:1px solid var(--gold-dim);
+}
+.btn-outline:hover { border-color:var(--gold); background:rgba(212,168,83,0.06); }
+.btn-sm { padding:5px 14px; font-size:0.8rem; }
+.btn-icon { width:36px; height:36px; padding:0; justify-content:center; border-radius:50%; }
+
+/* Dimension nav */
+.dim-nav {
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
+  gap:12px; margin-top:40px;
+}
+.dim-card {
+  background:var(--bg-card); border-radius:var(--radius-lg);
+  padding:22px 16px; text-align:center; cursor:pointer;
+  transition:var(--transition); border:1px solid transparent;
+}
+.dim-card:hover { border-color:var(--gold-dim); transform:translateY(-2px); background:var(--bg-hover); }
+.dim-card .dim-icon { font-size:2rem; margin-bottom:8px; }
+.dim-card .dim-name { font-size:0.9rem; font-weight:500; color:var(--text-primary); }
+.dim-card .dim-count { font-size:0.75rem; color:var(--text-muted); margin-top:3px; }
+
+/* Section titles */
+.section-title {
+  font-family:var(--font-serif);
+  font-size:1.6rem; color:var(--gold); margin-bottom:24px;
+  padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.06);
+}
+
+/* Quote cards */
+.quote-controls { display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; align-items:center; }
+.filter-chips { display:flex; gap:8px; flex-wrap:wrap; }
+.chip {
+  padding:5px 14px; border-radius:16px; font-size:0.8rem;
+  cursor:pointer; transition:var(--transition);
+  background:var(--bg-card); color:var(--text-secondary);
+  border:1px solid rgba(255,255,255,0.06);
+}
+.chip:hover, .chip.active { background:var(--gold-dim); color:var(--gold-light); border-color:var(--gold-dim); }
+.search-input {
+  background:var(--bg-card); border:1px solid rgba(255,255,255,0.08);
+  color:var(--text-primary); padding:8px 16px; border-radius:20px;
+  font-size:0.85rem; font-family:inherit; min-width:200px; outline:none;
+  transition:var(--transition);
+}
+.search-input:focus { border-color:var(--gold-dim); }
+.search-input::placeholder { color:var(--text-muted); }
+
+.quote-grid {
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));
+  gap:16px;
+}
+.quote-card {
+  background:var(--bg-card); border-radius:var(--radius-lg);
+  padding:24px; position:relative;
+  border:1px solid rgba(255,255,255,0.04);
+  transition:var(--transition);
+}
+.quote-card:hover { border-color:rgba(255,255,255,0.1); }
+.quote-card .quote-text {
+  font-family:var(--font-serif);
+  font-size:1.05rem; line-height:1.8; color:var(--text-primary);
+  margin-bottom:12px; quotes:"\201C""\201D";
+}
+.quote-card .quote-text::before { content:open-quote; color:var(--gold-dim); font-size:1.8rem; line-height:0; vertical-align:-0.3em; margin-right:4px; }
+.quote-card .quote-translation {
+  font-size:0.85rem; color:var(--text-secondary); margin-bottom:12px;
+  font-style:italic; padding-left:12px; border-left:2px solid var(--gold-dim);
+}
+.quote-card .quote-meta { font-size:0.8rem; color:var(--text-muted); }
+.quote-card .quote-meta strong { color:var(--text-secondary); }
+.quote-card .quote-dim {
+  display:inline-block; padding:2px 10px; border-radius:10px;
+  font-size:0.7rem; margin-top:8px;
+  background:rgba(212,168,83,0.12); color:var(--gold-light);
+}
+.quote-card .quote-actions {
+  position:absolute; top:12px; right:12px; display:flex; gap:6px; opacity:0;
+  transition:var(--transition);
+}
+.quote-card:hover .quote-actions { opacity:1; }
+.quote-card .fav-btn {
+  background:none; border:none; color:var(--text-muted); cursor:pointer;
+  font-size:1.2rem; transition:var(--transition); padding:4px;
+}
+.quote-card .fav-btn.faved { color:var(--gold); }
+.quote-card .copy-btn {
+  background:none; border:none; color:var(--text-muted); cursor:pointer;
+  font-size:0.9rem; transition:var(--transition); padding:4px;
+}
+.quote-card .copy-btn:hover, .quote-card .fav-btn:hover { color:var(--gold-light); }
+
+/* Timeline */
+.timeline-container {
+  position:relative; overflow-x:auto; padding:30px 0 50px;
+  cursor:grab;
+}
+.timeline-container:active { cursor:grabbing; }
+.timeline-track {
+  position:relative; height:280px; min-width:2800px;
+  padding:0 60px;
+}
+.timeline-line {
+  position:absolute; top:50%; left:60px; right:60px; height:2px;
+  background:linear-gradient(90deg, var(--gold-dim), var(--gold), var(--gold-dim));
+}
+.timeline-node {
+  position:absolute; transform:translate(-50%, -50%);
+  cursor:pointer; transition:var(--transition);
+}
+.timeline-node .dot {
+  width:14px; height:14px; border-radius:50%; border:2px solid var(--gold);
+  background:var(--bg-deep); transition:var(--transition);
+  margin:0 auto;
+}
+.timeline-node:hover .dot { background:var(--gold); transform:scale(1.3); }
+.timeline-node .label {
+  position:absolute; font-size:0.7rem; color:var(--text-secondary);
+  white-space:nowrap; text-align:center; width:100px; left:-50px;
+}
+.timeline-node.above .label { bottom:22px; }
+.timeline-node.below .label { top:22px; }
+.timeline-node .year {
+  font-size:0.65rem; color:var(--text-muted);
+  position:absolute; white-space:nowrap;
+}
+.timeline-node.above .year { bottom:6px; left:50%; transform:translateX(-50%); }
+.timeline-node.below .year { top:6px; left:50%; transform:translateX(-50%); }
+.timeline-era {
+  position:absolute; top:50%; transform:translateY(-50%);
+  font-size:0.7rem; color:var(--gold-dim); padding:4px 12px;
+  border:1px dashed var(--gold-dim); border-radius:12px;
+  white-space:nowrap; pointer-events:none;
+}
+.timeline-controls {
+  display:flex; gap:8px; justify-content:center; margin-bottom:16px;
+}
+
+/* Detail panel */
+.detail-overlay {
+  position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6);
+  z-index:200; display:none; align-items:center; justify-content:center;
+}
+.detail-overlay.open { display:flex; }
+.detail-panel {
+  background:var(--bg-panel); border-radius:var(--radius-lg);
+  max-width:560px; width:90%; max-height:80vh; overflow-y:auto;
+  padding:32px; position:relative;
+  border:1px solid rgba(255,255,255,0.08);
+}
+.detail-panel .close-btn {
+  position:absolute; top:12px; right:12px;
+  background:none; border:none; color:var(--text-muted); font-size:1.4rem;
+  cursor:pointer; transition:var(--transition);
+}
+.detail-panel .close-btn:hover { color:var(--text-primary); }
+.detail-panel h3 { font-family:var(--font-serif); color:var(--gold); margin-bottom:8px; }
+.detail-panel .meta { font-size:0.85rem; color:var(--text-muted); margin-bottom:16px; }
+.detail-panel .wiki-snippet {
+  background:var(--bg-card); border-radius:var(--radius); padding:14px;
+  margin-top:14px; font-size:0.85rem; color:var(--text-secondary);
+  line-height:1.6;
+}
+.detail-panel .wiki-snippet.loading { color:var(--text-muted); }
+
+/* Graph page */
+.graph-layout { display:flex; gap:0; height:calc(100vh - 120px); }
+#graph-container { flex:1; background:var(--bg-deep); border-radius:var(--radius-lg); overflow:hidden; position:relative; }
+#graph-container svg { width:100%; height:100%; }
+#graph-container .node { cursor:pointer; }
+#graph-container .node circle { stroke-width:2px; transition:var(--transition); }
+#graph-container .node:hover circle { stroke-width:3.5px; filter:brightness(1.3); }
+#graph-container .link { stroke-opacity:0.3; stroke-width:1px; }
+#graph-container .link.influence { stroke-dasharray:none; }
+#graph-container .link.opposes { stroke-dasharray:5,3; }
+#graph-container .link.complement { stroke-dasharray:2,4; }
+#graph-container .link.inherits { stroke-dasharray:8,4; }
+#graph-container text { font-size:11px; fill:var(--text-secondary); pointer-events:none; font-family:var(--font-sans); }
+
+.graph-sidebar {
+  width:280px; background:var(--bg-panel); border-radius:var(--radius-lg);
+  padding:20px; overflow-y:auto; border:1px solid rgba(255,255,255,0.06);
+}
+.graph-sidebar h4 { color:var(--gold); margin-bottom:12px; font-family:var(--font-serif); font-size:0.95rem; }
+.graph-sidebar .filter-group { margin-bottom:16px; }
+.graph-sidebar .filter-group label {
+  display:flex; align-items:center; gap:8px; font-size:0.8rem;
+  color:var(--text-secondary); padding:4px 0; cursor:pointer;
+}
+.graph-sidebar .filter-group input[type=checkbox] { accent-color:var(--gold); }
+.graph-sidebar .node-detail { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+.graph-sidebar .node-detail h5 { color:var(--gold); font-size:0.9rem; margin-bottom:4px; }
+.graph-path-control { margin-top:8px; }
+.graph-path-control select {
+  width:100%; background:var(--bg-card); color:var(--text-primary);
+  border:1px solid rgba(255,255,255,0.08); padding:6px 10px;
+  border-radius:var(--radius); font-family:inherit; font-size:0.8rem; margin-bottom:6px;
+}
+
+/* Quiz */
+.quiz-container { max-width:600px; margin:40px auto; }
+.quiz-progress {
+  height:3px; background:var(--bg-card); border-radius:2px; margin-bottom:32px;
+}
+.quiz-progress-bar { height:100%; background:var(--gold); border-radius:2px; transition:width 0.4s ease; }
+.quiz-question {
+  font-family:var(--font-serif); font-size:1.3rem; margin-bottom:24px; color:var(--text-primary);
+}
+.quiz-options { display:flex; flex-direction:column; gap:10px; }
+.quiz-option {
+  background:var(--bg-card); border:1px solid rgba(255,255,255,0.06);
+  border-radius:var(--radius); padding:16px 20px; cursor:pointer;
+  transition:var(--transition); text-align:left; font-size:0.95rem;
+  color:var(--text-secondary); font-family:inherit;
+}
+.quiz-option:hover { border-color:var(--gold-dim); color:var(--text-primary); background:var(--bg-hover); }
+.quiz-option.selected { border-color:var(--gold); color:var(--gold-light); background:rgba(212,168,83,0.08); }
+.quiz-result { text-align:center; }
+.quiz-result h3 { font-family:var(--font-serif); color:var(--gold); font-size:1.5rem; margin-bottom:12px; }
+.quiz-result .match-bar {
+  height:8px; border-radius:4px; margin:8px 0 16px;
+  background:linear-gradient(90deg, var(--gold), var(--gold-light));
+  transition:width 1s ease;
+}
+.quiz-result .recommendations { text-align:left; margin-top:24px; }
+
+/* Favorites */
+.fav-empty { text-align:center; padding:60px 20px; color:var(--text-muted); }
+.fav-actions { display:flex; gap:10px; margin-bottom:20px; }
+
+/* Toast */
+.toast {
+  position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
+  background:var(--bg-panel); color:var(--gold-light);
+  padding:10px 24px; border-radius:24px; font-size:0.85rem;
+  z-index:999; opacity:0; transition:opacity 0.3s ease;
+  border:1px solid var(--gold-dim); pointer-events:none;
+}
+.toast.show { opacity:1; }
+
+/* Search overlay */
+.search-overlay {
+  position:fixed; top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.75); z-index:300;
+  display:none; align-items:flex-start; justify-content:center;
+  padding-top:15vh;
+}
+.search-overlay.open { display:flex; }
+.search-modal {
+  background:var(--bg-panel); border-radius:var(--radius-lg);
+  width:560px; max-width:90%; overflow:hidden;
+  border:1px solid rgba(255,255,255,0.1);
+}
+.search-modal input {
+  width:100%; background:transparent; border:none;
+  color:var(--text-primary); font-size:1.1rem; padding:20px 24px;
+  font-family:inherit; outline:none;
+}
+.search-modal input::placeholder { color:var(--text-muted); }
+.search-results { max-height:400px; overflow-y:auto; }
+.search-result-item {
+  padding:14px 24px; cursor:pointer; transition:var(--transition);
+  border-top:1px solid rgba(255,255,255,0.04);
+  display:flex; align-items:center; gap:12px;
+}
+.search-result-item:hover { background:var(--bg-hover); }
+.search-result-item .result-type {
+  font-size:0.7rem; padding:2px 8px; border-radius:8px;
+  background:var(--gold-dim); color:var(--gold-light); white-space:nowrap;
+}
+.search-result-item .result-text { font-size:0.9rem; flex:1; }
+.search-result-item .result-sub { font-size:0.75rem; color:var(--text-muted); }
+
+/* Responsive */
+@media (max-width:768px) {
+  .hero h1 { font-size:1.8rem; }
+  .hero { padding:50px 16px 40px; }
+  .quote-grid { grid-template-columns:1fr; }
+  .dim-nav { grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); }
+  .graph-layout { flex-direction:column; height:auto; }
+  .graph-sidebar { width:100%; }
+  #graph-container { height:400px; }
+  .app-header nav { gap:10px; }
+  .app-header nav a { font-size:0.75rem; }
+  main { padding:16px; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:var(--bg-deep); }
+::-webkit-scrollbar-thumb { background:var(--bg-hover); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:var(--gold-dim); }
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div class="logo" onclick="navigate('/')">生命的意义</div>
+  <nav id="main-nav">
+    <a href="#/" class="active">首页</a>
+    <a href="#/quotes">名言库</a>
+    <a href="#/timeline">时间线</a>
+    <a href="#/graph">关系图</a>
+    <a href="#/quiz">你的意义</a>
+    <a href="#/favorites">收藏</a>
+  </nav>
+  <button class="search-trigger" onclick="openSearch()" title="全局搜索">
+    🔍 <span>搜索</span> <kbd>Ctrl+K</kbd>
+  </button>
+</div>
+
+<main id="main-content"></main>
+
+<div class="detail-overlay" id="detail-overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-panel" id="detail-panel"></div>
+</div>
+
+<div class="search-overlay" id="search-overlay" onclick="if(event.target===this)closeSearch()">
+  <div class="search-modal">
+    <input type="text" id="search-input" placeholder="搜索名言、思想家、事件..." oninput="performSearch(this.value)">
+    <div class="search-results" id="search-results"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const DIMENSIONS = {
+  philosophy:     { id:'philosophy',     name:'哲学',   icon:'🏛️', color:'#d4a853' },
+  religion:       { id:'religion',       name:'宗教与信仰', icon:'⛪', color:'#c0854a' },
+  science:        { id:'science',        name:'科学',   icon:'🔬', color:'#5a8db6' },
+  psychology:     { id:'psychology',     name:'心理学', icon:'🧠', color:'#8b6faa' },
+  literature:     { id:'literature',     name:'文学与艺术', icon:'📖', color:'#c05757' },
+  history:        { id:'history',        name:'历史与文化', icon:'📜', color:'#5a9e6f' },
+  contemporary:   { id:'contemporary',   name:'当代观点', icon:'💡', color:'#4a9e9e' }
+};
+
+const DIM_COLORS = {
+  philosophy:'#d4a853', religion:'#c0854a', science:'#5a8db6',
+  psychology:'#8b6faa', literature:'#c05757', history:'#5a9e6f',
+  contemporary:'#4a9e9e'
+};
+
+const quotes = [
+  { id:'q1', text:"The unexamined life is not worth living.", textZh:"未经审视的人生不值得过。", author:"苏格拉底", source:"《申辩篇》", dimension:'philosophy', tags:['自我','反思'], year:-399 },
+  { id:'q2', text:"He who has a why to live can bear almost any how.", textZh:"一个人知道自己为什么而活，就可以忍受任何一种生活。", author:"尼采", source:"《偶像的黄昏》", dimension:'philosophy', tags:['意义','苦难'], year:1889 },
+  { id:'q3', text:"Man is condemned to be free.", textZh:"人注定是自由的。", author:"萨特", source:"《存在主义是一种人道主义》", dimension:'philosophy', tags:['自由','责任'], year:1946 },
+  { id:'q4', text:"One must imagine Sisyphus happy.", textZh:"必须想象西西弗斯是幸福的。", author:"加缪", source:"《西西弗神话》", dimension:'philosophy', tags:['荒诞','幸福'], year:1942 },
+  { id:'q5', text:"The meaning of life is that it stops.", textZh:"生命的意义就在于它会停止。", author:"卡夫卡", source:"随笔", dimension:'literature', tags:['死亡','有限'], year:1920 },
+  { id:'q6', text:"道可道，非常道；名可名，非常名。", textZh:"The Tao that can be told is not the eternal Tao.", author:"老子", source:"《道德经》", dimension:'philosophy', tags:['道','不可言说'], year:-500 },
+  { id:'q7', text:"己所不欲，勿施于人。", textZh:"Do not do to others what you would not have them do to you.", author:"孔子", source:"《论语》", dimension:'philosophy', tags:['仁','伦理'], year:-480 },
+  { id:'q8', text:"What we achieve inwardly will change outer reality.", textZh:"我们内在的成就将改变外在的现实。", author:"普鲁塔克", source:"《希腊罗马名人传》", dimension:'history', tags:['内在','改变'], year:100 },
+  { id:'q9', text:"In the depth of winter, I finally learned that within me there lay an invincible summer.", textZh:"在隆冬，我终于知道，我身上有一个不可战胜的夏天。", author:"加缪", source:"《重返蒂巴萨》", dimension:'literature', tags:['韧性','希望'], year:1952 },
+  { id:'q10', text:"The only way to deal with an unfree world is to become so absolutely free that your very existence is an act of rebellion.", textZh:"应对不自由世界的唯一方式是变得如此自由，以至于你的存在本身就是一种反抗。", author:"加缪", source:"随笔", dimension:'philosophy', tags:['自由','反抗'], year:1951 },
+  { id:'q11', text:"Life is not a problem to be solved, but a reality to be experienced.", textZh:"生命不是一个需要解决的问题，而是一个需要体验的现实。", author:"克尔凯郭尔", source:"日记", dimension:'philosophy', tags:['体验','存在'], year:1843 },
+  { id:'q12', text:"The purpose of life is not to be happy. It is to be useful, to be honorable, to be compassionate.", textZh:"生命的目的不是快乐，而是有用、可敬、富有同情心。", author:"爱默生", source:"随笔集", dimension:'philosophy', tags:['目的','美德'], year:1850 },
+  { id:'q13', text:"Everything can be taken from a man but one thing: the last of the human freedoms—to choose one's attitude.", textZh:"人可以被剥夺一切，除了最后一项自由：选择自己态度的自由。", author:"维克多·弗兰克尔", source:"《活出生命的意义》", dimension:'psychology', tags:['态度','自由'], year:1946 },
+  { id:'q14', text:"What is to give light must endure burning.", textZh:"要发光，必先承受燃烧。", author:"维克多·弗兰克尔", source:"《活出生命的意义》", dimension:'psychology', tags:['苦难','成长'], year:1946 },
+  { id:'q15', text:"The cosmos is within us. We are made of star-stuff. We are a way for the universe to know itself.", textZh:"宇宙在我们之中。我们由星辰物质构成。我们是宇宙认识自身的一种方式。", author:"卡尔·萨根", source:"《宇宙》", dimension:'science', tags:['宇宙','意识'], year:1980 },
+  { id:'q16', text:"We are just an advanced breed of monkeys on a minor planet of a very average star. But we can understand the Universe. That makes us something very special.", textZh:"我们只是普通恒星的微小行星上的一种高级猴子。但我们能理解宇宙，这使我们非常特别。", author:"斯蒂芬·霍金", source:"采访", dimension:'science', tags:['宇宙','人类'], year:1990 },
+  { id:'q17', text:"The mystery of human existence lies not in just staying alive, but in finding something to live for.", textZh:"人类存在的奥秘不在于仅仅活着，而在于找到活着的理由。", author:"陀思妥耶夫斯基", source:"《卡拉马佐夫兄弟》", dimension:'literature', tags:['存在','目的'], year:1880 },
+  { id:'q18', text:"The two most important days in your life are the day you are born and the day you find out why.", textZh:"生命中最重要的两天，是你出生的那天，和你找到为何而生的那天。", author:"马克·吐温", source:"随笔", dimension:'literature', tags:['出生','目的'], year:1890 },
+  { id:'q19', text:"The meaning of life is to give life meaning.", textZh:"生命的意义在于赋予生命意义。", author:"弗兰克尔", source:"演讲", dimension:'psychology', tags:['意义','创造'], year:1960 },
+  { id:'q20', text:"You will never be happy if you continue to search for what happiness consists of. You will never live if you are looking for the meaning of life.", textZh:"如果你继续寻找幸福由什么构成，你永远不会幸福。如果你正在寻找生命的意义，你永远不会真正活着。", author:"加缪", source:"随笔", dimension:'philosophy', tags:['幸福','行动'], year:1945 },
+  { id:'q21', text:"The privilege of a lifetime is to become who you truly are.", textZh:"一生的特权是成为你真正的自己。", author:"荣格", source:"《回忆·梦·思考》", dimension:'psychology', tags:['自我','真实'], year:1961 },
+  { id:'q22', text:"Knowing others is intelligence; knowing yourself is true wisdom. Mastering others is strength; mastering yourself is true power.", textZh:"知人者智，自知者明。胜人者有力，自胜者强。", author:"老子", source:"《道德经》", dimension:'philosophy', tags:['自知','智慧'], year:-500 },
+  { id:'q23', text:"God is dead. God remains dead. And we have killed him.", textZh:"上帝已死。上帝仍然死了。我们杀死了他。", author:"尼采", source:"《快乐的科学》", dimension:'philosophy', tags:['信仰','现代性'], year:1882 },
+  { id:'q24', text:"Love the life you live. Live the life you love.", textZh:"爱你所过的生活，过你所爱的生活。", author:"鲍勃·马利", source:"歌词", dimension:'contemporary', tags:['爱','生活'], year:1975 },
+  { id:'q25', text:"The only true wisdom is in knowing you know nothing.", textZh:"唯一真正的智慧是知道自己一无所知。", author:"苏格拉底", source:"柏拉图《申辩篇》", dimension:'philosophy', tags:['智慧','谦卑'], year:-399 },
+  { id:'q26', text:"Life is really simple, but we insist on making it complicated.", textZh:"生活其实很简单，但我们坚持把它搞复杂。", author:"孔子", source:"《论语》", dimension:'philosophy', tags:['简单','生活'], year:-480 },
+  { id:'q27', text:"Peace comes from within. Do not seek it without.", textZh:"平静来自内心。不要向外寻求。", author:"佛陀", source:"法句经", dimension:'religion', tags:['平静','内省'], year:-450 },
+  { id:'q28', text:"We are what we repeatedly do. Excellence, then, is not an act, but a habit.", textZh:"我们是由重复的行为所塑造的。因此，卓越不是一种行为，而是一种习惯。", author:"亚里士多德", source:"《尼各马可伦理学》", dimension:'philosophy', tags:['习惯','卓越'], year:-340 },
+  { id:'q29', text:"Science without religion is lame, religion without science is blind.", textZh:"没有宗教的科学是跛脚的，没有科学的宗教是盲目的。", author:"爱因斯坦", source:"论文", dimension:'science', tags:['科学','宗教'], year:1940 },
+  { id:'q30', text:"The good life is one inspired by love and guided by knowledge.", textZh:"美好的生活由爱启发，由知识引导。", author:"罗素", source:"《我为什么而活》", dimension:'philosophy', tags:['爱','知识'], year:1950 },
+  { id:'q31', text:"Happiness is not something ready made. It comes from your own actions.", textZh:"幸福不是现成的东西。它来自你的行动。", author:"达赖喇嘛", source:"演讲", dimension:'religion', tags:['幸福','行动'], year:2000 },
+  { id:'q32', text:"In three words I can sum up everything I've learned about life: it goes on.", textZh:"用三个词总结我对生命的所有认识：它继续。", author:"罗伯特·弗罗斯特", source:"诗歌", dimension:'literature', tags:['坚韧','继续'], year:1940 },
+  { id:'q33', text:"The cave you fear to enter holds the treasure you seek.", textZh:"你害怕进入的洞穴，藏着你寻找的宝藏。", author:"约瑟夫·坎贝尔", source:"《千面英雄》", dimension:'psychology', tags:['恐惧','成长'], year:1949 },
+  { id:'q34', text:"You must be the change you wish to see in the world.", textZh:"你必须成为你想在世界上看到的变化。", author:"甘地", source:"演讲", dimension:'history', tags:['改变','行动'], year:1930 },
+  { id:'q35', text:"The best way to find yourself is to lose yourself in the service of others.", textZh:"找到自己最好的方式，是在服务他人中忘记自己。", author:"甘地", source:"演讲", dimension:'history', tags:['服务','自我'], year:1935 },
+  { id:'q36', text:"Be kind whenever possible. It is always possible.", textZh:"只要有可能，就要善良。而善良总是可能的。", author:"达赖喇嘛", source:"演讲", dimension:'religion', tags:['善良','可能'], year:2005 },
+  { id:'q37', text:"I think therefore I am.", textZh:"我思故我在。", author:"笛卡尔", source:"《第一哲学沉思集》", dimension:'philosophy', tags:['思考','存在'], year:1641 },
+  { id:'q38', text:"The unexamined belief is not worth believing.", textZh:"未经审视的信念不值得相信。", author:"佚名", source:"现代格言", dimension:'contemporary', tags:['信念','审视'], year:2000 },
+  { id:'q39', text:"Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment.", textZh:"不要沉湎于过去，不要梦想未来，专注于当下。", author:"佛陀", source:"法句经", dimension:'religion', tags:['当下','专注'], year:-450 },
+  { id:'q40', text:"The meaning of life is to find your gift. The purpose of life is to give it away.", textZh:"生命的意义是找到你的天赋。生命的目的就是把它奉献出去。", author:"毕加索", source:"访谈", dimension:'literature', tags:['天赋','奉献'], year:1950 }
+];
+
+const thinkers = [
+  { id:'socrates', name:'Socrates', nameZh:'苏格拉底', lifespan:'前470-前399', dimension:'philosophy', keyIdeas:['认识你自己','未经审视的人生不值得过','精神助产术'], works:[{title:'对话录(柏拉图记述)',year:-390}], influences:[], opposes:[], era:'ancient', region:'希腊' },
+  { id:'plato', name:'Plato', nameZh:'柏拉图', lifespan:'前427-前347', dimension:'philosophy', keyIdeas:['理念论','灵魂不朽','哲人王'], works:[{title:'理想国',year:-375}], influences:['socrates'], opposes:[], era:'ancient', region:'希腊' },
+  { id:'aristotle', name:'Aristotle', nameZh:'亚里士多德', lifespan:'前384-前322', dimension:'philosophy', keyIdeas:['目的论','中庸之道','幸福(eudaimonia)'], works:[{title:'尼各马可伦理学',year:-340}], influences:['plato'], opposes:[], era:'ancient', region:'希腊' },
+  { id:'laozi', name:'Laozi', nameZh:'老子', lifespan:'约前6世纪', dimension:'philosophy', keyIdeas:['道法自然','无为而治','柔弱胜刚强'], works:[{title:'道德经',year:-500}], influences:[], opposes:[], era:'ancient', region:'中国' },
+  { id:'zhuangzi', name:'Zhuangzi', nameZh:'庄子', lifespan:'约前369-前286', dimension:'philosophy', keyIdeas:['逍遥游','齐物论','无用之用'], works:[{title:'庄子',year:-300}], influences:['laozi'], opposes:[], era:'ancient', region:'中国' },
+  { id:'confucius', name:'Confucius', nameZh:'孔子', lifespan:'前551-前479', dimension:'philosophy', keyIdeas:['仁','礼','中庸','有教无类'], works:[{title:'论语',year:-480}], influences:[], opposes:[], era:'ancient', region:'中国' },
+  { id:'buddha', name:'Buddha', nameZh:'佛陀(释迦牟尼)', lifespan:'约前563-前483', dimension:'religion', keyIdeas:['四圣谛','八正道','中道','无我'], works:[{title:'法句经',year:-450}], influences:[], opposes:[], era:'ancient', region:'印度' },
+  { id:'augustine', name:'Augustine', nameZh:'奥古斯丁', lifespan:'354-430', dimension:'religion', keyIdeas:['原罪','恩典','上帝之城'], works:[{title:'忏悔录',year:400}], influences:['plato'], opposes:[], era:'medieval', region:'罗马' },
+  { id:'aquinas', name:'Thomas Aquinas', nameZh:'托马斯·阿奎那', lifespan:'1225-1274', dimension:'religion', keyIdeas:['自然神学','理性与信仰的调和'], works:[{title:'神学大全',year:1273}], influences:['aristotle'], opposes:[], era:'medieval', region:'意大利' },
+  { id:'descartes', name:'René Descartes', nameZh:'笛卡尔', lifespan:'1596-1650', dimension:'philosophy', keyIdeas:['我思故我在','身心二元论','方法论怀疑'], works:[{title:'第一哲学沉思集',year:1641}], influences:['aristotle'], opposes:[], era:'enlightenment', region:'法国' },
+  { id:'kant', name:'Immanuel Kant', nameZh:'康德', lifespan:'1724-1804', dimension:'philosophy', keyIdeas:['道德律令','物自体','人为自然立法'], works:[{title:'纯粹理性批判',year:1781}], influences:['descartes'], opposes:[], era:'enlightenment', region:'德国' },
+  { id:'nietzsche', name:'Friedrich Nietzsche', nameZh:'尼采', lifespan:'1844-1900', dimension:'philosophy', keyIdeas:['上帝已死','超人','权力意志','永恒轮回'], works:[{title:'查拉图斯特拉如是说',year:1883}], influences:[], opposes:['aquinas','augustine'], era:'modern', region:'德国' },
+  { id:'kierkegaard', name:'Søren Kierkegaard', nameZh:'克尔凯郭尔', lifespan:'1813-1855', dimension:'philosophy', keyIdeas:['信仰的跳跃','存在的三个阶段','焦虑与自由'], works:[{title:'恐惧与战栗',year:1843}], influences:[], opposes:[], era:'modern', region:'丹麦' },
+  { id:'sartre', name:'Jean-Paul Sartre', nameZh:'萨特', lifespan:'1905-1980', dimension:'philosophy', keyIdeas:['存在先于本质','他人即地狱','绝对自由'], works:[{title:'存在与虚无',year:1943}], influences:['kierkegaard','nietzsche'], opposes:[], era:'modern', region:'法国' },
+  { id:'camus', name:'Albert Camus', nameZh:'加缪', lifespan:'1913-1960', dimension:'philosophy', keyIdeas:['荒诞','反抗','西西弗的幸福'], works:[{title:'西西弗神话',year:1942},{title:'局外人',year:1942}], influences:['kierkegaard','nietzsche'], opposes:[], era:'modern', region:'法国' },
+  { id:'darwin', name:'Charles Darwin', nameZh:'达尔文', lifespan:'1809-1882', dimension:'science', keyIdeas:['自然选择','进化论','物种起源'], works:[{title:'物种起源',year:1859}], influences:[], opposes:[], era:'modern', region:'英国' },
+  { id:'einstein', name:'Albert Einstein', nameZh:'爱因斯坦', lifespan:'1879-1955', dimension:'science', keyIdeas:['相对论','宇宙宗教感','和平主义'], works:[{title:'相对论',year:1915}], influences:[], opposes:[], era:'modern', region:'德国/美国' },
+  { id:'sagan', name:'Carl Sagan', nameZh:'卡尔·萨根', lifespan:'1934-1996', dimension:'science', keyIdeas:['宇宙视角','科学传播','星辰之子'], works:[{title:'宇宙',year:1980}], influences:['einstein'], opposes:[], era:'contemporary', region:'美国' },
+  { id:'frankl', name:'Viktor Frankl', nameZh:'维克多·弗兰克尔', lifespan:'1905-1997', dimension:'psychology', keyIdeas:['意义疗法','苦难的意义','选择的自由'], works:[{title:'活出生命的意义',year:1946}], influences:['sartre','kierkegaard'], opposes:[], era:'modern', region:'奥地利' },
+  { id:'jung', name:'Carl Jung', nameZh:'荣格', lifespan:'1875-1961', dimension:'psychology', keyIdeas:['集体无意识','个体化','原型'], works:[{title:'回忆·梦·思考',year:1961}], influences:['nietzsche'], opposes:[], era:'modern', region:'瑞士' },
+  { id:'maslow', name:'Abraham Maslow', nameZh:'马斯洛', lifespan:'1908-1970', dimension:'psychology', keyIdeas:['需求层次','自我实现','高峰体验'], works:[{title:'动机与人格',year:1954}], influences:['frankl'], opposes:[], era:'modern', region:'美国' },
+  { id:'campbell', name:'Joseph Campbell', nameZh:'约瑟夫·坎贝尔', lifespan:'1904-1987', dimension:'psychology', keyIdeas:['英雄之旅','单一神话','追随你的幸福'], works:[{title:'千面英雄',year:1949}], influences:['jung'], opposes:[], era:'modern', region:'美国' },
+  { id:'dostoevsky', name:'Fyodor Dostoevsky', nameZh:'陀思妥耶夫斯基', lifespan:'1821-1881', dimension:'literature', keyIdeas:['苦难与救赎','自由与责任','信仰的挣扎'], works:[{title:'卡拉马佐夫兄弟',year:1880},{title:'罪与罚',year:1866}], influences:['kierkegaard'], opposes:[], era:'modern', region:'俄国' },
+  { id:'tolstoy', name:'Leo Tolstoy', nameZh:'托尔斯泰', lifespan:'1828-1910', dimension:'literature', keyIdeas:['生命意义','道德自省','非暴力'], works:[{title:'战争与和平',year:1869},{title:'忏悔录',year:1882}], influences:[], opposes:[], era:'modern', region:'俄国' },
+  { id:'hesse', name:'Hermann Hesse', nameZh:'赫尔曼·黑塞', lifespan:'1877-1962', dimension:'literature', keyIdeas:['自我寻求','东西方融合','个体与宇宙'], works:[{title:'悉达多',year:1922},{title:'荒原狼',year:1927}], influences:['nietzsche','buddha'], opposes:[], era:'modern', region:'德国/瑞士' }
+];
+
+const timelineEvents = [
+  { id:'t1', year:-800, title:'轴心时代开启', description:'世界各地几乎同时出现伟大的思想家：中国的老子与孔子、印度的佛陀、希腊的苏格拉底，人类首次系统性地追问生命的意义。', dimension:'history', relatedThinkers:['laozi','confucius','buddha','socrates'] },
+  { id:'t2', year:-500, title:'《道德经》成书', description:'老子著《道德经》，提出"道"作为宇宙本源与人生准则，影响中国及东亚两千多年。', dimension:'philosophy', relatedThinkers:['laozi'] },
+  { id:'t3', year:-450, title:'佛教创立', description:'释迦牟尼在菩提树下悟道，提出四圣谛与八正道，指出苦的根源与解脱之道。', dimension:'religion', relatedThinkers:['buddha'] },
+  { id:'t4', year:-399, title:'苏格拉底之死', description:'苏格拉底从容饮鸩，以身殉道。"未经审视的人生不值得过"成为哲学最著名的格言。', dimension:'philosophy', relatedThinkers:['socrates','plato'] },
+  { id:'t5', year:-340, title:'亚里士多德《尼各马可伦理学》', description:'提出"幸福（eudaimonia）"是人生的最终目的，美德是中庸之道。', dimension:'philosophy', relatedThinkers:['aristotle'] },
+  { id:'t6', year:30, title:'耶稣受难', description:'基督教的核心事件——耶稣为世人赎罪而被钉十字架，为生命赋予神圣目的。', dimension:'religion', relatedThinkers:[] },
+  { id:'t7', year:400, title:'奥古斯丁《忏悔录》', description:'从神学角度阐释人生目的：人类的心永远不安，直到在上帝那里找到安息。', dimension:'religion', relatedThinkers:['augustine'] },
+  { id:'t8', year:1273, title:'阿奎那《神学大全》', description:'试图调和亚里士多德哲学与基督教神学，论证理性与信仰的一致性。', dimension:'religion', relatedThinkers:['aquinas','aristotle'] },
+  { id:'t9', year:1641, title:'笛卡尔提出"我思故我在"', description:'以怀疑一切为起点，确立自我意识为确定性基础，开启近代哲学。', dimension:'philosophy', relatedThinkers:['descartes'] },
+  { id:'t10', year:1781, title:'康德《纯粹理性批判》', description:'限定理性范围，为信仰留出空间。提出"人为自然立法"，强调道德自律。', dimension:'philosophy', relatedThinkers:['kant'] },
+  { id:'t11', year:1843, title:'克尔凯郭尔《恐惧与战栗》', description:'存在主义先驱。提出"信仰的跳跃"：意义不能靠理性推论，只能凭信仰获得。', dimension:'philosophy', relatedThinkers:['kierkegaard'] },
+  { id:'t12', year:1859, title:'达尔文《物种起源》', description:'进化论彻底改变了人类对自身起源和地位的理解，挑战传统的生命目的论。', dimension:'science', relatedThinkers:['darwin'] },
+  { id:'t13', year:1880, title:'陀思妥耶夫斯基《卡拉马佐夫兄弟》', description:'"如果没有上帝，一切都被允许"——探讨信仰、自由与道德之间深刻关系。', dimension:'literature', relatedThinkers:['dostoevsky'] },
+  { id:'t14', year:1883, title:'尼采宣告"上帝已死"', description:'西方价值的根本危机。号召人类创造自己的价值，成为"超人"。', dimension:'philosophy', relatedThinkers:['nietzsche'] },
+  { id:'t15', year:1915, title:'爱因斯坦广义相对论', description:'彻底改变了时间和空间的概念，从宇宙尺度重新定义人类的地位。', dimension:'science', relatedThinkers:['einstein'] },
+  { id:'t16', year:1922, title:'黑塞《悉达多》', description:'通过一个古印度青年的求道之旅，探讨自我认知与生命意义的东方路径。', dimension:'literature', relatedThinkers:['hesse','buddha'] },
+  { id:'t17', year:1942, title:'加缪《西西弗神话》', description:'直面荒诞：生命本无意义，但正因如此，我们必须赋予它意义。', dimension:'philosophy', relatedThinkers:['camus'] },
+  { id:'t18', year:1946, title:'弗兰克尔《活出生命的意义》', description:'基于集中营经历创立"意义疗法"，论证寻找意义是人类最基本的动力。', dimension:'psychology', relatedThinkers:['frankl'] },
+  { id:'t19', year:1949, title:'坎贝尔《千面英雄》', description:'发现所有文化的神话共享"英雄之旅"叙事结构，揭示人类对意义的普遍追寻。', dimension:'psychology', relatedThinkers:['campbell','jung'] },
+  { id:'t20', year:1954, title:'马斯洛需求层次理论', description:'提出自我实现是人类最高需求，为生命意义提供心理学框架。', dimension:'psychology', relatedThinkers:['maslow'] },
+  { id:'t21', year:1961, title:'荣格《回忆·梦·思考》', description:'总结一生对个体化过程的探索，将生命意义描述为"成为真正的自己"。', dimension:'psychology', relatedThinkers:['jung'] },
+  { id:'t22', year:1980, title:'卡尔·萨根《宇宙》', description:'从宇宙学视角审视生命：我们由星辰物质构成，是宇宙认识自身的方式。', dimension:'science', relatedThinkers:['sagan'] },
+  { id:'t23', year:2000, title:'积极心理学兴起', description:'塞利格曼等人将心理学焦点从疾病转向幸福与意义，科学化研究"美好生活"。', dimension:'contemporary', relatedThinkers:['maslow'] }
+];
+
+const quizQuestions = [
+  {
+    id:'quiz1',
+    question:'你认为生命的意义来自哪里？',
+    options:[
+      { text:'自我创造——意义是我自己赋予的', weights:{philosophy:3, psychology:1, contemporary:1} },
+      { text:'外部赋予——来自更高的存在或秩序', weights:{religion:3, philosophy:1, history:1} },
+      { text:'不存在——生命本无意义，但这是好事', weights:{philosophy:2, literature:1} },
+      { text:'关系之中——意义在人与人的连接中', weights:{psychology:2, literature:1, history:1} }
+    ]
+  },
+  {
+    id:'quiz2',
+    question:'面对苦难，你倾向于如何应对？',
+    options:[
+      { text:'在苦难中寻找成长和意义', weights:{psychology:3, philosophy:2, religion:1} },
+      { text:'接受苦难是生命的一部分，顺其自然', weights:{religion:2, philosophy:2, literature:1} },
+      { text:'反抗苦难，用行动改变处境', weights:{philosophy:2, history:1, contemporary:1} },
+      { text:'理解苦难的科学/社会原因，寻求理性解决方案', weights:{science:3, contemporary:1} }
+    ]
+  },
+  {
+    id:'quiz3',
+    question:'哪种描述最接近你理想中的"美好生活"？',
+    options:[
+      { text:'追求智慧和自我认知', weights:{philosophy:3, psychology:1} },
+      { text:'与神圣或自然和谐共处', weights:{religion:3, literature:1} },
+      { text:'不断探索、发现和创造', weights:{science:2, contemporary:2, literature:1} },
+      { text:'建立深厚的关系，服务他人', weights:{psychology:2, history:1, religion:1} }
+    ]
+  },
+  {
+    id:'quiz4',
+    question:'你如何看待死亡？',
+    options:[
+      { text:'死亡使生命有了紧迫感和意义', weights:{philosophy:3, psychology:1, literature:1} },
+      { text:'死亡是通往另一种存在的门户', weights:{religion:3, literature:1} },
+      { text:'死亡是自然规律，让物种得以进化', weights:{science:3, contemporary:1} },
+      { text:'死亡提醒我们要充分活在当下', weights:{psychology:2, philosophy:1, contemporary:1} }
+    ]
+  },
+  {
+    id:'quiz5',
+    question:'在做重要决定时，你最依赖什么？',
+    options:[
+      { text:'理性分析和逻辑推理', weights:{science:3, philosophy:1} },
+      { text:'内心的直觉和良知', weights:{philosophy:2, psychology:1, literature:1} },
+      { text:'信仰和道德准则', weights:{religion:3, history:1} },
+      { text:'他人的建议和社会共识', weights:{psychology:2, contemporary:1, history:1} }
+    ]
+  },
+  {
+    id:'quiz6',
+    question:'你希望在生命结束时，人们如何评价你？',
+    options:[
+      { text:'一个有智慧、活明白的人', weights:{philosophy:3, psychology:1} },
+      { text:'一个善良、帮助了许多人的人', weights:{religion:2, psychology:1, history:1} },
+      { text:'一个推动了人类知识和进步的人', weights:{science:3, contemporary:1} },
+      { text:'一个活得真实、忠于自我的人', weights:{literature:2, philosophy:1, psychology:1} }
+    ]
+  },
+  {
+    id:'quiz7',
+    question:'周末下午，你最想做什么？',
+    options:[
+      { text:'读一本好哲学书或深度文章', weights:{philosophy:3, literature:1} },
+      { text:'去教堂/寺庙，或在大自然中冥想', weights:{religion:3, psychology:1} },
+      { text:'看科学纪录片或动手做实验', weights:{science:3, contemporary:1} },
+      { text:'和朋友聚会聊天，或做志愿者', weights:{psychology:2, history:1, religion:1} }
+    ]
+  },
+  {
+    id:'quiz8',
+    question:'如果给你一次重来的机会，你希望改变什么？',
+    options:[
+      { text:'获得更深层的智慧启迪', weights:{philosophy:3, literature:1} },
+      { text:'寻求心灵的平静与和解', weights:{religion:3, psychology:1} },
+      { text:'理解宇宙的运行规律', weights:{science:3, philosophy:1} },
+      { text:'帮助更多的人，改善世界', weights:{psychology:2, history:1, contemporary:1} }
+    ]
+  }
+];
+
+// ============================================================
+// ROUTER
+// ============================================================
+let currentPage = '';
+let favorites = JSON.parse(localStorage.getItem('lof-favs') || '[]');
+let quizResult = JSON.parse(localStorage.getItem('lof-quiz') || 'null');
+let selectedGraphNode = null;
+let graphPathSource = null;
+let graphPathTarget = null;
+
+function navigate(path) {
+  if (path === currentPage) return;
+  currentPage = path;
+  window.location.hash = '#' + path;
+  render(path);
+}
+
+function render(path) {
+  const main = document.getElementById('main-content');
+  const navLinks = document.querySelectorAll('#main-nav a');
+  navLinks.forEach(a => a.classList.remove('active'));
+  const activeLink = document.querySelector(`#main-nav a[href="#${path}"]`);
+  if (activeLink) activeLink.classList.add('active');
+
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => { if(p.parentNode===main) p.remove(); });
+
+  switch(path) {
+    case '/': renderHome(main); break;
+    case '/quotes': renderQuotesPage(main); break;
+    case '/timeline': renderTimelinePage(main); break;
+    case '/graph': renderGraphPage(main); break;
+    case '/quiz': renderQuizPage(main); break;
+    case '/favorites': renderFavoritesPage(main); break;
+    case '/about': renderAboutPage(main); break;
+    default:
+      if (path.startsWith('/explore/')) {
+        const dim = path.replace('/explore/', '');
+        renderExplorePage(main, dim);
+      } else {
+        navigate('/');
+      }
+  }
+}
+
+window.addEventListener('hashchange', () => {
+  const path = window.location.hash.slice(1) || '/';
+  if (path !== currentPage) {
+    currentPage = path;
+    render(path);
+  }
+});
+
+// ============================================================
+// UTILS
+// ============================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function formatYear(y) {
+  if (y < 0) return `公元前 ${Math.abs(y)} 年`;
+  return `${y} 年`;
+}
+
+function getQuoteById(id) { return quotes.find(q => q.id === id); }
+function getThinkerById(id) { return thinkers.find(t => t.id === id); }
+function getQuotesByDimension(dim) { return quotes.filter(q => q.dimension === dim); }
+function getThinkersByDimension(dim) { return thinkers.filter(t => t.dimension === dim); }
+
+function escapeHtml(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+// ============================================================
+// HOME PAGE
+// ============================================================
+function renderHome(main) {
+  const today = new Date();
+  const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+  const dailyQuote = quotes[dayOfYear % quotes.length];
+
+  main.innerHTML = `
+    <div class="page active">
+      <div class="hero">
+        <h1>生命的意义是什么？</h1>
+        <p class="subtitle">从哲学、宗教、科学、心理学、文学等多元维度，探索人类对这一终极问题的思考路径。不为给出答案，而为展开追问。</p>
+        <div class="cta-row">
+          <button class="btn btn-primary" onclick="navigate('/quiz')">🔍 探索你的意义</button>
+          <button class="btn btn-outline" onclick="navigate('/quotes')">📜 浏览名言库</button>
+          <button class="btn btn-outline" onclick="randomQuote()">🎲 随机漫步</button>
+        </div>
+      </div>
+
+      <div class="section-title">📅 每日一思</div>
+      <div class="quote-card" style="max-width:600px;margin:0 auto 40px;" id="daily-quote-card"></div>
+
+      <div class="section-title">📐 七大探索维度</div>
+      <div class="dim-nav" id="dim-nav"></div>
+    </div>
+  `;
+
+  // Daily quote card
+  renderQuoteCard(dailyQuote, document.getElementById('daily-quote-card'), false);
+
+  // Dimension cards
+  const dimNav = document.getElementById('dim-nav');
+  Object.values(DIMENSIONS).forEach(dim => {
+    const count = getQuotesByDimension(dim.id).length;
+    const card = document.createElement('div');
+    card.className = 'dim-card';
+    card.innerHTML = `<div class="dim-icon">${dim.icon}</div><div class="dim-name">${dim.name}</div><div class="dim-count">${count} 条名言</div>`;
+    card.onclick = () => navigate(`/explore/${dim.id}`);
+    dimNav.appendChild(card);
+  });
+}
+
+function randomQuote() {
+  const q = quotes[Math.floor(Math.random() * quotes.length)];
+  openDetail('quote', q);
+}
+
+// ============================================================
+// QUOTE CARD COMPONENT
+// ============================================================
+function renderQuoteCard(q, container, showActions = true) {
+  const isFaved = favorites.includes(q.id);
+  container.innerHTML = `
+    <div class="quote-text">${escapeHtml(q.text)}</div>
+    ${q.textZh ? `<div class="quote-translation">${escapeHtml(q.textZh)}</div>` : ''}
+    <div class="quote-meta">
+      <strong>${escapeHtml(q.author)}</strong> · ${escapeHtml(q.source)} · ${formatYear(q.year)}
+    </div>
+    <span class="quote-dim">${DIMENSIONS[q.dimension]?.icon || ''} ${DIMENSIONS[q.dimension]?.name || q.dimension}</span>
+    ${showActions ? `
+    <div class="quote-actions">
+      <button class="fav-btn ${isFaved?'faved':''}" onclick="event.stopPropagation();toggleFav('${q.id}',this)" title="收藏">${isFaved?'★':'☆'}</button>
+      <button class="copy-btn" onclick="event.stopPropagation();copyQuote('${q.id}')" title="复制">📋</button>
+    </div>` : ''}
+  `;
+  if (showActions) {
+    container.style.cursor = 'pointer';
+    container.onclick = () => openDetail('quote', q);
+  }
+}
+
+function toggleFav(id, btn) {
+  const idx = favorites.indexOf(id);
+  if (idx >= 0) { favorites.splice(idx,1); btn.classList.remove('faved'); btn.textContent='☆'; showToast('已取消收藏'); }
+  else { favorites.push(id); btn.classList.add('faved'); btn.textContent='★'; showToast('已添加收藏'); }
+  localStorage.setItem('lof-favs', JSON.stringify(favorites));
+}
+
+function copyQuote(id) {
+  const q = getQuoteById(id);
+  const text = `"${q.text}" — ${q.author}${q.textZh ? '\\n' + q.textZh : ''}`;
+  navigator.clipboard.writeText(text).then(() => showToast('已复制到剪贴板'));
+}
+
+// ============================================================
+// QUOTES PAGE
+// ============================================================
+function renderQuotesPage(main) {
+  main.innerHTML = `
+    <div class="page active">
+      <div class="section-title">📜 名言瀑布流</div>
+      <div class="quote-controls">
+        <input class="search-input" placeholder="搜索名言、作者..." oninput="filterQuotes()" id="quote-search">
+        <div class="filter-chips" id="quote-filter-chips"></div>
+      </div>
+      <div class="quote-grid" id="quote-grid"></div>
+      <div id="quote-empty" style="display:none;text-align:center;padding:40px;color:var(--text-muted);">没有找到匹配的名言</div>
+    </div>
+  `;
+
+  const chipContainer = document.getElementById('quote-filter-chips');
+  ['all', ...Object.keys(DIMENSIONS)].forEach(key => {
+    const chip = document.createElement('span');
+    chip.className = 'chip' + (key==='all'?' active':'');
+    chip.textContent = key === 'all' ? '全部' : DIMENSIONS[key].name;
+    chip.dataset.dim = key;
+    chip.onclick = function() {
+      document.querySelectorAll('#quote-filter-chips .chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      filterQuotes();
+    };
+    chipContainer.appendChild(chip);
+  });
+
+  filterQuotes();
+}
+
+function filterQuotes() {
+  const searchTerm = (document.getElementById('quote-search')?.value || '').toLowerCase();
+  const activeChip = document.querySelector('#quote-filter-chips .chip.active');
+  const dimFilter = activeChip ? activeChip.dataset.dim : 'all';
+
+  const filtered = quotes.filter(q => {
+    if (dimFilter !== 'all' && q.dimension !== dimFilter) return false;
+    if (searchTerm) {
+      const haystack = (q.text + q.textZh + q.author + q.source + q.tags.join(' ')).toLowerCase();
+      if (!haystack.includes(searchTerm)) return false;
+    }
+    return true;
+  });
+
+  const grid = document.getElementById('quote-grid');
+  const empty = document.getElementById('quote-empty');
+  if (!grid) return;
+  grid.innerHTML = '';
+  if (filtered.length === 0) {
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  filtered.forEach(q => {
+    const card = document.createElement('div');
+    card.className = 'quote-card';
+    renderQuoteCard(q, card);
+    grid.appendChild(card);
+  });
+}
+
+// ============================================================
+// TIMELINE PAGE
+// ============================================================
+function renderTimelinePage(main) {
+  main.innerHTML = `
+    <div class="page active">
+      <div class="section-title">⏳ 历史时间线</div>
+      <div class="timeline-controls">
+        <button class="btn btn-outline btn-sm" onclick="zoomTimeline(1.5)">🔍 放大</button>
+        <button class="btn btn-outline btn-sm" onclick="zoomTimeline(0.67)">🔎 缩小</button>
+        <button class="btn btn-outline btn-sm" onclick="resetTimeline()">↺ 重置</button>
+        <div class="filter-chips" id="timeline-filter-chips"></div>
+      </div>
+      <div class="timeline-container" id="timeline-container">
+        <div class="timeline-track" id="timeline-track">
+          <div class="timeline-line"></div>
+          <div id="timeline-nodes"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const chipContainer = document.getElementById('timeline-filter-chips');
+  ['all', ...Object.keys(DIMENSIONS)].forEach(key => {
+    const chip = document.createElement('span');
+    chip.className = 'chip' + (key==='all'?' active':'');
+    chip.textContent = key === 'all' ? '全部' : DIMENSIONS[key].name;
+    chip.dataset.dim = key;
+    chip.onclick = function() {
+      document.querySelectorAll('#timeline-filter-chips .chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      renderTimelineNodes();
+    };
+    chipContainer.appendChild(chip);
+  });
+
+  renderTimelineNodes();
+}
+
+let timelineScale = 1;
+
+function renderTimelineNodes() {
+  const container = document.getElementById('timeline-nodes');
+  if (!container) return;
+  const activeChip = document.querySelector('#timeline-filter-chips .chip.active');
+  const dimFilter = activeChip ? activeChip.dataset.dim : 'all';
+
+  const events = timelineEvents.filter(e => dimFilter === 'all' || e.dimension === dimFilter);
+  const minYear = -800, maxYear = 2020;
+  const range = maxYear - minYear;
+
+  container.innerHTML = '';
+  // Era labels
+  const eras = [
+    { start:-800, end:-200, label:'轴心时代', left:0, width:600 },
+    { start:200, end:1400, label:'中世纪', left:1000, width:1200 },
+    { start:1400, end:1800, label:'启蒙运动', left:2200, width:400 },
+    { start:1800, end:1950, label:'现代哲学', left:2600, width:200 },
+    { start:1950, end:2020, label:'当代', left:2950, width:150 }
+  ];
+
+  events.forEach((e, i) => {
+    const leftPct = ((e.year - minYear) / range) * 100;
+    const node = document.createElement('div');
+    node.className = 'timeline-node ' + (i % 2 === 0 ? 'above' : 'below');
+    node.style.left = leftPct + '%';
+    const isAbove = i % 2 === 0;
+    node.innerHTML = `
+      <div class="dot" style="border-color:${DIM_COLORS[e.dimension] || '#d4a853'}"></div>
+      <div class="label" style="${isAbove?'bottom:22px;':'top:22px;'}">${escapeHtml(e.title)}</div>
+      <div class="year" style="${isAbove?'bottom:6px;':'top:6px;'}">${formatYear(e.year)}</div>
+    `;
+    node.onclick = () => openDetail('timeline', e);
+    container.appendChild(node);
+  });
+
+  document.getElementById('timeline-track').style.minWidth = (2800 * timelineScale) + 'px';
+}
+
+function zoomTimeline(factor) {
+  timelineScale = Math.max(0.5, Math.min(3, timelineScale * factor));
+  document.getElementById('timeline-track').style.minWidth = (2800 * timelineScale) + 'px';
+}
+
+function resetTimeline() {
+  timelineScale = 1;
+  document.getElementById('timeline-track').style.minWidth = '2800px';
+}
+
+// ============================================================
+// GRAPH PAGE
+// ============================================================
+let graphSimulation = null;
+
+function renderGraphPage(main) {
+  main.innerHTML = `
+    <div class="page active">
+      <div class="section-title">🕸️ 哲学观点关系图</div>
+      <div class="graph-layout">
+        <div id="graph-container"></div>
+        <div class="graph-sidebar">
+          <h4>🔍 筛选维度</h4>
+          <div class="filter-group" id="graph-filters"></div>
+          <h4 style="margin-top:16px;">🧭 思想溯源</h4>
+          <div class="graph-path-control">
+            <select id="graph-path-source" onchange="updateGraphPath()"><option value="">选择起点...</option></select>
+            <select id="graph-path-target" onchange="updateGraphPath()"><option value="">选择终点...</option></select>
+            <button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;" onclick="clearGraphPath()">清除溯源</button>
+          </div>
+          <div id="graph-node-detail" class="node-detail" style="margin-top:16px;">
+            <p style="color:var(--text-muted);">点击节点查看详情</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Build filters
+  const filterGroup = document.getElementById('graph-filters');
+  Object.values(DIMENSIONS).forEach(dim => {
+    const label = document.createElement('label');
+    label.innerHTML = `<input type="checkbox" checked data-dim="${dim.id}" onchange="updateGraphFilters()"> <span style="color:${dim.color}">●</span> ${dim.name}`;
+    filterGroup.appendChild(label);
+  });
+
+  // Build path selects
+  const sourceSelect = document.getElementById('graph-path-source');
+  const targetSelect = document.getElementById('graph-path-target');
+  const sortedThinkers = [...thinkers].sort((a,b) => a.nameZh.localeCompare(b.nameZh));
+  sortedThinkers.forEach(t => {
+    sourceSelect.innerHTML += `<option value="${t.id}">${t.nameZh}</option>`;
+    targetSelect.innerHTML += `<option value="${t.id}">${t.nameZh}</option>`;
+  });
+
+  renderForceGraph();
+}
+
+function renderForceGraph() {
+  const container = document.getElementById('graph-container');
+  if (!container) return;
+  const w = container.clientWidth || 800;
+  const h = 500;
+
+  // Get visible dimensions
+  const visibleDims = new Set();
+  document.querySelectorAll('#graph-filters input:checked').forEach(cb => visibleDims.add(cb.dataset.dim));
+
+  const filteredThinkers = thinkers.filter(t => visibleDims.has(t.dimension));
+  const thinkerIds = new Set(filteredThinkers.map(t => t.id));
+
+  // Build links
+  const links = [];
+  filteredThinkers.forEach(t => {
+    t.influences.forEach(targetId => {
+      if (thinkerIds.has(targetId)) links.push({ source:t.id, target:targetId, type:'influences' });
+    });
+    t.opposes.forEach(targetId => {
+      if (thinkerIds.has(targetId)) links.push({ source:t.id, target:targetId, type:'opposes' });
+    });
+  });
+
+  // Color scale
+  const colorScale = d3.scaleOrdinal()
+    .domain(Object.keys(DIMENSIONS))
+    .range(Object.values(DIM_COLORS));
+
+  container.innerHTML = '';
+  const svg = d3.select('#graph-container')
+    .append('svg')
+    .attr('viewBox', [0, 0, w, h])
+    .attr('width', w)
+    .attr('height', h);
+
+  // Zoom
+  const g = svg.append('g');
+  svg.call(d3.zoom().scaleExtent([0.3, 3]).on('zoom', (event) => {
+    g.attr('transform', event.transform);
+  }));
+
+  // Arrow marker
+  svg.append('defs').selectAll('marker')
+    .data(['arrow'])
+    .join('marker')
+    .attr('id', 'arrow')
+    .attr('viewBox', '0 -5 10 10')
+    .attr('refX', 28)
+    .attr('refY', 0)
+    .attr('markerWidth', 6)
+    .attr('markerHeight', 6)
+    .attr('orient', 'auto')
+    .append('path')
+    .attr('fill', '#888')
+    .attr('d', 'M0,-5L10,0L0,5');
+
+  // Simulation
+  const simulation = d3.forceSimulation(filteredThinkers)
+    .force('link', d3.forceLink(links).id(d => d.id).distance(120))
+    .force('charge', d3.forceManyBody().strength(-300))
+    .force('center', d3.forceCenter(w / 2, h / 2))
+    .force('collision', d3.forceCollide(30));
+
+  graphSimulation = simulation;
+
+  // Draw links
+  const link = g.append('g')
+    .selectAll('line')
+    .data(links)
+    .join('line')
+    .attr('class', d => 'link ' + d.type)
+    .attr('stroke', '#888')
+    .attr('marker-end', 'url(#arrow)');
+
+  // Draw nodes
+  const node = g.append('g')
+    .selectAll('g')
+    .data(filteredThinkers)
+    .join('g')
+    .attr('class', 'node')
+    .call(d3.drag()
+      .on('start', dragstarted)
+      .on('drag', dragged)
+      .on('end', dragended));
+
+  node.append('circle')
+    .attr('r', d => d.dimension === 'philosophy' ? 18 : 14)
+    .attr('fill', d => colorScale(d.dimension))
+    .attr('stroke', '#fff')
+    .attr('stroke-opacity', 0.3);
+
+  node.append('text')
+    .text(d => d.nameZh)
+    .attr('x', 22)
+    .attr('y', 4)
+    .attr('font-size', '10px')
+    .attr('fill', '#8899aa');
+
+  node.on('click', (event, d) => {
+    event.stopPropagation();
+    selectGraphNode(d);
+  });
+
+  svg.on('click', () => {
+    selectGraphNode(null);
+  });
+
+  simulation.on('tick', () => {
+    link
+      .attr('x1', d => d.source.x)
+      .attr('y1', d => d.source.y)
+      .attr('x2', d => d.target.x)
+      .attr('y2', d => d.target.y);
+    node.attr('transform', d => `translate(${d.x},${d.y})`);
+  });
+
+  function dragstarted(event, d) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x; d.fy = d.y;
+  }
+  function dragged(event, d) {
+    d.fx = event.x; d.fy = event.y;
+  }
+  function dragended(event, d) {
+    if (!event.active) simulation.alphaTarget(0);
+    d.fx = null; d.fy = null;
+  }
+}
+
+function selectGraphNode(d) {
+  selectedGraphNode = d;
+  const detail = document.getElementById('graph-node-detail');
+  if (!detail) return;
+  if (!d) {
+    detail.innerHTML = '<p style="color:var(--text-muted);">点击节点查看详情</p>';
+    return;
+  }
+  const dim = DIMENSIONS[d.dimension];
+  detail.innerHTML = `
+    <h5>${dim?.icon || ''} ${escapeHtml(d.nameZh)} (${escapeHtml(d.name)})</h5>
+    <p style="font-size:0.75rem;">${d.lifespan} · ${dim?.name || d.dimension} · ${d.era || ''} · ${d.region || ''}</p>
+    <p style="margin-top:8px;"><strong>核心主张：</strong>${d.keyIdeas.map(k => escapeHtml(k)).join('、')}</p>
+    ${d.works.length ? `<p style="margin-top:4px;"><strong>代表著作：</strong>${d.works.map(w => `《${escapeHtml(w.title)}》(${w.year})`).join('、')}</p>` : ''}
+    <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="fetchWikipedia('${d.name.replace(/'/g,"\\'")}','${d.id}')">📖 Wikipedia</button>
+    <div id="wiki-snippet-${d.id}" class="wiki-snippet" style="display:none;"></div>
+  `;
+}
+
+function updateGraphFilters() {
+  renderForceGraph();
+  selectedGraphNode = null;
+  const detail = document.getElementById('graph-node-detail');
+  if (detail) detail.innerHTML = '<p style="color:var(--text-muted);">点击节点查看详情</p>';
+}
+
+function updateGraphPath() {
+  const source = document.getElementById('graph-path-source')?.value;
+  const target = document.getElementById('graph-path-target')?.value;
+  if (!source || !target) return;
+  highlightPath(source, target);
+}
+
+function highlightPath(sourceId, targetId) {
+  if (!graphSimulation) return;
+  // BFS shortest path on thinker influence graph
+  const visited = new Set();
+  const parent = {};
+  const queue = [sourceId];
+  visited.add(sourceId);
+  while (queue.length > 0) {
+    const cur = queue.shift();
+    if (cur === targetId) break;
+    const thinker = getThinkerById(cur);
+    if (!thinker) continue;
+    const neighbors = [...(thinker.influences || []), ...(thinker.opposes || [])];
+    thinkers.filter(t => t.influences?.includes(cur) || t.opposes?.includes(cur)).forEach(t => {
+      if (!neighbors.includes(t.id)) neighbors.push(t.id);
+    });
+    neighbors.forEach(nid => {
+      if (!visited.has(nid)) {
+        visited.add(nid);
+        parent[nid] = cur;
+        queue.push(nid);
+      }
+    });
+  }
+
+  const path = [];
+  let node = targetId;
+  while (node) {
+    path.unshift(node);
+    node = parent[node];
+  }
+  const pathSet = new Set(path);
+
+  // Update visual highlighting
+  d3.select('#graph-container').selectAll('.node circle')
+    .attr('stroke', d => pathSet.has(d.id) ? '#d4a853' : '#fff')
+    .attr('stroke-width', d => pathSet.has(d.id) ? 3 : 1)
+    .attr('stroke-opacity', d => pathSet.has(d.id) ? 1 : 0.3);
+
+  d3.select('#graph-container').selectAll('.link')
+    .attr('stroke', d => (pathSet.has(d.source.id) && pathSet.has(d.target.id)) ? '#d4a853' : '#888')
+    .attr('stroke-opacity', d => (pathSet.has(d.source.id) && pathSet.has(d.target.id)) ? 0.8 : 0.3)
+    .attr('stroke-width', d => (pathSet.has(d.source.id) && pathSet.has(d.target.id)) ? 2.5 : 1);
+
+  showToast(`溯源路径: ${path.map(id => getThinkerById(id)?.nameZh || id).join(' → ')}`);
+}
+
+function clearGraphPath() {
+  d3.select('#graph-container').selectAll('.node circle')
+    .attr('stroke', '#fff')
+    .attr('stroke-width', 1)
+    .attr('stroke-opacity', 0.3);
+  d3.select('#graph-container').selectAll('.link')
+    .attr('stroke', '#888')
+    .attr('stroke-opacity', 0.3)
+    .attr('stroke-width', 1);
+  document.getElementById('graph-path-source').value = '';
+  document.getElementById('graph-path-target').value = '';
+}
+
+// ============================================================
+// EXPLORE PAGE (Dimension Detail)
+// ============================================================
+function renderExplorePage(main, dimId) {
+  const dim = DIMENSIONS[dimId];
+  if (!dim) { navigate('/'); return; }
+  const dimQuotes = getQuotesByDimension(dimId);
+  const dimThinkers = getThinkersByDimension(dimId);
+  const dimEvents = timelineEvents.filter(e => e.dimension === dimId);
+
+  main.innerHTML = `
+    <div class="page active">
+      <div style="margin-bottom:24px;">
+        <a href="#/" style="font-size:0.85rem;">← 返回首页</a>
+      </div>
+      <div class="section-title">${dim.icon} ${dim.name}</div>
+      <div style="color:var(--text-secondary);margin-bottom:32px;max-width:700px;">
+        ${getDimensionIntro(dimId)}
+      </div>
+
+      ${dimThinkers.length ? `
+      <div class="section-title" style="font-size:1.2rem;">代表人物</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:32px;">
+        ${dimThinkers.map(t => `
+          <div class="quote-card" style="flex:1;min-width:200px;cursor:pointer;" onclick="openDetail('thinker','${t.id}')">
+            <strong style="color:var(--gold);">${escapeHtml(t.nameZh)}</strong>
+            <span style="font-size:0.75rem;color:var(--text-muted);margin-left:8px;">${t.lifespan}</span>
+            <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:6px;">${t.keyIdeas.map(k=>escapeHtml(k)).join(' · ')}</p>
+          </div>
+        `).join('')}
+      </div>` : ''}
+
+      ${dimQuotes.length ? `
+      <div class="section-title" style="font-size:1.2rem;">相关名言</div>
+      <div class="quote-grid" style="margin-bottom:32px;" id="explore-quote-grid"></div>` : ''}
+
+      ${dimEvents.length ? `
+      <div class="section-title" style="font-size:1.2rem;">关键时间节点</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:32px;">
+        ${dimEvents.map(e => `
+          <div class="quote-card" style="flex:1;min-width:200px;cursor:pointer;" onclick="openDetail('timeline','${e.id}')">
+            <span style="font-size:0.75rem;color:var(--gold-dim);">${formatYear(e.year)}</span>
+            <strong style="display:block;color:var(--text-primary);margin-top:4px;">${escapeHtml(e.title)}</strong>
+            <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:6px;">${escapeHtml(e.description.substring(0,80))}...</p>
+          </div>
+        `).join('')}
+      </div>` : ''}
+
+      <div class="section-title" style="font-size:1.2rem;">相关视频</div>
+      <div style="display:flex;flex-wrap:wrap;gap:16px;" id="explore-videos">
+        <p style="color:var(--text-muted);">加载中...</p>
+      </div>
+    </div>
+  `;
+
+  // Render quotes
+  const qGrid = document.getElementById('explore-quote-grid');
+  if (qGrid) {
+    dimQuotes.forEach(q => {
+      const card = document.createElement('div');
+      card.className = 'quote-card';
+      renderQuoteCard(q, card);
+      qGrid.appendChild(card);
+    });
+  }
+
+  // Load videos
+  loadVideosForDimension(dimId, document.getElementById('explore-videos'));
+}
+
+function getDimensionIntro(dimId) {
+  const intros = {
+    philosophy: '哲学是追问生命意义最古老的学科。从苏格拉底的"认识你自己"到加缪的荒诞哲学，哲学家们苦苦思索：如果宇宙不在乎我们，我们该如何赋予自己的生命以价值？',
+    religion: '各大宗教都试图回答"为何而活"这一终极问题。或以神的旨意，或以因果轮回，或以与道合一，宗教信仰为无数人提供了意义的锚点和心灵的归宿。',
+    science: '科学不直接回答"应该为什么而活"，但它告诉我们生命从何而来、由什么构成。从宇宙学到神经科学，科学发现不断重塑我们对自身地位的理解。',
+    psychology: '心理学将"意义"从哲学思辨转化为可研究的心理现象。弗兰克尔、荣格和马斯洛都认为：寻找意义不是奢侈，而是心理健康的核心。',
+    literature: '伟大的文学作品是人类叩问意义的艺术表达。从但丁到黑塞，作家们用故事和诗歌承载了最深层的生命追问。',
+    history: '对生命意义的理解随时代而变。从轴心时代到启蒙运动再到现代，每个文明都在特定历史条件下对"意义"给出了独特的答案。',
+    contemporary: '在当代社会，传统信仰衰退，科学主义与消费主义兴起，人们对意义的追寻变得更加多元化和个人化。'
+  };
+  return intros[dimId] || '';
+}
+
+function loadVideosForDimension(dimId, container) {
+  const videoMap = {
+    philosophy: [{id:'abc123',title:'PHILOSOPHY - The Meaning of Life'},{id:'xyz789',title:'Existentialism: Crash Course Philosophy'}],
+    science: [{id:'sci001',title:'Carl Sagan - Pale Blue Dot'}],
+    psychology: [{id:'psy001',title:'Man\'s Search for Meaning - Viktor Frankl'}],
+    literature: [{id:'lit001',title:'The Myth of Sisyphus - Albert Camus'}],
+    religion: [{id:'rel001',title:'The Life of the Buddha'}],
+    history: [{id:'his001',title:'The Axial Age'}],
+    contemporary: [{id:'con001',title:'What is the Meaning of Life?'}]
+  };
+  const videos = videoMap[dimId] || [];
+  container.innerHTML = videos.length ? videos.map(v => `
+    <div class="quote-card" style="width:280px;">
+      <div style="font-size:0.85rem;margin-bottom:8px;">🎬 ${escapeHtml(v.title)}</div>
+      <div style="color:var(--text-muted);font-size:0.75rem;">YouTube 视频 · 点击观看</div>
+    </div>
+  `).join('') : '<p style="color:var(--text-muted);">暂无相关视频</p>';
+}
+
+// ============================================================
+// QUIZ PAGE
+// ============================================================
+let quizState = { current: 0, scores: {} };
+
+function renderQuizPage(main) {
+  quizState = { current: 0, scores: {} };
+
+  if (quizResult) {
+    showQuizResult(main);
+  } else {
+    main.innerHTML = `
+      <div class="page active">
+        <div class="section-title">💭 你的意义</div>
+        <p style="color:var(--text-secondary);margin-bottom:24px;">回答以下问题，探索你的生命观与哪种哲学观点最接近。</p>
+        <div class="quiz-container" id="quiz-container"></div>
+      </div>
+    `;
+    renderQuizQuestion();
+  }
+}
+
+function renderQuizQuestion() {
+  const container = document.getElementById('quiz-container');
+  if (!container) return;
+  if (quizState.current >= quizQuestions.length) {
+    finishQuiz();
+    return;
+  }
+  const q = quizQuestions[quizState.current];
+  const progress = ((quizState.current) / quizQuestions.length) * 100;
+  container.innerHTML = `
+    <div class="quiz-progress"><div class="quiz-progress-bar" style="width:${progress}%;"></div></div>
+    <div class="quiz-question">${quizState.current + 1}. ${escapeHtml(q.question)}</div>
+    <div class="quiz-options">
+      ${q.options.map((o,i) => `
+        <button class="quiz-option" onclick="selectQuizOption(${i})">${escapeHtml(o.text)}</button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function selectQuizOption(idx) {
+  const q = quizQuestions[quizState.current];
+  const option = q.options[idx];
+  Object.keys(option.weights).forEach(dim => {
+    quizState.scores[dim] = (quizState.scores[dim] || 0) + option.weights[dim];
+  });
+  quizState.current++;
+  renderQuizQuestion();
+}
+
+function finishQuiz() {
+  const sorted = Object.entries(quizState.scores).sort((a,b) => b[1] - a[1]);
+  const top = sorted[0];
+  const top3 = sorted.slice(0, 3);
+  const maxScore = top[1];
+
+  quizResult = { top: top[0], top3: top3.map(s => ({dim:s[0], score:s[1]})), date: new Date().toISOString() };
+  localStorage.setItem('lof-quiz', JSON.stringify(quizResult));
+
+  const main = document.getElementById('main-content');
+  showQuizResult(main);
+}
+
+function showQuizResult(main) {
+  if (!quizResult) { renderQuizPage(main); return; }
+  const topDim = DIMENSIONS[quizResult.top];
+  const maxScore = quizResult.top3[0].score;
+
+  // Build personalized recommendations: allocate 5 slots across top-3 dimensions
+  // proportionally to their scores, then pick different quotes each time (seeded by score).
+  const totalScore = quizResult.top3.reduce((sum, s) => sum + s.score, 0);
+  const allocations = quizResult.top3.map(s => ({
+    dim: s.dim,
+    score: s.score,
+    count: Math.max(1, Math.round((s.score / totalScore) * 5))
+  }));
+  // Adjust so total = 5
+  let diff = 5 - allocations.reduce((s, a) => s + a.count, 0);
+  for (let i = 0; diff > 0 && i < allocations.length; i++) { allocations[i].count++; diff--; }
+  for (let i = allocations.length - 1; diff < 0 && i >= 0; i--) { if (allocations[i].count > 1) { allocations[i].count--; diff++; } }
+
+  const dimQuotes = [];
+  allocations.forEach(a => {
+    const pool = getQuotesByDimension(a.dim);
+    // Deterministic shuffle seeded by the dimension score so same score = same picks
+    const seed = quizResult.top3.find(s => s.dim === a.dim).score;
+    const shuffled = [...pool].sort((a, b) => {
+      const ha = hashStr(a.id + seed);
+      const hb = hashStr(b.id + seed);
+      return ha - hb;
+    });
+    dimQuotes.push(...shuffled.slice(0, a.count));
+  });
+
+  function hashStr(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) { h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; }
+    return h;
+  }
+
+  main.innerHTML = `
+    <div class="page active">
+      <div class="section-title">💭 你的生命意义观</div>
+      <div class="quiz-result">
+        <div style="font-size:3rem;margin-bottom:8px;">${topDim?.icon || '🌟'}</div>
+        <h3>你与<strong style="color:${topDim?.color || 'var(--gold)'};">${topDim?.name || quizResult.top}</strong>视角最为接近</h3>
+        <div class="match-bar" style="width:${Math.round((maxScore / (quizQuestions.length * 3)) * 100)}%;max-width:300px;margin:16px auto;"></div>
+        <p style="color:var(--text-secondary);max-width:500px;margin:0 auto;">${getDimensionIntro(quizResult.top)}</p>
+        <div style="margin-top:24px;text-align:left;">
+          <h4 style="color:var(--gold);margin-bottom:12px;">得分分布</h4>
+          ${quizResult.top3.map((s,i) => {
+            const d = DIMENSIONS[s.dim];
+            const pct = Math.round((s.score / (quizQuestions.length * 3)) * 100);
+            return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span style="width:80px;font-size:0.85rem;">${d?.icon || ''} ${d?.name || s.dim}</span>
+              <div style="flex:1;height:6px;background:var(--bg-card);border-radius:3px;">
+                <div style="height:100%;width:${pct}%;background:${d?.color || 'var(--gold)'};border-radius:3px;"></div>
+              </div>
+              <span style="font-size:0.8rem;color:var(--text-muted);width:30px;">${pct}%</span>
+            </div>`;
+          }).join('')}
+        </div>
+        ${dimQuotes.length ? `
+        <div class="recommendations">
+          <h4 style="color:var(--gold);margin-bottom:12px;">推荐名言</h4>
+          ${dimQuotes.map(q => `
+            <div class="quote-card" style="margin-bottom:10px;">
+              <div class="quote-text" style="font-size:0.9rem;">${escapeHtml(q.text)}</div>
+              ${q.textZh ? `<div class="quote-translation" style="font-size:0.8rem;">${escapeHtml(q.textZh)}</div>` : ''}
+              <div class="quote-meta" style="font-size:0.75rem;">— ${escapeHtml(q.author)}</div>
+            </div>
+          `).join('')}
+        </div>` : ''}
+        <div style="margin-top:24px;display:flex;gap:12px;justify-content:center;">
+          <button class="btn btn-primary" onclick="exploreDimension('${quizResult.top}')">深入了解 ${topDim?.name || ''}</button>
+          <button class="btn btn-outline" onclick="retakeQuiz()">重新测试</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function exploreDimension(dim) { navigate('/explore/' + dim); }
+function retakeQuiz() {
+  quizResult = null;
+  localStorage.removeItem('lof-quiz');
+  quizState = { current: 0, scores: {} };
+  renderQuizPage(document.getElementById('main-content'));
+}
+
+// ============================================================
+// FAVORITES PAGE
+// ============================================================
+function renderFavoritesPage(main) {
+  const favQuotes = favorites.map(id => getQuoteById(id)).filter(Boolean);
+  main.innerHTML = `
+    <div class="page active">
+      <div class="section-title">⭐ 我的收藏</div>
+      ${favQuotes.length === 0 ? `
+        <div class="fav-empty">
+          <p style="font-size:3rem;margin-bottom:16px;">📭</p>
+          <p>还没有收藏任何名言</p>
+          <button class="btn btn-outline" style="margin-top:16px;" onclick="navigate('/quotes')">去浏览名言库</button>
+        </div>
+      ` : `
+        <div class="fav-actions">
+          <span style="color:var(--text-muted);font-size:0.85rem;">共 ${favQuotes.length} 条收藏</span>
+          <button class="btn btn-outline btn-sm" onclick="exportFavorites()">📤 导出</button>
+          <button class="btn btn-outline btn-sm" onclick="clearAllFavorites()">🗑️ 清空</button>
+        </div>
+        <div class="quote-grid" id="fav-quote-grid"></div>
+      `}
+    </div>
+  `;
+
+  const grid = document.getElementById('fav-quote-grid');
+  if (grid) {
+    favQuotes.forEach(q => {
+      const card = document.createElement('div');
+      card.className = 'quote-card';
+      renderQuoteCard(q, card);
+      grid.appendChild(card);
+    });
+  }
+}
+
+function exportFavorites() {
+  const favQuotes = favorites.map(id => getQuoteById(id)).filter(Boolean);
+  const text = favQuotes.map(q => `"${q.text}" — ${q.author}${q.textZh ? '\n  ' + q.textZh : ''}\n`).join('\n---\n');
+  const blob = new Blob([text], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '我的收藏-生命的意义.txt';
+  a.click();
+  showToast('已导出收藏');
+}
+
+function clearAllFavorites() {
+  if (confirm('确定清空所有收藏吗？')) {
+    favorites = [];
+    localStorage.setItem('lof-favs', JSON.stringify(favorites));
+    renderFavoritesPage(document.getElementById('main-content'));
+    showToast('已清空收藏');
+  }
+}
+
+// ============================================================
+// DETAIL OVERLAY
+// ============================================================
+function openDetail(type, data) {
+  const overlay = document.getElementById('detail-overlay');
+  const panel = document.getElementById('detail-panel');
+
+  if (type === 'quote') {
+    const dim = DIMENSIONS[data.dimension];
+    panel.innerHTML = `
+      <button class="close-btn" onclick="closeDetail()">✕</button>
+      <span style="color:${dim?.color || 'var(--gold)'};font-size:0.8rem;">${dim?.icon || ''} ${dim?.name || data.dimension}</span>
+      <div style="font-family:var(--font-serif);font-size:1.3rem;margin:12px 0;color:var(--text-primary);line-height:1.8;">"${escapeHtml(data.text)}"</div>
+      ${data.textZh ? `<div style="color:var(--text-secondary);font-style:italic;padding-left:12px;border-left:2px solid var(--gold-dim);margin-bottom:12px;">${escapeHtml(data.textZh)}</div>` : ''}
+      <div class="meta"><strong>${escapeHtml(data.author)}</strong> · ${escapeHtml(data.source)} · ${formatYear(data.year)}</div>
+      <button class="btn btn-outline btn-sm" onclick="navigate('/explore/${data.dimension}');closeDetail();">在${dim?.name || data.dimension}维度中探索</button>
+    `;
+  } else if (type === 'thinker') {
+    const t = getThinkerById(data);
+    if (!t) return;
+    const dim = DIMENSIONS[t.dimension];
+    panel.innerHTML = `
+      <button class="close-btn" onclick="closeDetail()">✕</button>
+      <h3>${dim?.icon || ''} ${escapeHtml(t.nameZh)} (${escapeHtml(t.name)})</h3>
+      <div class="meta">${t.lifespan} · ${dim?.name || t.dimension} · ${t.era || ''} · ${t.region || ''}</div>
+      <p><strong>核心主张：</strong>${t.keyIdeas.map(k => escapeHtml(k)).join('、')}</p>
+      ${t.works.length ? `<p style="margin-top:8px;"><strong>代表著作：</strong>${t.works.map(w => `《${escapeHtml(w.title)}》(${w.year})`).join('、')}</p>` : ''}
+      ${t.influences.length ? `<p style="margin-top:8px;"><strong>受影响于：</strong>${t.influences.map(id => getThinkerById(id)?.nameZh || id).join('、')}</p>` : ''}
+      <button class="btn btn-outline btn-sm" style="margin-top:12px;" onclick="fetchWikipedia('${t.name.replace(/'/g,"\\'")}','${t.id}')">📖 Wikipedia</button>
+      <div id="wiki-snippet-${t.id}" class="wiki-snippet" style="display:none;"></div>
+    `;
+  } else if (type === 'timeline') {
+    panel.innerHTML = `
+      <button class="close-btn" onclick="closeDetail()">✕</button>
+      <span style="color:var(--gold-dim);font-size:0.85rem;">${formatYear(data.year)}</span>
+      <h3>${escapeHtml(data.title)}</h3>
+      <p style="color:var(--text-secondary);margin-top:12px;line-height:1.8;">${escapeHtml(data.description)}</p>
+      ${data.relatedThinkers?.length ? `<p style="margin-top:12px;"><strong>相关人物：</strong>${data.relatedThinkers.map(id => `<a href="#" onclick="openDetail('thinker','${id}');return false;">${escapeHtml(getThinkerById(id)?.nameZh || id)}</a>`).join('、')}</p>` : ''}
+    `;
+  }
+
+  overlay.classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detail-overlay').classList.remove('open');
+}
+
+// ============================================================
+// WIKIPEDIA API
+// ============================================================
+const wikiCache = {};
+async function fetchWikipedia(title, snippetId) {
+  const targetEl = document.getElementById('wiki-snippet-' + (snippetId || title.replace(/[^a-zA-Z]/g,'')));
+  if (!targetEl) return;
+
+  if (wikiCache[title]) {
+    targetEl.style.display = 'block';
+    targetEl.innerHTML = wikiCache[title];
+    targetEl.classList.remove('loading');
+    return;
+  }
+
+  targetEl.style.display = 'block';
+  targetEl.classList.add('loading');
+  targetEl.textContent = '正在获取 Wikipedia 摘要...';
+
+  try {
+    const resp = await fetch(`https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+    if (!resp.ok) throw new Error('Not found');
+    const data = await resp.json();
+    const html = `
+      <strong>Wikipedia 摘要：</strong>
+      <p style="margin-top:6px;">${escapeHtml(data.extract?.substring(0, 500) || '暂无摘要')}...</p>
+      ${data.content_urls?.desktop?.page ? `<a href="${data.content_urls.desktop.page}" target="_blank" style="font-size:0.8rem;">在 Wikipedia 阅读全文 →</a>` : ''}
+    `;
+    wikiCache[title] = html;
+    targetEl.innerHTML = html;
+    targetEl.classList.remove('loading');
+  } catch(e) {
+    targetEl.innerHTML = '<span style="color:var(--text-muted);">暂无 Wikipedia 条目（或网络不可用）</span>';
+    targetEl.classList.remove('loading');
+  }
+}
+
+// ============================================================
+// GLOBAL SEARCH
+// ============================================================
+function openSearch() {
+  document.getElementById('search-overlay').classList.add('open');
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-results').innerHTML = '';
+  setTimeout(() => document.getElementById('search-input').focus(), 100);
+}
+
+function closeSearch() {
+  document.getElementById('search-overlay').classList.remove('open');
+}
+
+function performSearch(query) {
+  const results = document.getElementById('search-results');
+  if (!query || query.length < 1) {
+    results.innerHTML = '';
+    return;
+  }
+  const q = query.toLowerCase();
+
+  const matchedQuotes = quotes.filter(item =>
+    item.text.toLowerCase().includes(q) || item.textZh.toLowerCase().includes(q) ||
+    item.author.toLowerCase().includes(q) || item.tags.some(t => t.includes(q))
+  ).slice(0, 5);
+
+  const matchedThinkers = thinkers.filter(item =>
+    item.name.toLowerCase().includes(q) || item.nameZh.includes(q) ||
+    item.keyIdeas.some(k => k.includes(q)) || item.region?.includes(q)
+  ).slice(0, 5);
+
+  const matchedEvents = timelineEvents.filter(item =>
+    item.title.toLowerCase().includes(q) || item.title.includes(q) ||
+    item.description.includes(q)
+  ).slice(0, 5);
+
+  let html = '';
+  if (matchedQuotes.length) {
+    html += `<div style="padding:8px 24px;font-size:0.75rem;color:var(--text-muted);">名言 (${matchedQuotes.length})</div>`;
+    matchedQuotes.forEach(item => {
+      html += `<div class="search-result-item" onclick="closeSearch();navigate('/quotes');setTimeout(()=>openDetail('quote',getQuoteById('${item.id}')),300)">
+        <span class="result-type">名言</span>
+        <span class="result-text">"${escapeHtml(item.text.substring(0, 60))}..."</span>
+        <span class="result-sub">${escapeHtml(item.author)}</span>
+      </div>`;
+    });
+  }
+  if (matchedThinkers.length) {
+    html += `<div style="padding:8px 24px;font-size:0.75rem;color:var(--text-muted);">思想家 (${matchedThinkers.length})</div>`;
+    matchedThinkers.forEach(item => {
+      html += `<div class="search-result-item" onclick="closeSearch();navigate('/graph');setTimeout(()=>openDetail('thinker','${item.id}'),500)">
+        <span class="result-type">人物</span>
+        <span class="result-text">${escapeHtml(item.nameZh)} (${escapeHtml(item.name)})</span>
+        <span class="result-sub">${DIMENSIONS[item.dimension]?.name || item.dimension}</span>
+      </div>`;
+    });
+  }
+  if (matchedEvents.length) {
+    html += `<div style="padding:8px 24px;font-size:0.75rem;color:var(--text-muted);">时间线事件 (${matchedEvents.length})</div>`;
+    matchedEvents.forEach(item => {
+      html += `<div class="search-result-item" onclick="closeSearch();navigate('/timeline');setTimeout(()=>openDetail('timeline',timelineEvents.find(e=>e.id==='${item.id}')),500)">
+        <span class="result-type">事件</span>
+        <span class="result-text">${escapeHtml(item.title)}</span>
+        <span class="result-sub">${formatYear(item.year)}</span>
+      </div>`;
+    });
+  }
+  if (!html) {
+    html = `<div style="padding:24px;text-align:center;color:var(--text-muted);">未找到相关结果</div>`;
+  }
+  results.innerHTML = html;
+}
+
+// Keyboard shortcut
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    openSearch();
+  }
+  if (e.key === 'Escape') {
+    closeSearch();
+    closeDetail();
+  }
+});
+
+// ============================================================
+// ABOUT PAGE
+// ============================================================
+function renderAboutPage(main) {
+  main.innerHTML = `
+    <div class="page active">
+      <div class="section-title">关于本项目</div>
+      <div style="max-width:700px;color:var(--text-secondary);line-height:1.9;">
+        <p>"生命的意义"是一个多维度交互式探索平台，整合哲学、宗教、科学、心理学等领域的智慧，试图回答人类最古老的问题：<strong style="color:var(--gold);">我们为什么而活？</strong></p>
+        <p style="margin-top:16px;">本项目的核心理念是：<strong>不给出标准答案</strong>，而是展示多种思考路径，让用户在探索中形成自己的理解。</p>
+        <h4 style="color:var(--gold);margin-top:24px;">设计原则</h4>
+        <ul style="padding-left:20px;">
+          <li>多元而非单一——永远展示多种观点</li>
+          <li>引用而非断言——所有内容标注出处</li>
+          <li>探索而非灌输——交互设计引导主动发现</li>
+          <li>深度与可访问性平衡——从浅入深</li>
+        </ul>
+        <h4 style="color:var(--gold);margin-top:24px;">内容来源</h4>
+        <ul style="padding-left:20px;">
+          <li>Wikipedia API — 人物与概念摘要</li>
+          <li>哲学经典著作 — 名人名言</li>
+          <li>YouTube — 相关视频资源</li>
+        </ul>
+        <p style="margin-top:24px;font-size:0.85rem;color:var(--text-muted);">版本 1.0 · 涵盖 40+ 名言、25+ 思想家、23 个历史事件、8 道问卷题目</p>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+const path = window.location.hash.slice(1) || '/';
+currentPage = path;
+render(path);
+</script>
+</body>
+</html>
