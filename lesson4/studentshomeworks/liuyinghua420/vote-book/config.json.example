@@ -1,0 +1,8 @@
+{
+  "smtp": {
+    "host": "smtp.qq.com",
+    "port": 465,
+    "user": "你的QQ邮箱@qq.com",
+    "pass": "你的16位授权码"
+  }
+}

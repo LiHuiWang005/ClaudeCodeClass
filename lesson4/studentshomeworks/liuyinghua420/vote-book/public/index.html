@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图书投票</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+  <!-- 顶部 -->
+  <header class="top-bar">
+    <h1 class="logo">图书投票</h1>
+    <div id="header-right"></div>
+  </header>
+
+  <!-- 图书列表 -->
+  <main class="content">
+    <!-- 管理面板（仅管理员可见） -->
+    <section class="admin-panel" id="admin-panel" hidden>
+      <h2 class="add-title">管理操作</h2>
+      <button id="reset-votes-btn" class="danger-btn">重置所有投票</button>
+    </section>
+
+    <!-- 添加图书（仅管理员可见） -->
+    <section class="add-book-section" id="add-book-section" hidden>
+      <h2 class="add-title">添加图书（管理员）</h2>
+      <div class="add-row">
+        <input id="add-title" placeholder="书名" maxlength="50" class="add-input">
+        <input id="add-author" placeholder="作者（可选）" maxlength="30" class="add-input">
+        <button id="add-submit" class="add-btn">搜索并添加</button>
+      </div>
+      <div id="add-status" class="status-text" style="padding:8px 0" hidden></div>
+    </section>
+
+    <div id="book-list" class="book-list"></div>
+    <div id="loading" class="status-text">加载中...</div>
+    <div id="error" class="status-text" style="color:#d14a30" hidden></div>
+  </main>
+
+  <!-- 编辑图书弹窗 -->
+  <div class="modal-overlay" id="edit-modal" hidden>
+    <div class="modal-content">
+      <h3 class="modal-title">编辑图书</h3>
+      <label class="modal-label">书名</label>
+      <input id="edit-title" class="add-input" maxlength="50">
+      <label class="modal-label">作者</label>
+      <input id="edit-author" class="add-input" maxlength="30">
+      <label class="modal-label">封面 URL</label>
+      <input id="edit-cover" class="add-input" placeholder="https://...">
+      <label class="modal-label">简介</label>
+      <textarea id="edit-desc" class="add-input" rows="3" style="resize:vertical" maxlength="500"></textarea>
+      <div class="modal-btns">
+        <button id="edit-cancel" class="lbtn">取消</button>
+        <button id="edit-save" class="add-btn">保存</button>
+      </div>
+      <div id="edit-status" class="status-text" style="padding:4px 0" hidden></div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
