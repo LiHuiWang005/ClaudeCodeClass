@@ -1,0 +1,169 @@
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#333;min-height:100vh}
+
+/* ===== Header ===== */
+.top-bar{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+.logo{font-size:20px;color:#1a1a1a;white-space:nowrap}
+#header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+.uname{font-size:14px;color:#555}
+.vbadge{font-size:13px;background:#fff7e6;color:#d48806;padding:4px 10px;border-radius:12px;font-weight:600;white-space:nowrap}
+.vbadge.zero{background:#fff2f0;color:#d14a30}
+.lbtn{padding:5px 12px;border:1px solid #ddd;border-radius:6px;background:#fff;color:#888;font-size:13px;cursor:pointer}
+.lbtn:hover{border-color:#ccc;color:#555}
+
+#h-username,#h-password{padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;outline:none;width:110px}
+#h-username:focus,#h-password:focus{border-color:#4a90d9}
+.obtn{padding:6px 16px;border:1px solid #4a90d9;background:#fff;color:#4a90d9;font-size:13px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.obtn:hover{background:#4a90d9;color:#fff}
+.slnk{font-size:12px;color:#999;text-decoration:none;white-space:nowrap}
+.slnk:hover{color:#4a90d9}
+.herr{width:100%;padding:4px 8px;background:#fff2f0;color:#d14a30;border-radius:4px;font-size:12px}
+.reset-msg{width:100%;padding:4px 8px;background:#f6ffed;color:#52c41a;border-radius:4px;font-size:12px}
+
+#h-email,#h-reset-token{padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;outline:none;width:140px}
+#h-email:focus,#h-reset-token:focus{border-color:#4a90d9}
+.reset-info{font-size:13px;color:#555;white-space:nowrap}
+
+/* ===== Content ===== */
+.content{max-width:1080px;margin:0 auto;padding:28px 20px 48px}
+
+/* ===== Responsive Grid ===== */
+.book-list{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+@media(max-width:560px){.book-list{grid-template-columns:1fr}}
+
+/* ===== Book Card ===== */
+.bcard{
+  background:#fff;
+  border-radius:14px;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  transition:transform .25s,box-shadow .25s;
+  overflow:hidden;
+}
+.bcard:hover{
+  transform:translateY(-5px);
+  box-shadow:0 12px 30px rgba(0,0,0,.11);
+}
+
+/* ===== Cover Area ===== */
+.bcover-wrap{
+  position:relative;
+  width:100%;
+  height:420px;
+  overflow:hidden;
+  background:#eef0f4;
+}
+.bcover-ph{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:52px;
+  background:linear-gradient(145deg,#c4d0e6,#a7b5d3);
+}
+
+/* ===== Card Body ===== */
+.bbody{flex:1;display:flex;flex-direction:column;padding:18px 20px 16px}
+
+.btitle{font-size:17px;font-weight:700;color:#1a1a1a;margin-bottom:6px}
+.bauthor{font-size:13px;color:#999;margin-bottom:10px}
+.bdesc{
+  font-size:14px;
+  color:#666;
+  line-height:1.45;
+  flex:1;
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  margin-bottom:12px;
+}
+
+/* ===== Footer ===== */
+.bfoot{display:flex;align-items:center;justify-content:space-between}
+
+.bvotes{font-size:13px;color:#aaa;display:flex;align-items:baseline;gap:4px}
+.bvotes b{font-size:24px;font-weight:800;color:#4a90d9;line-height:1}
+
+.vbtn{
+  padding:9px 28px;
+  border:none;
+  border-radius:22px;
+  background:#4a90d9;
+  color:#fff;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:background .2s,transform .1s;
+  flex-shrink:0;
+  letter-spacing:.5px;
+}
+.vbtn:hover{background:#357abd}
+.vbtn:active{transform:scale(.95)}
+.vbtn:disabled{background:#d4d8dd;color:#aaa;cursor:not-allowed;transform:none}
+
+/* Status */
+.status-text{text-align:center;padding:60px 0;font-size:14px;color:#aaa}
+
+/* ===== Add Book ===== */
+.add-book-section{margin-top:36px;padding:20px 24px;background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.add-title{font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:12px}
+.add-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.add-input{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;flex:1;min-width:120px}
+.add-input:focus{border-color:#4a90d9}
+.add-btn{padding:8px 20px;border:none;border-radius:8px;background:#4a90d9;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap}
+.add-btn:hover{background:#357abd}
+.add-btn:disabled{background:#d4d8dd;color:#aaa;cursor:not-allowed}
+
+/* ===== Admin Panel ===== */
+.admin-panel{margin-top:36px;padding:16px 24px;background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.danger-btn{padding:8px 20px;border:none;border-radius:8px;background:#d14a30;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap}
+.danger-btn:hover{background:#b03a28}
+
+/* ===== Card Admin Actions ===== */
+.bcard-actions{display:flex;gap:6px;padding:0 20px 14px}
+.act-edit,.act-del{padding:4px 12px;border:1px solid #e0e0e0;border-radius:4px;background:#fff;font-size:12px;color:#888;cursor:pointer;transition:all .15s}
+.act-edit:hover{border-color:#4a90d9;color:#4a90d9}
+.act-del:hover{border-color:#d14a30;color:#d14a30}
+
+/* ===== Edit Modal ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal-overlay[hidden]{display:none}
+.modal-content{background:#fff;border-radius:14px;padding:24px 28px;width:90%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.modal-title{font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:16px}
+.modal-label{display:block;font-size:13px;color:#888;margin-bottom:4px;margin-top:10px}
+.modal-label:first-of-type{margin-top:0}
+.modal-content .add-input{width:100%;margin-bottom:4px}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+
+/* ===== Mobile: horizontal card ===== */
+@media(max-width:560px){
+  .content{padding:16px 12px 32px}
+
+  .bcard{flex-direction:row}
+
+  .bcover-wrap{
+    width:120px;
+    height:180px;
+    flex-shrink:0;
+  }
+  .bcover-ph{font-size:32px}
+
+  .bbody{padding:12px 14px 10px}
+  .btitle{font-size:15px;margin-bottom:4px}
+  .bauthor{margin-bottom:6px}
+  .bdesc{font-size:13px;-webkit-line-clamp:2;margin-bottom:8px}
+  .bvotes b{font-size:20px}
+  .vbtn{padding:7px 18px;font-size:13px}
+
+  .top-bar{flex-direction:column;align-items:flex-start}
+  #header-right{width:100%}
+  #h-username,#h-password{flex:1;min-width:70px}
+
+  .bcard-actions{padding:0 14px 10px}
+  .modal-content{padding:18px 16px;width:94%}
+  .admin-panel{flex-direction:column;align-items:flex-start}
+}
