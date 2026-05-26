@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>图书投票</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Book Vote</p>
+          <h1 id="page-title">选择下一本共读书</h1>
+          <p class="hero-text">为你最想读的图书投一票，结果会实时保存。</p>
+        </div>
+        <div class="hero-metric" aria-live="polite">
+          <span class="metric-value" id="totalVotes">0</span>
+          <span class="metric-label">总票数</span>
+        </div>
+      </section>
+
+      <section class="auth-panel" aria-label="用户账号">
+        <div class="auth-state">
+          <div>
+            <p class="eyebrow auth-eyebrow">Account</p>
+            <h2>账号</h2>
+          </div>
+          <div class="signed-in" id="signedInView" hidden>
+            <span class="user-badge" id="currentUser"></span>
+            <button class="secondary-button" type="button" id="logoutButton">退出登录</button>
+          </div>
+        </div>
+
+        <div class="auth-forms" id="authForms">
+          <form class="auth-form" id="loginForm">
+            <h3>登录</h3>
+            <label>
+              <span>用户名</span>
+              <input autocomplete="username" name="username" required />
+            </label>
+            <label>
+              <span>密码</span>
+              <input autocomplete="current-password" name="password" required type="password" />
+            </label>
+            <button class="primary-button" type="submit">登录</button>
+          </form>
+
+          <form class="auth-form" id="registerForm">
+            <h3>注册</h3>
+            <label>
+              <span>用户名</span>
+              <input autocomplete="username" name="username" required />
+            </label>
+            <label>
+              <span>密码</span>
+              <input autocomplete="new-password" minlength="6" name="password" required type="password" />
+            </label>
+            <button class="secondary-button" type="submit">注册</button>
+          </form>
+        </div>
+      </section>
+
+      <div class="status-message" id="statusMessage" role="status" aria-live="polite"></div>
+
+      <section class="book-section" aria-label="候选图书">
+        <div class="section-header">
+          <h2>候选图书</h2>
+          <span id="bookCount">加载中</span>
+        </div>
+        <div class="book-grid" id="bookList"></div>
+      </section>
+    </main>
+
+    <template id="bookCardTemplate">
+      <article class="book-card">
+        <div class="book-cover" aria-hidden="true">
+          <span class="book-cover-mark"></span>
+          <span class="book-cover-title"></span>
+          <span class="book-cover-author"></span>
+          <span class="book-index"></span>
+        </div>
+        <div class="book-content">
+          <div class="book-heading">
+            <div>
+              <h3 class="book-title"></h3>
+              <p class="book-author"></p>
+            </div>
+            <div class="vote-pill">
+              <strong class="book-votes"></strong>
+              <span>票</span>
+            </div>
+          </div>
+          <p class="book-description"></p>
+          <button class="vote-button" type="button">投票</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

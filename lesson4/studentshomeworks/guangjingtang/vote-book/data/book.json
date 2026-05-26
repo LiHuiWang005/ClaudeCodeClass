@@ -1,0 +1,42 @@
+[
+  {
+    "id": "book-1",
+    "title": "原则",
+    "author": "Ray Dalio",
+    "description": "关于决策、组织管理和个人成长的系统化方法。",
+    "votes": 0,
+    "coverColor": "#1f5f8b"
+  },
+  {
+    "id": "book-2",
+    "title": "被讨厌的勇气",
+    "author": "岸见一郎、古贺史健",
+    "description": "用对话体呈现阿德勒心理学，讨论自由、关系和自我接纳。",
+    "votes": 0,
+    "coverColor": "#d4513f"
+  },
+  {
+    "id": "book-3",
+    "title": "纳瓦尔宝典",
+    "author": "Eric Jorgenson",
+    "description": "整理纳瓦尔关于财富、判断力、幸福和长期主义的观点。",
+    "votes": 0,
+    "coverColor": "#28344f"
+  },
+  {
+    "id": "book-4",
+    "title": "刻意练习",
+    "author": "Anders Ericsson、Robert Pool",
+    "description": "解释高水平技能形成的训练方式和反馈机制。",
+    "votes": 0,
+    "coverColor": "#2f7d62"
+  },
+  {
+    "id": "book-5",
+    "title": "人类简史",
+    "author": "Yuval Noah Harari",
+    "description": "从宏观历史视角讲述人类社会、认知和文明的发展。",
+    "votes": 0,
+    "coverColor": "#8b5a2b"
+  }
+]
