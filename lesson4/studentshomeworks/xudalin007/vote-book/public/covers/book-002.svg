@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="520" viewBox="0 0 360 520" role="img" aria-labelledby="title desc">
+  <title id="title">JavaScript 高级程序设计</title>
+  <desc id="desc">JavaScript 高级程序设计图书封面</desc>
+  <rect width="360" height="520" rx="24" fill="#1f2937"/>
+  <rect x="30" y="34" width="300" height="452" rx="18" fill="#f7df1e"/>
+  <rect x="54" y="58" width="252" height="404" rx="12" fill="#111827" opacity="0.92"/>
+  <text x="180" y="176" text-anchor="middle" font-family="Arial, sans-serif" font-size="76" font-weight="900" fill="#f7df1e">JS</text>
+  <text x="180" y="246" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, Arial, sans-serif" font-size="30" font-weight="800" fill="#ffffff">高级程序设计</text>
+  <text x="180" y="304" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, Arial, sans-serif" font-size="17" fill="#f9f4a6">浏览器端开发 · 语言特性</text>
+  <text x="180" y="408" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#f7df1e">Nicholas C. Zakas</text>
+</svg>

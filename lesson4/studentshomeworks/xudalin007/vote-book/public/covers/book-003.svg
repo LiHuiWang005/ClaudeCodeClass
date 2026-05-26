@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="520" viewBox="0 0 360 520" role="img" aria-labelledby="title desc">
+  <title id="title">代码整洁之道</title>
+  <desc id="desc">代码整洁之道图书封面</desc>
+  <rect width="360" height="520" rx="24" fill="#f5f7fb"/>
+  <rect x="34" y="38" width="292" height="444" rx="18" fill="#ffffff" stroke="#d8dee9" stroke-width="4"/>
+  <circle cx="180" cy="150" r="76" fill="#1f77b4" opacity="0.12"/>
+  <path d="M125 151l34 34 78-86" fill="none" stroke="#1f77b4" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="180" y="270" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, Arial, sans-serif" font-size="42" font-weight="900" fill="#1f2937">代码整洁</text>
+  <text x="180" y="324" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, Arial, sans-serif" font-size="42" font-weight="900" fill="#1f77b4">之道</text>
+  <text x="180" y="378" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, Arial, sans-serif" font-size="17" fill="#667085">命名 · 函数 · 测试 · 重构</text>
+  <text x="180" y="438" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#1f2937">Robert C. Martin</text>
+</svg>

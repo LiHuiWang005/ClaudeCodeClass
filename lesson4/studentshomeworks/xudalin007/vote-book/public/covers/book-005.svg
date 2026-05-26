@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="520" viewBox="0 0 360 520" role="img" aria-labelledby="title desc">
+  <title id="title">设计模式</title>
+  <desc id="desc">设计模式图书封面</desc>
+  <rect width="360" height="520" rx="24" fill="#3d405b"/>
+  <rect x="32" y="36" width="296" height="448" rx="18" fill="#f4f1de"/>
+  <g fill="#e07a5f">
+    <rect x="78" y="96" width="62" height="62" rx="14"/>
+    <rect x="149" y="96" width="62" height="62" rx="14" opacity="0.82"/>
+    <rect x="220" y="96" width="62" height="62" rx="14" opacity="0.64"/>
+    <rect x="78" y="168" width="62" height="62" rx="14" opacity="0.64"/>
+    <rect x="149" y="168" width="62" height="62" rx="14"/>
+    <rect x="220" y="168" width="62" height="62" rx="14" opacity="0.82"/>
+  </g>
+  <text x="180" y="318" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, Arial, sans-serif" font-size="58" font-weight="900" fill="#3d405b">设计模式</text>
+  <text x="180" y="370" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, Arial, sans-serif" font-size="17" fill="#555b6e">可复用面向对象软件基础</text>
+  <text x="180" y="432" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, Arial, sans-serif" font-size="20" font-weight="700" fill="#3d405b">Erich Gamma 等</text>
+</svg>
