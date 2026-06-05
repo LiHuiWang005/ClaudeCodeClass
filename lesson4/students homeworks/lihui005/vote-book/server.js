@@ -254,10 +254,43 @@ function isAdmin(req) {
   return getCurrentUser(req)?.role === "admin";
 }
 
+function requireAdmin(req, res) {
+  const currentUser = getCurrentUser(req);
+
+  if (!currentUser) {
+    sendError(res, 401, "请先登录");
+    return null;
+  }
+
+  if (currentUser.role !== "admin") {
+    sendError(res, 403, "无管理员权限");
+    return null;
+  }
+
+  return currentUser;
+}
+
 function clearSession(req) {
   const sessionId = getCookie(req, SESSION_COOKIE_NAME);
   if (sessionId) {
     sessions.delete(sessionId);
+  }
+}
+
+function updateSessionsForUser(user) {
+  for (const session of sessions.values()) {
+    if (session.userId === user.id) {
+      session.username = user.username;
+      session.role = normalizeRole(user.role);
+    }
+  }
+}
+
+function deleteSessionsForUser(userId, keepSessionId = "") {
+  for (const [sessionId, session] of sessions.entries()) {
+    if (session.userId === userId && sessionId !== keepSessionId) {
+      sessions.delete(sessionId);
+    }
   }
 }
 
@@ -316,6 +349,57 @@ function findUserByEmail(users, email) {
   }
 
   return users.find((user) => normalizeEmail(user.email) === normalized) || null;
+}
+
+function validateOptionalEmail(value) {
+  const email = normalizeEmail(value);
+  if (!email) {
+    return { email: "" };
+  }
+
+  if (email.length > 254 || !EMAIL_REGEX.test(email)) {
+    return { error: "邮箱格式不正确" };
+  }
+
+  return { email };
+}
+
+function normalizeRole(value) {
+  return value === "admin" ? "admin" : "user";
+}
+
+function isValidRole(value) {
+  return value === "user" || value === "admin";
+}
+
+function countAdmins(users) {
+  return users.filter((user) => normalizeRole(user.role) === "admin").length;
+}
+
+function serializeManagedUser(user, userVotes = {}) {
+  const quota = getVoteQuota(userVotes, user.id);
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email || "",
+    role: normalizeRole(user.role),
+    createdAt: user.createdAt,
+    voteTotal: quota.voteTotal,
+    remainingVotes: quota.remainingVotes,
+    maxVotesPerUser: quota.maxVotesPerUser
+  };
+}
+
+async function serializeManagedUsers(users) {
+  const userVotes = await loadUserVotes();
+  return users
+    .map((user) => serializeManagedUser(user, userVotes))
+    .sort((a, b) => {
+      if (a.role !== b.role) {
+        return a.role === "admin" ? -1 : 1;
+      }
+      return a.createdAt.localeCompare(b.createdAt);
+    });
 }
 
 function hashResetToken(token) {
@@ -1425,6 +1509,229 @@ async function handleSetEmail(req, res) {
   await updateTask;
 }
 
+async function handleGetAdminUsers(req, res) {
+  const currentUser = requireAdmin(req, res);
+  if (!currentUser) {
+    return;
+  }
+
+  const users = await loadUsers();
+  sendJson(res, 200, {
+    success: true,
+    data: await serializeManagedUsers(users)
+  });
+}
+
+async function handleUpdateAdminUser(req, res, userId) {
+  const currentUser = requireAdmin(req, res);
+  if (!currentUser) {
+    return;
+  }
+
+  if (!userId) {
+    sendError(res, 400, "userId 不能为空");
+    return;
+  }
+
+  const payload = await readRequestBody(req);
+  const username = typeof payload.username === "string" ? payload.username.trim() : "";
+  const emailValidation = validateOptionalEmail(payload.email);
+  const role = typeof payload.role === "string" ? payload.role.trim() : "";
+
+  if (!username) {
+    sendError(res, 400, "用户名不能为空");
+    return;
+  }
+
+  if (emailValidation.error) {
+    sendError(res, 400, emailValidation.error);
+    return;
+  }
+
+  if (!isValidRole(role)) {
+    sendError(res, 400, "角色必须是 user 或 admin");
+    return;
+  }
+
+  const updateTask = userWriteQueue.then(async () => {
+    const users = await loadUsers();
+    const index = users.findIndex((user) => user.id === userId);
+
+    if (index === -1) {
+      sendError(res, 404, "用户不存在");
+      return;
+    }
+
+    const target = users[index];
+    const usernameExists = users.some((user) => user.id !== userId && user.username === username);
+    if (usernameExists) {
+      sendError(res, 409, "用户名已存在");
+      return;
+    }
+
+    if (emailValidation.email) {
+      const emailUser = findUserByEmail(users, emailValidation.email);
+      if (emailUser && emailUser.id !== userId) {
+        sendError(res, 409, "邮箱已被其他账号使用");
+        return;
+      }
+    }
+
+    const demotingLastAdmin = normalizeRole(target.role) === "admin" && role !== "admin" && countAdmins(users) <= 1;
+    if (demotingLastAdmin) {
+      sendError(res, 400, "至少需要保留一个管理员");
+      return;
+    }
+
+    const updated = {
+      ...target,
+      username,
+      email: emailValidation.email,
+      role
+    };
+    users[index] = updated;
+    await writeJsonFile(USER_FILE, users);
+
+    updateSessionsForUser(updated);
+    if (userId !== currentUser.id && normalizeRole(target.role) === "admin" && role !== "admin") {
+      deleteSessionsForUser(userId);
+    }
+
+    sendJson(res, 200, {
+      success: true,
+      data: await serializeManagedUsers(users),
+      message: "用户信息已更新"
+    });
+  });
+
+  userWriteQueue = updateTask.catch(() => {});
+  await updateTask;
+}
+
+async function handleSetAdminUserPassword(req, res, userId) {
+  const currentUser = requireAdmin(req, res);
+  if (!currentUser) {
+    return;
+  }
+
+  if (!userId) {
+    sendError(res, 400, "userId 不能为空");
+    return;
+  }
+
+  const payload = await readRequestBody(req);
+  const password = typeof payload.password === "string" ? payload.password : "";
+
+  if (!password) {
+    sendError(res, 400, "新密码不能为空");
+    return;
+  }
+
+  if (password.length < 6) {
+    sendError(res, 400, "新密码长度不少于 6 位");
+    return;
+  }
+
+  const currentSessionId = getCookie(req, SESSION_COOKIE_NAME);
+  const updateTask = userWriteQueue.then(async () => {
+    const users = await loadUsers();
+    const index = users.findIndex((user) => user.id === userId);
+
+    if (index === -1) {
+      sendError(res, 404, "用户不存在");
+      return;
+    }
+
+    const passwordRecord = createPasswordRecord(password);
+    users[index] = {
+      ...users[index],
+      passwordHash: passwordRecord.passwordHash,
+      salt: passwordRecord.salt
+    };
+    await writeJsonFile(USER_FILE, users);
+    deleteSessionsForUser(userId, userId === currentUser.id ? currentSessionId : "");
+
+    sendJson(res, 200, {
+      success: true,
+      data: await serializeManagedUsers(users),
+      message: "用户密码已重置"
+    });
+  });
+
+  userWriteQueue = updateTask.catch(() => {});
+  await updateTask;
+}
+
+async function handleDeleteAdminUser(req, res, userId) {
+  const currentUser = requireAdmin(req, res);
+  if (!currentUser) {
+    return;
+  }
+
+  if (!userId) {
+    sendError(res, 400, "userId 不能为空");
+    return;
+  }
+
+  if (userId === currentUser.id) {
+    sendError(res, 400, "不能删除当前登录用户");
+    return;
+  }
+
+  const deleteTask = userWriteQueue.then(async () => {
+    const users = await loadUsers();
+    const index = users.findIndex((user) => user.id === userId);
+
+    if (index === -1) {
+      sendError(res, 404, "用户不存在");
+      return;
+    }
+
+    const target = users[index];
+    if (normalizeRole(target.role) === "admin" && countAdmins(users) <= 1) {
+      sendError(res, 400, "至少需要保留一个管理员");
+      return;
+    }
+
+    users.splice(index, 1);
+    await writeJsonFile(USER_FILE, users);
+    deleteSessionsForUser(userId);
+
+    const cleanupTask = voteWriteQueue.then(async () => {
+      const books = await loadBooks();
+      const userVotes = await loadUserVotes();
+      const record = getUserVoteRecord(userVotes, userId);
+
+      if (!record.votes.length) {
+        return;
+      }
+
+      const votes = await loadVotes(books);
+      for (const item of record.votes) {
+        const vote = votes[item.bookId];
+        if (vote) {
+          vote.count = Math.max((Number(vote.count) || 0) - 1, 0);
+        }
+      }
+      delete userVotes[userId];
+      await writeJsonFile(VOTE_FILE, votes);
+      await writeJsonFile(USER_VOTE_FILE, userVotes);
+    });
+
+    voteWriteQueue = cleanupTask.catch(() => {});
+    await cleanupTask;
+
+    sendJson(res, 200, {
+      success: true,
+      data: await serializeManagedUsers(users),
+      message: `用户 ${target.username} 已删除`
+    });
+  });
+
+  userWriteQueue = deleteTask.catch(() => {});
+  await deleteTask;
+}
+
 async function handleForgotPassword(req, res) {
   const payload = await readRequestBody(req);
   const validation = validateEmail(payload.email);
@@ -1686,6 +1993,28 @@ async function handleRequest(req, res) {
 
     if (req.method === "PUT" && url.pathname === "/api/config") {
       await handleUpdateConfig(req, res);
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/admin/users") {
+      await handleGetAdminUsers(req, res);
+      return;
+    }
+
+    const adminUserMatch = url.pathname.match(/^\/api\/admin\/users\/([^/]+)$/);
+    if (req.method === "PUT" && adminUserMatch) {
+      await handleUpdateAdminUser(req, res, decodeURIComponent(adminUserMatch[1]));
+      return;
+    }
+
+    if (req.method === "DELETE" && adminUserMatch) {
+      await handleDeleteAdminUser(req, res, decodeURIComponent(adminUserMatch[1]));
+      return;
+    }
+
+    const adminUserPasswordMatch = url.pathname.match(/^\/api\/admin\/users\/([^/]+)\/password$/);
+    if (req.method === "POST" && adminUserPasswordMatch) {
+      await handleSetAdminUserPassword(req, res, decodeURIComponent(adminUserPasswordMatch[1]));
       return;
     }
 

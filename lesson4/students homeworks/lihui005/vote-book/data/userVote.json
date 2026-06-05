@@ -1,18 +1,18 @@
 {
-  "user-9c00b2bf-db9f-408f-9f7d-f253b02736a9": {
-    "userId": "user-9c00b2bf-db9f-408f-9f7d-f253b02736a9",
+  "user-7dec92ff-cad0-42bd-8230-ea5f1e58cf8d": {
+    "userId": "user-7dec92ff-cad0-42bd-8230-ea5f1e58cf8d",
     "votes": [
       {
-        "bookId": "book-004",
-        "createdAt": "2026-05-24T07:52:59.974Z"
+        "bookId": "book-005",
+        "createdAt": "2026-05-27T05:51:03.928Z"
       },
       {
-        "bookId": "book-001",
-        "createdAt": "2026-05-24T07:53:02.772Z"
+        "bookId": "book-005",
+        "createdAt": "2026-05-27T05:51:05.242Z"
       },
       {
-        "bookId": "book-001",
-        "createdAt": "2026-05-24T07:53:03.773Z"
+        "bookId": "book-005",
+        "createdAt": "2026-05-27T05:51:05.793Z"
       }
     ],
     "total": 3

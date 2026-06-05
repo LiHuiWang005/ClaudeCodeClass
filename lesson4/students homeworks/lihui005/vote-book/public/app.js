@@ -15,6 +15,7 @@ const currentEmail = document.querySelector("#currentEmail");
 const voteQuota = document.querySelector("#voteQuota");
 const adminPanel = document.querySelector("#adminPanel");
 const adminBookList = document.querySelector("#adminBookList");
+const adminUserList = document.querySelector("#adminUserList");
 const resetVotesButton = document.querySelector("#resetVotesButton");
 const leaderboard = document.querySelector("#leaderboard");
 const emailPromptPanel = document.querySelector("#emailPromptPanel");
@@ -47,6 +48,7 @@ const configTitleInput = document.querySelector("#configTitleInput");
 
 const state = {
   books: [],
+  users: [],
   currentUser: null,
   config: { title: "图书投票活动" },
   suggestionTimers: new Map(),
@@ -219,6 +221,28 @@ function getVoteQuotaLabel() {
   return `剩余 ${remainingVotes} 票 / 共 ${maxVotes} 票，已投 ${usedVotes} 票`;
 }
 
+function getUserVoteQuotaLabel(user) {
+  const remainingVotes = Math.max(Number(user.remainingVotes) || 0, 0);
+  const maxVotes = Number(user.maxVotesPerUser) || 3;
+  const usedVotes = Math.max(Number(user.voteTotal) || 0, 0);
+  return `剩余 ${remainingVotes} / 共 ${maxVotes}，已投 ${usedVotes}`;
+}
+
+function formatDateTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "未知时间";
+  }
+
+  return date.toLocaleString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
 function renderAuth() {
   const isLoggedIn = Boolean(state.currentUser);
   authForm.hidden = isLoggedIn;
@@ -274,12 +298,106 @@ async function updateConfig(title) {
   setStatus(payload.message || "活动标题已更新。", "success");
 }
 
+async function fetchAdminUsers() {
+  const response = await fetch("/api/admin/users");
+  const payload = await parseApiResponse(response);
+  return Array.isArray(payload.data) ? payload.data : [];
+}
+
+function renderAdminUsers() {
+  if (!adminUserList) {
+    return;
+  }
+
+  if (state.currentUser?.role !== "admin") {
+    adminUserList.innerHTML = "";
+    return;
+  }
+
+  if (!state.users.length) {
+    adminUserList.innerHTML = '<p class="empty-state">暂无用户。</p>';
+    return;
+  }
+
+  adminUserList.innerHTML = state.users.map((user) => {
+    const roleLabel = user.role === "admin" ? "管理员" : "普通用户";
+    const isCurrentUser = state.currentUser?.id === user.id;
+
+    return `
+      <form class="admin-user-form" data-admin-user="${escapeHtml(user.id)}">
+        <div class="admin-user-summary">
+          <div class="admin-user-identity">
+            <strong>${escapeHtml(user.username)}</strong>
+            <span>${escapeHtml(user.id)}</span>
+          </div>
+          <div class="admin-user-meta">
+            <span class="role-badge">${roleLabel}</span>
+            ${isCurrentUser ? '<span class="book-meta-pill">当前账号</span>' : ""}
+            <span class="book-meta-pill">${escapeHtml(getUserVoteQuotaLabel(user))}</span>
+          </div>
+        </div>
+        <label class="field">
+          <span>用户名</span>
+          <input name="username" type="text" value="${escapeHtml(user.username)}" autocomplete="off">
+        </label>
+        <label class="field">
+          <span>邮箱</span>
+          <input name="email" type="email" value="${escapeHtml(user.email || "")}" placeholder="可留空" autocomplete="off">
+        </label>
+        <label class="field">
+          <span>角色</span>
+          <select name="role">
+            <option value="user"${user.role === "user" ? " selected" : ""}>普通用户</option>
+            <option value="admin"${user.role === "admin" ? " selected" : ""}>管理员</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>新密码</span>
+          <input name="password" type="password" minlength="6" placeholder="输入后点重置密码" autocomplete="new-password">
+        </label>
+        <div class="admin-user-stats">
+          <span>注册时间：${escapeHtml(formatDateTime(user.createdAt))}</span>
+          <span>${escapeHtml(user.email || "未绑定邮箱")}</span>
+        </div>
+        <div class="admin-user-actions">
+          <button class="secondary-button" type="submit">保存资料</button>
+          <button class="secondary-button admin-password-button" type="button" data-reset-user-password="${escapeHtml(user.id)}">重置密码</button>
+          <button class="danger-button" type="button" data-delete-user="${escapeHtml(user.id)}"${isCurrentUser ? " disabled" : ""}>删除用户</button>
+        </div>
+      </form>
+    `;
+  }).join("");
+}
+
+async function loadAdminUsers() {
+  if (state.currentUser?.role !== "admin") {
+    state.users = [];
+    renderAdminUsers();
+    return;
+  }
+
+  if (adminUserList) {
+    adminUserList.innerHTML = '<p class="empty-state">正在加载用户...</p>';
+  }
+
+  try {
+    state.users = await fetchAdminUsers();
+    renderAdminUsers();
+  } catch (error) {
+    state.users = [];
+    if (adminUserList) {
+      adminUserList.innerHTML = `<p class="empty-state">${escapeHtml(error.message || "用户加载失败。")}</p>`;
+    }
+  }
+}
+
 function renderAdminPanel() {
   const canManageBooks = state.currentUser?.role === "admin";
   adminPanel.hidden = !canManageBooks;
   if (adminConfigForm) {
     adminConfigForm.hidden = !canManageBooks;
   }
+  renderAdminUsers();
   state.suggestionTimers.forEach((timer) => clearTimeout(timer));
   state.suggestionTimers.clear();
 
@@ -487,6 +605,7 @@ async function submitAuth(endpoint, successPrefix) {
       emailInput.value = "";
       renderAuth();
       renderBooks();
+      loadAdminUsers();
     } else if (endpoint === "/api/register") {
       passwordInput.value = "";
     }
@@ -626,6 +745,7 @@ async function logout() {
     });
     const payload = await parseApiResponse(response);
     state.currentUser = null;
+    state.users = [];
     renderAuth();
     renderBooks();
     setStatus(payload.message || "退出登录成功。", "success");
@@ -696,6 +816,112 @@ async function deleteBook(bookId, button) {
     setStatus(error.message || "删除失败。", "error");
     button.disabled = false;
     button.textContent = "删除";
+  }
+}
+
+async function updateAdminUser(userId, form) {
+  const formData = new FormData(form);
+  const payload = {
+    username: String(formData.get("username") || ""),
+    email: String(formData.get("email") || ""),
+    role: String(formData.get("role") || "")
+  };
+  const submitButton = form.querySelector("button[type='submit']");
+
+  submitButton.disabled = true;
+  setStatus("正在保存用户信息...");
+
+  try {
+    const response = await fetch(`/api/admin/users/${encodeURIComponent(userId)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const result = await parseApiResponse(response);
+    state.users = result.data || await fetchAdminUsers();
+    await refreshCurrentUser();
+    renderAdminUsers();
+    setStatus(result.message || "用户信息已更新。", "success");
+  } catch (error) {
+    setStatus(error.message || "用户信息保存失败。", "error");
+  } finally {
+    submitButton.disabled = false;
+  }
+}
+
+async function resetAdminUserPassword(userId, button) {
+  const form = button.closest("[data-admin-user]");
+  const passwordInput = form?.elements.password;
+  const password = passwordInput ? passwordInput.value : "";
+  const user = state.users.find((item) => item.id === userId);
+
+  if (!user) {
+    setStatus("用户不存在。", "error");
+    return;
+  }
+
+  if (!password || password.length < 6) {
+    setStatus("新密码至少 6 位。", "error");
+    passwordInput?.focus();
+    return;
+  }
+
+  if (!window.confirm(`确认将用户 ${user.username} 的密码重置为当前输入的新密码吗？`)) {
+    return;
+  }
+
+  button.disabled = true;
+  setStatus("正在重置用户密码...");
+
+  try {
+    const response = await fetch(`/api/admin/users/${encodeURIComponent(userId)}/password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password })
+    });
+    const result = await parseApiResponse(response);
+    state.users = result.data || await fetchAdminUsers();
+    if (passwordInput) {
+      passwordInput.value = "";
+    }
+    renderAdminUsers();
+    setStatus(result.message || "用户密码已重置。", "success");
+  } catch (error) {
+    setStatus(error.message || "用户密码重置失败。", "error");
+  } finally {
+    button.disabled = false;
+  }
+}
+
+async function deleteAdminUser(userId, button) {
+  const user = state.users.find((item) => item.id === userId);
+  if (!user) {
+    setStatus("用户不存在。", "error");
+    return;
+  }
+
+  if (!window.confirm(`确认删除用户 ${user.username} 吗？该用户的投票记录也会被清理。`)) {
+    return;
+  }
+
+  button.disabled = true;
+  setStatus(`正在删除用户 ${user.username}...`);
+
+  try {
+    const response = await fetch(`/api/admin/users/${encodeURIComponent(userId)}`, {
+      method: "DELETE"
+    });
+    const result = await parseApiResponse(response);
+    state.users = result.data || await fetchAdminUsers();
+    state.books = await fetchBooks();
+    await refreshCurrentUser();
+    renderBooks();
+    renderAdminUsers();
+    setStatus(result.message || "用户已删除。", "success");
+  } catch (error) {
+    setStatus(error.message || "删除用户失败。", "error");
+  } finally {
+    button.disabled = false;
   }
 }
 
@@ -1016,6 +1242,7 @@ async function resetVotes() {
 
     renderAuth();
     renderBooks();
+    await loadAdminUsers();
     setStatus(payload.message || "所有票数已重置。", "success");
   } catch (error) {
     setStatus(error.message || "重置票数失败。", "error");
@@ -1065,6 +1292,31 @@ adminBookList.addEventListener("input", (event) => {
 
   scheduleBookSuggestion(form);
 });
+
+if (adminUserList) {
+  adminUserList.addEventListener("submit", (event) => {
+    const form = event.target.closest("[data-admin-user]");
+    if (!form) {
+      return;
+    }
+
+    event.preventDefault();
+    updateAdminUser(form.dataset.adminUser, form);
+  });
+
+  adminUserList.addEventListener("click", (event) => {
+    const passwordButton = event.target.closest("[data-reset-user-password]");
+    if (passwordButton) {
+      resetAdminUserPassword(passwordButton.dataset.resetUserPassword, passwordButton);
+      return;
+    }
+
+    const deleteButton = event.target.closest("[data-delete-user]");
+    if (deleteButton) {
+      deleteAdminUser(deleteButton.dataset.deleteUser, deleteButton);
+    }
+  });
+}
 
 authForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -1150,6 +1402,7 @@ function consumeResetTokenFromUrl() {
 async function init() {
   await loadConfig();
   await loadCurrentUser();
+  await loadAdminUsers();
   await loadBooks();
   consumeResetTokenFromUrl();
 }
