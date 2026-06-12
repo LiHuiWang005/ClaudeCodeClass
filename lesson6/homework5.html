@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 5 次课作业 · Claude Code 实战课程</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --text-primary: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --text-tertiary: #86868b;
+    --bg-primary: #fbfbfd;
+    --bg-section-alt: #f5f5f7;
+    --accent: #0071e3;
+    --accent-hover: #0077ed;
+    --accent-soft: #e8f1fd;
+    --accent-2: #bf5af2;
+    --accent-3: #30d158;
+    --border: #d2d2d7;
+    --card-bg: #ffffff;
+    --card-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    --card-shadow-hover: 0 12px 48px rgba(0,0,0,0.12);
+    --radius: 22px;
+    --radius-sm: 14px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+                 "Helvetica Neue", "PingFang SC", "Noto Sans SC", sans-serif;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .headline-xl {
+    font-size: clamp(44px, 7.5vw, 80px);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+  }
+  .headline-lg {
+    font-size: clamp(30px, 4.2vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.018em;
+    line-height: 1.1;
+  }
+  .headline-md {
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .eyebrow {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  .body-xl { font-size: clamp(19px, 2vw, 24px); line-height: 1.45; color: var(--text-secondary); font-weight: 400; }
+  .body-lg { font-size: 19px; line-height: 1.55; color: var(--text-secondary); }
+  .body-md { font-size: 17px; line-height: 1.65; color: var(--text-secondary); }
+  .body-sm { font-size: 14px; line-height: 1.5; color: var(--text-tertiary); }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+  .container-wide { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 110px 0; }
+  section.alt { background: var(--bg-section-alt); }
+  section.tight { padding: 80px 0; }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(251,251,253,0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .nav-inner {
+    max-width: 1120px; margin: 0 auto; padding: 0 24px;
+    height: 52px; display: flex; align-items: center; justify-content: space-between;
+  }
+  nav .nav-brand { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+  nav .nav-meta { font-size: 13px; color: var(--text-tertiary); }
+
+  .hero {
+    text-align: center;
+    padding: 120px 0 100px;
+    background: linear-gradient(180deg, #ffffff 0%, var(--bg-primary) 60%);
+  }
+  .hero .eyebrow { margin-bottom: 18px; display: inline-block; }
+  .hero h1 { margin-bottom: 22px; }
+  .hero h1 .grad {
+    background: linear-gradient(135deg, #0071e3 0%, #bf5af2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero .lede { max-width: 760px; margin: 0 auto; }
+  .hero .meta-pills {
+    display: flex; gap: 10px; justify-content: center;
+    margin-top: 40px; flex-wrap: wrap;
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 980px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    font-size: 13px; color: var(--text-secondary);
+  }
+  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .pill.green .dot { background: var(--accent-3); }
+  .pill.purple .dot { background: var(--accent-2); }
+
+  .section-head { text-align: center; margin-bottom: 72px; }
+  .section-head .eyebrow { margin-bottom: 14px; display: inline-block; }
+  .section-head h2 { margin-bottom: 18px; }
+  .section-head p { max-width: 680px; margin: 0 auto; }
+
+  .hw-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+  @media (max-width: 860px) {
+    .hw-grid { grid-template-columns: 1fr; }
+  }
+  .hw-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 48px 44px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(0,0,0,0.04);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .hw-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-hover);
+  }
+  .hw-card .num {
+    font-size: 13px; font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .hw-card.alt2 .num { color: var(--accent-2); }
+  .hw-card h3 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 18px;
+    line-height: 1.25;
+  }
+  .hw-card p { font-size: 16px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 16px; }
+  .hw-card .accent-bar {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), #5ac8fa);
+  }
+  .hw-card.alt2 .accent-bar {
+    background: linear-gradient(90deg, var(--accent-2), #ff375f);
+  }
+
+  .feature-list {
+    list-style: none;
+    margin: 18px 0 22px;
+  }
+  .feature-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-primary);
+    border-bottom: 1px solid #f0f0f2;
+  }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-list li .ico {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    border-radius: 7px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+    margin-top: 1px;
+  }
+  .hw-card.alt2 .feature-list li .ico {
+    background: #faf0ff;
+    color: var(--accent-2);
+  }
+  .feature-list li strong {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .feature-list li span.desc {
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+  .feature-list li code {
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 13px;
+    background: rgba(0,0,0,0.05);
+    padding: 1px 6px;
+    border-radius: 5px;
+    color: var(--text-primary);
+  }
+
+  .scenarios {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin: 18px 0 22px;
+  }
+  .scn {
+    text-align: center;
+    padding: 14px 10px;
+    background: #faf6ff;
+    border: 1px solid #ecdcff;
+    border-radius: 14px;
+    font-size: 14px;
+    color: #5d3a87;
+    font-weight: 500;
+  }
+
+  .stack-note {
+    margin-top: 6px;
+    padding: 16px 18px;
+    background: #fff8ed;
+    border: 1px solid #ffe4b8;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #6b4a13;
+    line-height: 1.6;
+  }
+  .stack-note code {
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 13px;
+    background: rgba(0,0,0,0.05);
+    padding: 1px 6px;
+    border-radius: 5px;
+    color: #1d1d1f;
+  }
+
+  .deliverables {
+    margin-top: 24px;
+    padding: 22px;
+    background: var(--bg-section-alt);
+    border-radius: var(--radius-sm);
+  }
+  .deliverables .label {
+    font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+  }
+  .deliverables ul { list-style: none; }
+  .deliverables li {
+    display: flex; align-items: center;
+    padding: 8px 0;
+    font-size: 15px;
+    color: var(--text-primary);
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  }
+  .deliverables li::before {
+    content: "";
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+  .hw-card.alt2 .deliverables li::before { background: var(--accent-2); }
+
+  .workflow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    align-items: stretch;
+    position: relative;
+  }
+  @media (max-width: 860px) {
+    .workflow { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 520px) {
+    .workflow { grid-template-columns: 1fr; }
+  }
+  .step {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 32px 22px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(0,0,0,0.04);
+    position: relative;
+    transition: transform 0.3s ease;
+  }
+  .step:hover { transform: translateY(-3px); }
+  .step .step-num {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 600;
+    margin: 0 auto 18px;
+  }
+  .step h4 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+  }
+  .step p { font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
+  .step code {
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 12px;
+    background: rgba(0,0,0,0.05);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--text-primary);
+  }
+
+  .tips {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 8px;
+  }
+  @media (max-width: 720px) {
+    .tips { grid-template-columns: 1fr; }
+  }
+  .tip {
+    background: var(--card-bg);
+    border-radius: var(--radius-sm);
+    padding: 22px 24px;
+    border: 1px solid var(--border);
+  }
+  .tip h5 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tip h5 .emoji { font-size: 18px; }
+  .tip p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .tip code {
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 13px;
+    background: rgba(0,0,0,0.05);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--text-primary);
+  }
+
+  .why-card {
+    background: linear-gradient(135deg, #f5f5f7 0%, #fafafa 100%);
+    border-radius: var(--radius);
+    padding: 56px 48px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .why-card .eyebrow { margin-bottom: 14px; display: inline-block; }
+  .why-card h3 { margin-bottom: 16px; font-size: 28px; font-weight: 600; letter-spacing: -0.01em; }
+  .why-card p { font-size: 17px; color: var(--text-secondary); max-width: 720px; margin: 0 auto; line-height: 1.7; }
+  .why-card .tags {
+    display: flex; gap: 10px; justify-content: center;
+    margin-top: 28px; flex-wrap: wrap;
+  }
+  .tag {
+    padding: 8px 18px;
+    border-radius: 980px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    font-size: 14px; font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .resource-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    margin-top: 4px;
+  }
+  .hw-card.alt2 .resource-link {
+    background: #faf0ff;
+    color: var(--accent-2);
+  }
+
+  footer {
+    padding: 56px 0;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    background: var(--card-bg);
+  }
+  footer p { font-size: 13px; color: var(--text-tertiary); margin-bottom: 6px; }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">Claude Code 实战课程</span>
+    <span class="nav-meta">第 5 次课 · 课后作业</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <span class="eyebrow">Homework · Lesson 5</span>
+    <h1 class="headline-xl">用 Skills 编排<br><span class="grad">真实工作流</span></h1>
+    <p class="body-xl lede" style="margin-top: 24px;">
+      第一项作业：把 Anthropic 的金融行业 Skills 装进 Claude Code，组合多个 Skill 跑通一次真实研究任务。<br>
+      第二项作业：确定你课程作品的主题与 spec，开启你自己的产品旅程。
+    </p>
+    <div class="meta-pills">
+      <span class="pill"><span class="dot"></span>共 2 项作业</span>
+      <span class="pill green"><span class="dot"></span>Anthropic Financial Skills</span>
+      <span class="pill purple"><span class="dot"></span>gstack · spec.md</span>
+    </div>
+  </div>
+</header>
+
+<section class="alt">
+  <div class="container-wide">
+    <div class="section-head reveal">
+      <span class="eyebrow">Assignments</span>
+      <h2 class="headline-lg">两项作业，两种能力</h2>
+      <p class="body-lg">第一项练「用别人的 Skills 解决问题」，第二项练「为自己的产品定方向」。</p>
+    </div>
+
+    <div class="hw-grid">
+
+      <div class="hw-card reveal">
+        <div class="accent-bar"></div>
+        <div class="num">作业 1 · 实战 Skills</div>
+        <h3>用金融行业 Skills 完成一次真实调研</h3>
+        <p>
+          安装并使用 Anthropic 提供的
+          <strong style="color: var(--text-primary);">financial-services</strong> 这套 Skills，
+          先让 AI 帮你把仓库里所有 Skill 介绍汇总一遍，再挑一个真实任务，
+          <strong style="color: var(--text-primary);">组合多个 Skill</strong> 跑出一份完整产物。
+        </p>
+
+        <ul class="feature-list">
+          <li>
+            <span class="ico">1</span>
+            <div>
+              <strong>安装 Skills</strong><br>
+              <span class="desc">克隆 / 安装 <code>anthropics/financial-services</code> 仓库下的 Skills 到 Claude Code。</span>
+            </div>
+          </li>
+          <li>
+            <span class="ico">2</span>
+            <div>
+              <strong>汇总介绍</strong><br>
+              <span class="desc">让 AI 通读所有 Skill，整理成一份可读的索引（每个 Skill 是什么、能做什么、何时用）。</span>
+            </div>
+          </li>
+          <li>
+            <span class="ico">3</span>
+            <div>
+              <strong>选定任务</strong><br>
+              <span class="desc">调研一家公司 / 调研一个行业 / 做一次财务分析 —— 任选其一。</span>
+            </div>
+          </li>
+          <li>
+            <span class="ico">4</span>
+            <div>
+              <strong>编排工作流</strong><br>
+              <span class="desc">至少串联 2–3 个 Skill，按顺序跑完，产出一份完整调研报告。</span>
+            </div>
+          </li>
+          <li>
+            <span class="ico">5</span>
+            <div>
+              <strong>提交到 GitHub</strong><br>
+              <span class="desc">把过程、产物、思考一起提交，方便复盘和复用。</span>
+            </div>
+          </li>
+        </ul>
+
+        <div class="stack-note">
+          <strong>参考样例：</strong>
+          <code>crusoe_questions_summary.md</code> 展示了一条「认识工具 → 选用 → 执行 → 升级形态 → 沉淀方法」的完整链路 —— 你的作业不必照搬，但可以照着结构走。
+          <br>
+          <strong>仓库地址：</strong>
+          <a href="https://github.com/anthropics/financial-services" target="_blank">github.com/anthropics/financial-services</a>
+        </div>
+
+        <div class="deliverables">
+          <div class="label">提交内容</div>
+          <ul>
+            <li>skills_overview.md（Skill 介绍汇总）</li>
+            <li>research_report.md / .html（调研产物）</li>
+            <li>questions_summary.md（过程 / 提示词清单）</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="hw-card alt2 reveal">
+        <div class="accent-bar"></div>
+        <div class="num">作业 2 · 定主题</div>
+        <h3>确定你AI课程作品/产品的主题和 Spec</h3>
+        <p>
+          想清楚整门课你想做的那个
+          <strong style="color: var(--text-primary);">完整作品 / 产品</strong>
+          —— 主题是什么、解决什么问题、大致有哪些功能。
+          用 gstack 里的 skill 帮你想，
+          <strong style="color: var(--text-primary);">5 月内完成初版 spec.md</strong>。
+        </p>
+
+        <div class="scenarios">
+          <div class="scn">/office-hours</div>
+          <div class="scn">/plan-ceo-review</div>
+          <div class="scn">/plan-eng-review</div>
+          <div class="scn">/design-consultation</div>
+        </div>
+
+        <ul class="feature-list">
+          <li>
+            <span class="ico">1</span>
+            <div>
+              <strong>定主题</strong><br>
+              <span class="desc">想做的产品是什么、给谁用、解决什么真实痛点。</span>
+            </div>
+          </li>
+          <li>
+            <span class="ico">2</span>
+            <div>
+              <strong>用 skill 讨论</strong><br>
+              <span class="desc">用 <code>/office-hours</code> 想清楚要不要做，再用 <code>/plan-ceo-review</code> 拔高视角、检查方向。</span>
+            </div>
+          </li>
+          <li>
+            <span class="ico">3</span>
+            <div>
+              <strong>写初版 spec.md</strong><br>
+              <span class="desc">用户、核心功能、关键流程、技术栈，能让别人 5 分钟读懂。</span>
+            </div>
+          </li>
+          <li>
+            <span class="ico">4</span>
+            <div>
+              <strong>互相讨论</strong><br>
+              <span class="desc">把主题抛到群里互相 review —— 旁观者最容易发现盲点。</span>
+            </div>
+          </li>
+        </ul>
+
+        <div class="stack-note">
+          <strong>gstack 仓库：</strong>
+          <a href="https://github.com/garrytan/gstack" target="_blank">github.com/garrytan/gstack</a>
+          <br>
+          <strong>时间节点：</strong>尽量在 <strong>5 月份</strong>完成初版 spec.md，后续课程会在这个 spec 基础上一步步推进。
+        </div>
+
+        <div class="deliverables">
+          <div class="label">提交内容</div>
+          <ul>
+            <li>spec.md（初版即可，可迭代）</li>
+            <li>讨论记录 / 想法演变（可选）</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Workflow · 作业 1 推荐流程</span>
+      <h2 class="headline-lg">从认识 Skill 到产出报告</h2>
+      <p class="body-lg">不要一上来就让 AI「调研一家公司」。先摸清工具，再编排流程，再执行。</p>
+    </div>
+
+    <div class="workflow">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <h4>装 + 看</h4>
+        <p>安装 financial-services 下的 Skills，让 AI 读完仓库，输出一份 Skill 索引。</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">2</div>
+        <h4>选任务</h4>
+        <p>挑一个具体目标：例如调研 <code>crusoe.ai</code>、分析某个赛道、做财报快读。</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">3</div>
+        <h4>编排顺序</h4>
+        <p>让 AI 推荐用哪几个 Skill、按什么顺序，确认后按步骤跑。</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">4</div>
+        <h4>沉淀</h4>
+        <p>报告 + 提示词清单 + GitHub 提交，下次直接复用这条工作流。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt tight">
+  <div class="container">
+    <div class="section-head reveal" style="margin-bottom: 48px;">
+      <span class="eyebrow">Tips</span>
+      <h2 class="headline-lg">几个小建议</h2>
+    </div>
+    <div class="tips">
+      <div class="tip reveal">
+        <h5><span class="emoji">🧭</span> 先别急着「干活」</h5>
+        <p>第一步永远是先让 AI 把工具摸清楚 —— Skill 的介绍、输入输出、适用场景。这一步省下的时间比你想的多。</p>
+      </div>
+      <div class="tip reveal">
+        <h5><span class="emoji">🔗</span> 工作流贵在「串」</h5>
+        <p>单个 Skill 是工具，多个 Skill 串起来才是工作流。试着让上一步的输出，自然成为下一步的输入。</p>
+      </div>
+      <div class="tip reveal">
+        <h5><span class="emoji">📝</span> 把提示词留下来</h5>
+        <p>每次 AI 跑完，把你「问了什么、为什么这么问」记一份 <code>questions_summary.md</code>，下次复用就是几秒钟的事。</p>
+      </div>
+      <div class="tip reveal">
+        <h5><span class="emoji">🎯</span> spec 不必完美</h5>
+        <p>作业 2 的目标是「定方向」，不是「定终稿」。先写出一个能讨论的版本，后面会随着课程一起迭代。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tight">
+  <div class="container">
+    <div class="why-card reveal">
+      <span class="eyebrow">Why it matters</span>
+      <h3>从「会用 AI」到「会编排 AI」</h3>
+      <p>
+        作业 1 让你第一次真正用<strong style="color: var(--text-primary);">别人写好的 Skills</strong> 解决一个真实任务 ——
+        这是未来你和 AI 协作的常态。
+        作业 2 把视线拉到自己身上：你想做的那个产品，到底是什么样？
+        把它写下来，<strong style="color: var(--text-primary);">课程剩下的几次课就有了主线</strong>。
+      </p>
+      <div class="tags">
+        <span class="tag">Skill 编排</span>
+        <span class="tag">工作流思维</span>
+        <span class="tag">产品方向</span>
+        <span class="tag">spec 驱动</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Claude Code 实战课程 · 第 5 次课课后作业</p>
+  <p>设计灵感:Apple Human Interface · 2026</p>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>

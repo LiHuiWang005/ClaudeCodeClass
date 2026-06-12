@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 6 次课作业 · AI 时代的阅读动作图谱 · Claude Code 实战课程</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --text-primary: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --text-tertiary: #86868b;
+    --bg-primary: #fbfbfd;
+    --bg-section-alt: #f5f5f7;
+    --accent: #0071e3;
+    --accent-hover: #0077ed;
+    --accent-soft: #e8f1fd;
+    --accent-2: #bf5af2;
+    --accent-3: #30d158;
+    --border: #d2d2d7;
+    --card-bg: #ffffff;
+    --card-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    --card-shadow-hover: 0 12px 48px rgba(0,0,0,0.12);
+    --radius: 22px;
+    --radius-sm: 14px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+                 "Helvetica Neue", "PingFang SC", "Noto Sans SC", sans-serif;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .headline-xl {
+    font-size: clamp(44px, 7.5vw, 80px);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+  }
+  .headline-lg {
+    font-size: clamp(30px, 4.2vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.018em;
+    line-height: 1.1;
+  }
+  .headline-md {
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .eyebrow {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  .body-xl { font-size: clamp(19px, 2vw, 24px); line-height: 1.45; color: var(--text-secondary); font-weight: 400; }
+  .body-lg { font-size: 19px; line-height: 1.55; color: var(--text-secondary); }
+  .body-md { font-size: 17px; line-height: 1.65; color: var(--text-secondary); }
+  .body-sm { font-size: 14px; line-height: 1.5; color: var(--text-tertiary); }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+  .container-wide { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 110px 0; }
+  section.alt { background: var(--bg-section-alt); }
+  section.tight { padding: 80px 0; }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(251,251,253,0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .nav-inner {
+    max-width: 1120px; margin: 0 auto; padding: 0 24px;
+    height: 52px; display: flex; align-items: center; justify-content: space-between;
+  }
+  nav .nav-brand { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+  nav .nav-meta { font-size: 13px; color: var(--text-tertiary); }
+
+  .hero {
+    text-align: center;
+    padding: 120px 0 100px;
+    background: linear-gradient(180deg, #ffffff 0%, var(--bg-primary) 60%);
+  }
+  .hero .eyebrow { margin-bottom: 18px; display: inline-block; }
+  .hero h1 { margin-bottom: 22px; }
+  .hero h1 .grad {
+    background: linear-gradient(135deg, #0071e3 0%, #bf5af2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero .lede { max-width: 780px; margin: 0 auto; }
+  .hero .meta-pills {
+    display: flex; gap: 10px; justify-content: center;
+    margin-top: 40px; flex-wrap: wrap;
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 980px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    font-size: 13px; color: var(--text-secondary);
+  }
+  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .pill.green .dot { background: var(--accent-3); }
+  .pill.purple .dot { background: var(--accent-2); }
+
+  .section-head { text-align: center; margin-bottom: 72px; }
+  .section-head .eyebrow { margin-bottom: 14px; display: inline-block; }
+  .section-head h2 { margin-bottom: 18px; }
+  .section-head p { max-width: 700px; margin: 0 auto; }
+
+  /* 过去 vs AI 时代 对比 */
+  .shift {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 28px;
+    align-items: center;
+  }
+  @media (max-width: 760px) {
+    .shift { grid-template-columns: 1fr; }
+    .shift .arrow { transform: rotate(90deg); }
+  }
+  .shift-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 40px 36px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+  .shift-card .kicker {
+    font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+  .shift-card.past { background: #f5f5f7; }
+  .shift-card.past .kicker { color: var(--text-tertiary); }
+  .shift-card.now { border: 1px solid #e6d2f7; }
+  .shift-card.now .kicker { color: var(--accent-2); }
+  .shift-card h3 { font-size: 24px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 14px; line-height: 1.3; }
+  .shift-card p { font-size: 16px; color: var(--text-secondary); line-height: 1.7; }
+  .shift-card .verbs {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px;
+  }
+  .shift-card .verbs span {
+    padding: 6px 14px; border-radius: 980px;
+    background: #faf0ff; color: #8e3fd0;
+    font-size: 14px; font-weight: 600;
+  }
+  .shift .arrow {
+    font-size: 30px; color: var(--accent-2); font-weight: 300;
+  }
+
+  /* 6 大类 */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+  }
+  @media (max-width: 920px) { .cat-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .cat-grid { grid-template-columns: 1fr; } }
+  .cat-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(0,0,0,0.04);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .cat-card:hover { transform: translateY(-4px); box-shadow: var(--card-shadow-hover); }
+  .cat-card .bar { position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+  .cat-card .icon { font-size: 26px; margin-bottom: 12px; }
+  .cat-card h3 { font-size: 21px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
+  .cat-card .goal { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px; }
+  .cat-card .acts { display: flex; flex-wrap: wrap; gap: 7px; }
+  .cat-card .acts span {
+    font-size: 13px; padding: 5px 11px; border-radius: 8px;
+    background: var(--bg-section-alt); color: var(--text-primary); font-weight: 500;
+  }
+  .c1 .bar { background: linear-gradient(90deg, #0071e3, #5ac8fa); }
+  .c2 .bar { background: linear-gradient(90deg, #ff375f, #ff9f0a); }
+  .c3 .bar { background: linear-gradient(90deg, #bf5af2, #5e5ce6); }
+  .c4 .bar { background: linear-gradient(90deg, #30d158, #66d4cf); }
+  .c5 .bar { background: linear-gradient(90deg, #ff9f0a, #ffd60a); }
+  .c6 .bar { background: linear-gradient(90deg, #5e5ce6, #bf5af2); }
+
+  /* 图谱表格 */
+  .atlas-wrap {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(0,0,0,0.04);
+    overflow: hidden;
+  }
+  .atlas-scroll { overflow-x: auto; }
+  table.atlas {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+    font-size: 14px;
+  }
+  table.atlas thead th {
+    background: var(--bg-section-alt);
+    text-align: left;
+    padding: 16px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+  }
+  table.atlas tbody td {
+    padding: 15px 18px;
+    border-bottom: 1px solid #f0f0f2;
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  table.atlas tbody tr:last-child td { border-bottom: none; }
+  table.atlas tbody tr:hover { background: #fafafe; }
+  table.atlas .way { font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+  table.atlas .q { color: var(--text-secondary); }
+  table.atlas .prompt {
+    color: var(--text-primary);
+    font-style: italic;
+  }
+  table.atlas .tag-cat {
+    display: inline-block;
+    font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 6px;
+    margin-top: 6px;
+  }
+  .t-c1 { background: var(--accent-soft); color: var(--accent); }
+  .t-c2 { background: #ffeef0; color: #ff375f; }
+  .t-c3 { background: #faf0ff; color: var(--accent-2); }
+  .t-c4 { background: #eafaef; color: #1da94e; }
+  .t-c5 { background: #fff6e6; color: #c47f0a; }
+  .t-c6 { background: #efeefe; color: #5e5ce6; }
+
+  /* 作业卡片 */
+  .hw-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+  @media (max-width: 860px) { .hw-grid { grid-template-columns: 1fr; } }
+  .hw-single { max-width: 640px; margin: 0 auto; }
+  .hw-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 48px 44px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(0,0,0,0.04);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .hw-card:hover { transform: translateY(-4px); box-shadow: var(--card-shadow-hover); }
+  .hw-card .num {
+    font-size: 13px; font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .hw-card.alt2 .num { color: var(--accent-2); }
+  .hw-card h3 {
+    font-size: 28px; font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 18px;
+    line-height: 1.25;
+  }
+  .hw-card p { font-size: 16px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 16px; }
+  .hw-card .accent-bar {
+    position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--accent), #5ac8fa);
+  }
+  .hw-card.alt2 .accent-bar { background: linear-gradient(90deg, var(--accent-2), #ff375f); }
+
+  .feature-list { list-style: none; margin: 18px 0 22px; }
+  .feature-list li {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 0;
+    font-size: 15px; line-height: 1.55;
+    color: var(--text-primary);
+    border-bottom: 1px solid #f0f0f2;
+  }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-list li .ico {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    border-radius: 7px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+    margin-top: 1px;
+  }
+  .hw-card.alt2 .feature-list li .ico { background: #faf0ff; color: var(--accent-2); }
+  .feature-list li strong { font-weight: 600; color: var(--text-primary); }
+  .feature-list li span.desc { color: var(--text-secondary); font-size: 14px; }
+  .feature-list li code {
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 13px;
+    background: rgba(0,0,0,0.05);
+    padding: 1px 6px; border-radius: 5px;
+    color: var(--text-primary);
+  }
+
+  .stack-note {
+    margin-top: 6px;
+    padding: 16px 18px;
+    background: #fff8ed;
+    border: 1px solid #ffe4b8;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #6b4a13;
+    line-height: 1.6;
+  }
+  .stack-note code {
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 13px;
+    background: rgba(0,0,0,0.05);
+    padding: 1px 6px; border-radius: 5px;
+    color: #1d1d1f;
+  }
+
+  .deliverables {
+    margin-top: 24px;
+    padding: 22px;
+    background: var(--bg-section-alt);
+    border-radius: var(--radius-sm);
+  }
+  .deliverables .label {
+    font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+  }
+  .deliverables ul { list-style: none; }
+  .deliverables li {
+    display: flex; align-items: center;
+    padding: 8px 0;
+    font-size: 15px;
+    color: var(--text-primary);
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  }
+  .deliverables li::before {
+    content: "";
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+  .hw-card.alt2 .deliverables li::before { background: var(--accent-2); }
+
+  /* workflow */
+  .workflow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    align-items: stretch;
+  }
+  @media (max-width: 860px) { .workflow { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .workflow { grid-template-columns: 1fr; } }
+  .step {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 32px 22px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(0,0,0,0.04);
+    transition: transform 0.3s ease;
+  }
+  .step:hover { transform: translateY(-3px); }
+  .step .step-num {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 600;
+    margin: 0 auto 18px;
+  }
+  .step h4 { font-size: 17px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
+  .step p { font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
+  .step code {
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 12px;
+    background: rgba(0,0,0,0.05);
+    padding: 1px 5px; border-radius: 4px;
+    color: var(--text-primary);
+  }
+
+  /* tips */
+  .tips { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 8px; }
+  @media (max-width: 720px) { .tips { grid-template-columns: 1fr; } }
+  .tip {
+    background: var(--card-bg);
+    border-radius: var(--radius-sm);
+    padding: 22px 24px;
+    border: 1px solid var(--border);
+  }
+  .tip h5 {
+    font-size: 15px; font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tip h5 .emoji { font-size: 18px; }
+  .tip p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+  .tip code {
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 13px;
+    background: rgba(0,0,0,0.05);
+    padding: 1px 5px; border-radius: 4px;
+    color: var(--text-primary);
+  }
+
+  .why-card {
+    background: linear-gradient(135deg, #f5f5f7 0%, #fafafa 100%);
+    border-radius: var(--radius);
+    padding: 56px 48px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .why-card .eyebrow { margin-bottom: 14px; display: inline-block; }
+  .why-card h3 { margin-bottom: 16px; font-size: 28px; font-weight: 600; letter-spacing: -0.01em; }
+  .why-card p { font-size: 17px; color: var(--text-secondary); max-width: 720px; margin: 0 auto; line-height: 1.7; }
+  .why-card .tags { display: flex; gap: 10px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
+  .tag {
+    padding: 8px 18px;
+    border-radius: 980px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    font-size: 14px; font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  footer {
+    padding: 56px 0;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    background: var(--card-bg);
+  }
+  footer p { font-size: 13px; color: var(--text-tertiary); margin-bottom: 6px; }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">Claude Code 实战课程</span>
+    <span class="nav-meta">20260606 作业</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <span class="eyebrow">Homework · 2026.06.06</span>
+    <h1 class="headline-xl">从读懂一本书，<br>到<span class="grad">读出一本书背后的世界</span></h1>
+    <p class="body-xl lede" style="margin-top: 24px;">
+      过去阅读，主要是理解「作者写了什么」。<br>
+      AI 时代，阅读可以进一步变成 —— 追问、对抗、扩展、验证、迁移、创造。<br>
+      这次作业：用一套「阅读动作系统」，把一本书读出第二层。
+    </p>
+    <div class="meta-pills">
+      <span class="pill"><span class="dot"></span>不是总结，而是追问</span>
+      <span class="pill green"><span class="dot"></span>6 大类 · 30 个阅读动作</span>
+      <span class="pill purple"><span class="dot"></span>做成一个网页工具</span>
+    </div>
+  </div>
+</header>
+
+<!-- 核心变化 -->
+<section class="alt">
+  <div class="container-wide">
+    <div class="section-head reveal">
+      <span class="eyebrow">The Shift</span>
+      <h2 class="headline-lg">核心变化</h2>
+      <p class="body-lg">同一本书，AI 改变的不是「读得快」，而是「读得深」—— 从单向理解，变成多向追问。</p>
+    </div>
+
+    <div class="shift">
+      <div class="shift-card past reveal">
+        <div class="kicker">过去 · 理解式阅读</div>
+        <h3>理解作者写了什么</h3>
+        <p>顺着作者的思路走，把书读懂、记住、复述出来。读者是被动的接收者，书读完，阅读就结束了。</p>
+      </div>
+      <div class="arrow reveal">→</div>
+      <div class="shift-card now reveal">
+        <div class="kicker">AI 时代 · 动作式阅读</div>
+        <h3>读出作者没写出来的</h3>
+        <p>书只是起点。借助 AI，你可以对每一个观点发起一连串「阅读动作」，把一本书读成一张知识网络。</p>
+        <div class="verbs">
+          <span>追问</span><span>对抗</span><span>扩展</span><span>验证</span><span>迁移</span><span>创造</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 大类 -->
+<section>
+  <div class="container-wide">
+    <div class="section-head reveal">
+      <span class="eyebrow">Six Modes</span>
+      <h2 class="headline-lg">六大类阅读动作（仅供参考，请自己扩展，筛选等）</h2>
+      <p class="body-lg">30 个阅读动作，可以归纳成 6 大类。从「看懂」一路走到「输出」。</p>
+    </div>
+
+    <div class="cat-grid">
+      <div class="cat-card c1 reveal">
+        <div class="bar"></div>
+        <div class="icon">📖</div>
+        <h3>理解型阅读</h3>
+        <div class="goal">看懂作者写了什么</div>
+        <div class="acts"><span>结构阅读</span><span>概念阅读</span><span>问题阅读</span><span>压缩阅读</span></div>
+      </div>
+      <div class="cat-card c2 reveal">
+        <div class="bar"></div>
+        <div class="icon">⚔️</div>
+        <h3>批判型阅读</h3>
+        <div class="goal">判断作者说得对不对</div>
+        <div class="acts"><span>反方阅读</span><span>前提阅读</span><span>边界阅读</span><span>盲区阅读</span></div>
+      </div>
+      <div class="cat-card c3 reveal">
+        <div class="bar"></div>
+        <div class="icon">🌐</div>
+        <h3>扩展型阅读</h3>
+        <div class="goal">读出书外之书</div>
+        <div class="acts"><span>影子阅读</span><span>谱系阅读</span><span>跨学科阅读</span><span>时代阅读</span></div>
+      </div>
+      <div class="cat-card c4 reveal">
+        <div class="bar"></div>
+        <div class="icon">🔬</div>
+        <h3>验证型阅读</h3>
+        <div class="goal">连接现实证据</div>
+        <div class="acts"><span>证据阅读</span><span>案例阅读</span><span>变量阅读</span><span>预测阅读</span></div>
+      </div>
+      <div class="cat-card c5 reveal">
+        <div class="bar"></div>
+        <div class="icon">🛠️</div>
+        <h3>迁移型阅读</h3>
+        <div class="goal">把知识变成方法</div>
+        <div class="acts"><span>迁移阅读</span><span>场景阅读</span><span>模型阅读</span><span>决策阅读</span></div>
+      </div>
+      <div class="cat-card c6 reveal">
+        <div class="bar"></div>
+        <div class="icon">✍️</div>
+        <h3>创造型阅读</h3>
+        <div class="goal">把阅读变成输出</div>
+        <div class="acts"><span>教学阅读</span><span>创作阅读</span><span>展开阅读</span><span>自我阅读</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 阅读动作图谱 -->
+<section class="alt">
+  <div class="container-wide">
+    <div class="section-head reveal">
+      <span class="eyebrow">The Atlas</span>
+      <h2 class="headline-lg">阅读动作图谱 · 30 式（仅供参考，请自己扩展，筛选等）</h2>
+      <p class="body-lg">每一种阅读方式，都对应一个核心问题和一句可以直接用的 Prompt。挑你需要的用。</p>
+    </div>
+
+    <div class="atlas-wrap reveal">
+      <div class="atlas-scroll">
+        <table class="atlas">
+          <thead>
+            <tr>
+              <th style="width:120px;">阅读方式</th>
+              <th style="width:200px;">核心问题</th>
+              <th>示例 Prompt</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="way">影子阅读</span><br><span class="tag-cat t-c3">扩展型</span></td>
+              <td class="q">作者没有写出来的是什么？</td>
+              <td class="prompt">“这段话背后有哪些作者没有明说的前提？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">反方阅读</span><br><span class="tag-cat t-c2">批判型</span></td>
+              <td class="q">谁会反对这个观点？</td>
+              <td class="prompt">“请找出三个反对此观点的学派或思想家。”</td>
+            </tr>
+            <tr>
+              <td><span class="way">前提阅读</span><br><span class="tag-cat t-c2">批判型</span></td>
+              <td class="q">这个结论成立依赖什么条件？</td>
+              <td class="prompt">“这个结论成立需要哪些前提？哪些前提一旦不成立，结论就会崩塌？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">谱系阅读</span><br><span class="tag-cat t-c3">扩展型</span></td>
+              <td class="q">这个思想从哪里来？</td>
+              <td class="prompt">“这个观点可能继承自哪些思想传统或作者？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">边界阅读</span><br><span class="tag-cat t-c2">批判型</span></td>
+              <td class="q">这个观点在哪里失效？</td>
+              <td class="prompt">“这个观点在哪些场景下有效？在哪些场景下会误导人？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">证据阅读</span><br><span class="tag-cat t-c4">验证型</span></td>
+              <td class="q">有没有事实支持？</td>
+              <td class="prompt">“有哪些科学实验、数据或案例支持这个观点？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">结构阅读</span><br><span class="tag-cat t-c1">理解型</span></td>
+              <td class="q">这本书的骨架是什么？</td>
+              <td class="prompt">“请把这本书的核心论证结构画成一棵树。”</td>
+            </tr>
+            <tr>
+              <td><span class="way">概念阅读</span><br><span class="tag-cat t-c1">理解型</span></td>
+              <td class="q">这本书最重要的概念是什么？</td>
+              <td class="prompt">“请提取这章最重要的 10 个概念，并解释它们之间的关系。”</td>
+            </tr>
+            <tr>
+              <td><span class="way">问题阅读</span><br><span class="tag-cat t-c1">理解型</span></td>
+              <td class="q">作者到底在回答什么问题？</td>
+              <td class="prompt">“这本书真正想回答的核心问题是什么？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">对话阅读</span><br><span class="tag-cat t-c2">批判型</span></td>
+              <td class="q">我可以和作者辩论吗？</td>
+              <td class="prompt">“请模拟我和作者进行一场关于这个观点的对话。”</td>
+            </tr>
+            <tr>
+              <td><span class="way">类比阅读</span><br><span class="tag-cat t-c1">理解型</span></td>
+              <td class="q">这个观点像什么？</td>
+              <td class="prompt">“请用创业、投资和教育三个类比解释这个观点。”</td>
+            </tr>
+            <tr>
+              <td><span class="way">迁移阅读</span><br><span class="tag-cat t-c5">迁移型</span></td>
+              <td class="q">这个观点能用到哪里？</td>
+              <td class="prompt">“这个观点对 Web3 投资、创业和个人成长分别有什么启发？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">场景阅读</span><br><span class="tag-cat t-c5">迁移型</span></td>
+              <td class="q">如果放到现实中会怎样？</td>
+              <td class="prompt">“请把这个观点放到一个创业公司管理场景中解释。”</td>
+            </tr>
+            <tr>
+              <td><span class="way">案例阅读</span><br><span class="tag-cat t-c4">验证型</span></td>
+              <td class="q">有没有对应案例？</td>
+              <td class="prompt">“请给我 3 个支持这个观点的案例和 3 个反例。”</td>
+            </tr>
+            <tr>
+              <td><span class="way">变量阅读</span><br><span class="tag-cat t-c4">验证型</span></td>
+              <td class="q">影响这个结论的关键变量是什么？</td>
+              <td class="prompt">“这个观点中最关键的变量是什么？变量之间如何相互影响？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">模型阅读</span><br><span class="tag-cat t-c5">迁移型</span></td>
+              <td class="q">能不能变成一个模型？</td>
+              <td class="prompt">“请把这章内容整理成一个可复用的思维模型。”</td>
+            </tr>
+            <tr>
+              <td><span class="way">清单阅读</span><br><span class="tag-cat t-c5">迁移型</span></td>
+              <td class="q">能不能变成行动清单？</td>
+              <td class="prompt">“请把这章内容转化为我明天就能执行的行动清单。”</td>
+            </tr>
+            <tr>
+              <td><span class="way">复利阅读</span><br><span class="tag-cat t-c3">扩展型</span></td>
+              <td class="q">哪些内容值得反复读？</td>
+              <td class="prompt">“这本书中哪些观点具有长期复利价值？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">压缩阅读</span><br><span class="tag-cat t-c1">理解型</span></td>
+              <td class="q">能不能浓缩成一句话？</td>
+              <td class="prompt">“请把这章压缩成一句话、三句话和一页纸三个版本。”</td>
+            </tr>
+            <tr>
+              <td><span class="way">展开阅读</span><br><span class="tag-cat t-c6">创造型</span></td>
+              <td class="q">能不能把一句话展开成一本书？</td>
+              <td class="prompt">“请把这句话展开成一篇完整的思想文章。”</td>
+            </tr>
+            <tr>
+              <td><span class="way">跨学科阅读</span><br><span class="tag-cat t-c3">扩展型</span></td>
+              <td class="q">别的学科怎么看？</td>
+              <td class="prompt">“请分别用经济学、心理学、进化论和系统论解释这个观点。”</td>
+            </tr>
+            <tr>
+              <td><span class="way">时代阅读</span><br><span class="tag-cat t-c3">扩展型</span></td>
+              <td class="q">这个观点属于哪个时代？</td>
+              <td class="prompt">“这个观点是在什么历史背景下产生的？今天还适用吗？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">人格阅读</span><br><span class="tag-cat t-c3">扩展型</span></td>
+              <td class="q">作者为什么会这么想？</td>
+              <td class="prompt">“作者的人生经历如何影响了这个观点？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">盲区阅读</span><br><span class="tag-cat t-c2">批判型</span></td>
+              <td class="q">作者看不到什么？</td>
+              <td class="prompt">“作者可能忽略了哪些人群、变量或现实问题？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">预测阅读</span><br><span class="tag-cat t-c4">验证型</span></td>
+              <td class="q">如果观点正确，未来会怎样？</td>
+              <td class="prompt">“如果这个观点成立，未来 5 年会产生哪些变化？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">反事实阅读</span><br><span class="tag-cat t-c2">批判型</span></td>
+              <td class="q">如果反过来会怎样？</td>
+              <td class="prompt">“如果作者的观点完全相反，会得出什么结论？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">决策阅读</span><br><span class="tag-cat t-c5">迁移型</span></td>
+              <td class="q">这对我有什么用？</td>
+              <td class="prompt">“根据这章内容，我在做项目选择时应该看哪些指标？”</td>
+            </tr>
+            <tr>
+              <td><span class="way">教学阅读</span><br><span class="tag-cat t-c6">创造型</span></td>
+              <td class="q">如何教给别人？</td>
+              <td class="prompt">“请把这章内容设计成一节 60 分钟读书会课程。”</td>
+            </tr>
+            <tr>
+              <td><span class="way">创作阅读</span><br><span class="tag-cat t-c6">创造型</span></td>
+              <td class="q">如何变成内容？</td>
+              <td class="prompt">“请把这章内容改写成一篇适合公众号的文章。”</td>
+            </tr>
+            <tr>
+              <td><span class="way">自我阅读</span><br><span class="tag-cat t-c6">创造型</span></td>
+              <td class="q">它和我有什么关系？</td>
+              <td class="prompt">“这个观点如何解释我当前在创业和投资中的困惑？”</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 作业 -->
+<section>
+  <div class="container-wide">
+    <div class="section-head reveal">
+      <span class="eyebrow">Assignment</span>
+      <h2 class="headline-lg">本次作业</h2>
+      <p class="body-lg">把这套阅读动作图谱，做成一个真正能用的网页工具。</p>
+    </div>
+
+    <div class="hw-single">
+
+      <div class="hw-card alt2 reveal">
+        <div class="accent-bar"></div>
+        <div class="num">作业 · 做成产品</div>
+        <h3>设计一个「AI 阅读动作系统」产品</h3>
+        <p>
+          别只做「AI 总结书」。把这套动作图谱做成一个
+          <strong style="color: var(--text-primary);">能真正运行的网页工具</strong> ——
+          用户输入一本书 / 一段观点，工具调用 AI，按你设计的阅读动作
+          带他完成一次「深读」。不是速读，而是深读；不是总结，而是追问。
+        </p>
+
+        <ul class="feature-list">
+          <li>
+            <span class="ico">1</span>
+            <div>
+              <strong>定位</strong><br>
+              <span class="desc">给谁用？读经典的人 / 创业者 / 学生？解决什么阅读痛点？</span>
+            </div>
+          </li>
+          <li>
+            <span class="ico">2</span>
+            <div>
+              <strong>选动作</strong><br>
+              <span class="desc">从 30等 个动作里挑出最核心的几个，作为产品的主功能。？</span>
+            </div>
+          </li>
+          <li>
+            <span class="ico">3</span>
+            <div>
+              <strong>画流程</strong><br>
+              <span class="desc">用户输入一本书 / 一段话后，工具怎么一步步带他「深读」？</span>
+            </div>
+          </li>
+          <li>
+            <span class="ico">4</span>
+            <div>
+              <strong>做成网页</strong><br>
+              <span class="desc">用一个网页把它实现出来：输入框、动作按钮、AI 返回结果，能真正点着用。</span>
+            </div>
+          </li>
+        </ul>
+
+        <div class="stack-note">
+          <strong>命名灵感：</strong>
+          「从读懂一本书，到读出一本书背后的世界。」
+          「不是总结，而是追问。不是速读，而是深读。」
+          想清楚要不要做，可以用 <code>/office-hours</code>；想拔高视角，用 <code>/plan-ceo-review</code>。
+        </div>
+
+        <div class="stack-note" style="background:#eef4ff; border-color:#cfe0ff; color:#1d3a6b;">
+          <strong>⚠️ 关于 AI Key：</strong>
+          这个工具一定会用到 AI 大模型的 API Key。
+          <strong>建议直接用 DeepSeek</strong> —— 注册简单、接入方便、价格便宜，
+          国内调用也稳定，最适合做这种练手工具。把 Key 配在网页里调用即可跑通。
+        </div>
+
+        <div class="deliverables">
+          <div class="label">提交内容</div>
+          <ul>
+            <li>一个网页方式的工具（可打开即用）</li>
+            <li>接入 AI 大模型（推荐 DeepSeek API）</li>
+            <li>spec.md（产品说明）</li>
+            <li>task.md（任务拆解）</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- workflow -->
+<section class="alt">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Workflow · 作业推荐流程</span>
+      <h2 class="headline-lg">从一张图谱，到一个能用的工具</h2>
+      <p class="body-lg">不要一上来就写代码。先想清楚定位和动作，再接 AI，再做成网页。</p>
+    </div>
+
+    <div class="workflow">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <h4>定位 + 选动作</h4>
+        <p>想清楚给谁用、解决什么痛点，从 30 个动作里挑出核心几个。</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">2</div>
+        <h4>画流程</h4>
+        <p>用户输入一本书 / 一段话后，工具怎么一步步带他深读。</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">3</div>
+        <h4>接 AI</h4>
+        <p>申请 <code>DeepSeek</code> API Key，在网页里调用大模型返回结果。</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">4</div>
+        <h4>做成网页</h4>
+        <p>输入框 + 动作按钮 + 结果展示，能真正点着用，提交即可。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- tips -->
+<section class="tight">
+  <div class="container">
+    <div class="section-head reveal" style="margin-bottom: 48px;">
+      <span class="eyebrow">Tips</span>
+      <h2 class="headline-lg">几个小建议</h2>
+    </div>
+    <div class="tips">
+      <div class="tip reveal">
+        <h5><span class="emoji">🎯</span> 先把靶子选小</h5>
+        <p>不要对「整本书」做 30 个动作。挑一个最打动你的观点，把它读穿，比泛泛读完一本书收获更大。</p>
+      </div>
+      <div class="tip reveal">
+        <h5><span class="emoji">⚔️</span> 一定要做批判型</h5>
+        <p>反方、前提、盲区、边界 —— 这几招最容易被跳过，却最能让你跳出「被作者说服」的状态。</p>
+      </div>
+      <div class="tip reveal">
+        <h5><span class="emoji">🛠️</span> 别停在「读懂」</h5>
+        <p>迁移阅读和决策阅读，是把书里的知识变成你自己的方法。读完一定要问一句：「这对我有什么用？」</p>
+      </div>
+      <div class="tip reveal">
+        <h5><span class="emoji">📝</span> 把 Prompt 攒下来</h5>
+        <p>每个好用的提问都记进 <code>prompts.md</code>。读第二本书时，这就是你自己的「阅读动作库」。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- why -->
+<section class="alt tight">
+  <div class="container">
+    <div class="why-card reveal">
+      <span class="eyebrow">Why it matters</span>
+      <h3>不是总结，而是追问</h3>
+      <p>
+        AI 时代，「读完一本书」越来越廉价 —— 几秒钟就能得到一份摘要。
+        真正稀缺的，是<strong style="color: var(--text-primary);">能对一本书发起追问、对抗、扩展、验证、迁移和创造</strong>的能力。
+        这次作业，就是练这件事：让阅读从「接收信息」，变成「生产理解」。
+      </p>
+      <div class="tags">
+        <span class="tag">深读 &gt; 速读</span>
+        <span class="tag">追问 &gt; 总结</span>
+        <span class="tag">阅读动作系统</span>
+        <span class="tag">读出书外之书</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Claude Code 实战课程 · 第 6 次课课后作业 · 2026.06.06</p>
+  <p>主题:从读懂一本书，到读出一本书背后的世界 · 设计灵感 Apple Human Interface</p>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
