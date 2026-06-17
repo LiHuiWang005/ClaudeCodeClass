@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 数据分析与可视化 · 结构化知识地图</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --ink: #1f2430;
+    --ink-soft: #5b6472;
+    --line: #e6e9ef;
+    --brand: #d97757;
+    --brand-soft: #fbeee8;
+    --blue: #4a7bd6;
+    --blue-soft: #eaf1fb;
+    --green: #3f9e6b;
+    --green-soft: #e9f6ef;
+    --amber: #c98a1e;
+    --amber-soft: #fbf2e0;
+    --purple: #8a63c9;
+    --purple-soft: #f0eafb;
+    --code-bg: #2b303b;
+    --code-ink: #e6e9ef;
+    --radius: 14px;
+    --shadow: 0 1px 3px rgba(20,28,45,.06), 0 8px 24px rgba(20,28,45,.05);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.7; font-size: 16px;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 20px 80px; }
+
+  /* Header */
+  header.hero {
+    background: linear-gradient(135deg, #fff 0%, #fdf6f2 100%);
+    border-bottom: 1px solid var(--line); padding: 48px 20px 40px;
+  }
+  .hero-inner { max-width: 920px; margin: 0 auto; }
+  .eyebrow {
+    display: inline-block; font-size: 13px; font-weight: 600; letter-spacing: .08em;
+    color: var(--brand); background: var(--brand-soft);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 16px;
+  }
+  h1 { font-size: 34px; line-height: 1.25; margin: 0 0 14px; letter-spacing: -.01em; }
+  .subtitle { color: var(--ink-soft); font-size: 17px; max-width: 720px; margin: 0; }
+  .lead-quote {
+    margin: 20px 0 0; padding: 14px 18px; background: #fff; border: 1px solid var(--line);
+    border-left: 3px solid var(--brand); border-radius: 10px; color: var(--ink); font-size: 15.5px;
+  }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; background: #fff;
+    border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 14px; color: var(--ink-soft);
+  }
+  .chip strong { color: var(--ink); font-weight: 600; }
+
+  /* Section titles */
+  h2.section {
+    font-size: 14px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700;
+    margin: 48px 0 18px; padding-bottom: 10px; border-bottom: 2px solid var(--line);
+  }
+  .layer-tag {
+    display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+    margin-right: 8px; vertical-align: middle;
+  }
+  .lt1 { background: var(--blue-soft); color: var(--blue); }
+  .lt2 { background: var(--green-soft); color: var(--green); }
+  .lt3 { background: var(--purple-soft); color: var(--purple); }
+
+  /* Cards */
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 22px 26px; margin: 18px 0;
+  }
+  .card h3 { font-size: 19px; margin: 0 0 6px; }
+  .card h3 .num { color: var(--brand); font-weight: 800; margin-right: 8px; }
+  .card p { margin: 8px 0 0; }
+  .muted { color: var(--ink-soft); }
+
+  /* Pipeline / flow */
+  .pipe {
+    background: var(--code-bg); color: var(--code-ink); border-radius: 10px; padding: 18px 20px;
+    font-family: "SF Mono","JetBrains Mono",Menlo,Consolas,monospace; font-size: 13px;
+    line-height: 1.7; white-space: pre-wrap; word-break: break-word; margin: 14px 0;
+  }
+  .flowstrip {
+    display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; margin: 14px 0;
+  }
+  .flowstrip .node { flex: 1 1 110px; text-align: center; padding: 12px 8px; border-radius: 10px; background: #fafbfd; border: 1px solid var(--line); }
+  .flowstrip .node .b { font-weight: 700; font-size: 14px; }
+  .flowstrip .node .s { font-size: 12px; color: var(--ink-soft); margin-top: 3px; }
+  .flowstrip .arrow { align-self: center; color: var(--brand); font-weight: 700; }
+
+  /* Tables */
+  .tbl-wrap { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); margin: 16px 0; }
+  table.grid { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.grid th { background: #f1f3f7; text-align: left; padding: 10px 14px; font-weight: 600; color: var(--ink); border-bottom: 1px solid var(--line); }
+  table.grid td { padding: 10px 14px; border-bottom: 1px solid var(--line); color: var(--ink-soft); vertical-align: top; }
+  table.grid tr:last-child td { border-bottom: none; }
+  table.grid td strong, table.grid td b { color: var(--ink); }
+  .ok { color: var(--green); font-weight: 700; }
+  .no { color: var(--brand); font-weight: 700; }
+
+  /* two-col compare */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+  .compare .col { border-radius: var(--radius); padding: 16px 18px; border: 1px solid var(--line); }
+  .compare .col.yes { background: var(--green-soft); }
+  .compare .col.no { background: var(--brand-soft); }
+  .compare .col h4 { margin: 0 0 8px; font-size: 15px; }
+  .compare .col.yes h4 { color: var(--green); }
+  .compare .col.no h4 { color: var(--brand); }
+  .compare ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--ink-soft); }
+  .compare li { margin: 4px 0; }
+
+  /* steps */
+  ol.steps { margin: 0; padding-left: 0; list-style: none; counter-reset: s; }
+  ol.steps li { position: relative; padding: 9px 0 9px 38px; border-bottom: 1px dashed var(--line); counter-increment: s; font-size: 14.5px; }
+  ol.steps li:last-child { border-bottom: none; }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 9px; width: 24px; height: 24px;
+    background: var(--brand-soft); color: var(--brand); border-radius: 50%;
+    font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  }
+  ol.steps li b { color: var(--ink); }
+
+  /* core 20 list */
+  .core ul { list-style: none; padding: 0; margin: 0; }
+  .core li { padding: 10px 0 10px 30px; position: relative; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+  .core li:last-child { border-bottom: none; }
+  .core li::before { content: "✓"; position: absolute; left: 0; top: 10px; color: var(--green); font-weight: 800; }
+  .core li b { color: var(--ink); }
+
+  /* prompt */
+  .prompt {
+    background: var(--code-bg); color: var(--code-ink); border-radius: 10px; margin-top: 12px;
+    padding: 16px 18px; font-family: "SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    font-size: 13px; line-height: 1.65; white-space: pre-wrap; word-break: break-word; position: relative;
+  }
+  .prompt .tag { position: absolute; top: 0; right: 0; background: var(--brand); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-bottom-left-radius: 8px; letter-spacing: .05em; }
+
+  .callout { margin: 22px 0; padding: 18px 22px; background: var(--brand-soft); border-radius: var(--radius); border: 1px solid #f3d9cb; }
+  .callout .big { font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 6px; }
+  .callout p { margin: 6px 0 0; color: #8a4f37; font-size: 15px; }
+
+  .note { font-size: 13.5px; color: var(--ink-soft); border-left: 3px solid var(--amber); background: var(--amber-soft); padding: 10px 14px; border-radius: 8px; margin: 14px 0; }
+
+  footer { text-align: center; color: var(--ink-soft); font-size: 13px; margin-top: 50px; }
+  @media (max-width: 600px){ h1{font-size:27px;} .compare{grid-template-columns:1fr;} .card{padding:18px;} }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow">第 6 课延伸 · 知识地图实例</span>
+    <h1>AI 数据分析与可视化 · 结构化知识地图</h1>
+    <p class="subtitle">面向非技术背景成年人，目标是「能用 AI 辅助完成日常数据分析与可视化」。这是用「地图式自学流程」产出的一份真实范例。</p>
+    <div class="lead-quote">数据分析是从数据里找答案，数据可视化是把答案讲清楚；AI 让这两件事的门槛大幅降低。</div>
+    <div class="meta-row">
+      <span class="chip">三层地图 · <strong>定位 / 结构 / 应用</strong></span>
+      <span class="chip"><strong>15</strong> 个核心概念</span>
+      <span class="chip">核心 <strong>20%</strong></span>
+      <span class="chip"><strong>4 周</strong>学习路径</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 第一层 -->
+  <h2 class="section"><span class="layer-tag lt1">第一层</span>定位 · 这个模块是什么</h2>
+
+  <div class="card">
+    <h3><span class="num">1</span>它在整个领域中的位置</h3>
+    <p class="muted">数据科学是一条从「拿到数据」到「产生价值」的链路，你处在「分析 + 可视化」环节：</p>
+    <div class="flowstrip">
+      <div class="node"><div class="b">数据采集</div><div class="s">爬取/埋点</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="b">数据工程</div><div class="s">清洗/存储</div></div>
+      <div class="arrow">→</div>
+      <div class="node" style="background:var(--brand-soft);border-color:#f3d9cb;"><div class="b" style="color:var(--brand)">数据分析</div><div class="s">找规律</div></div>
+      <div class="arrow">→</div>
+      <div class="node" style="background:var(--brand-soft);border-color:#f3d9cb;"><div class="b" style="color:var(--brand)">数据可视化</div><div class="s">讲清楚</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="b">决策/行动</div><div class="s"></div></div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="grid">
+        <thead><tr><th>层级</th><th>做什么</th><th>是否本模块</th></tr></thead>
+        <tbody>
+          <tr><td>数据工程</td><td>把数据搬运、清洗、存好</td><td>相邻（上游）</td></tr>
+          <tr><td><strong>数据分析</strong></td><td><strong>从数据里找规律、回答业务问题</strong></td><td><span class="ok">✅ 核心</span></td></tr>
+          <tr><td><strong>数据可视化</strong></td><td><strong>把分析结果用图表讲清楚</strong></td><td><span class="ok">✅ 核心</span></td></tr>
+          <tr><td>机器学习 / AI 建模</td><td>用数据做预测、分类</td><td>相邻（进阶）</td></tr>
+          <tr><td>BI 报表</td><td>把指标做成固定看板、定期刷新</td><td>相邻（产品化）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>AI 的角色：</b>过去这些工作需要写 SQL、Python、统计知识。现在 AI 可帮你写代码、清洗、跑分析、生成图表——你的核心能力从「会写代码」转向「会提问、会判断结果」。</div>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">2</span>主要解决什么问题</h3>
+    <div class="compare">
+      <div class="col yes">
+        <h4>✅ 它解决</h4>
+        <ul>
+          <li>这个月销售为什么下滑？</li>
+          <li>哪类客户最容易流失？</li>
+          <li>两个产品哪个表现更好？</li>
+          <li>怎么把结论一张图讲清楚？</li>
+        </ul>
+      </div>
+      <div class="col no">
+        <h4>❌ 它不解决</h4>
+        <ul>
+          <li>数据本身怎么采集（数据工程）</li>
+          <li>预测明年精确销量（机器学习）</li>
+          <li>决策本身该怎么做（只提供依据）</li>
+          <li>保证数据 100% 真实（需业务核对）</li>
+        </ul>
+      </div>
+    </div>
+    <p>一句话：<b>它把「一堆看不懂的数据」变成「一个能行动的结论」。</b></p>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">3</span>与相邻模块的区别</h3>
+    <div class="tbl-wrap">
+      <table class="grid">
+        <thead><tr><th>概念</th><th>一句话定义</th><th>关键区别</th></tr></thead>
+        <tbody>
+          <tr><td>数据分析</td><td>从数据中找答案</td><td>探索性，回答「为什么/是什么」</td></tr>
+          <tr><td>数据工程</td><td>把数据准备好</td><td>偏工程，量大、管道化</td></tr>
+          <tr><td>机器学习</td><td>用数据做预测</td><td>偏未来、自动化决策</td></tr>
+          <tr><td>BI / 报表</td><td>固定指标的持续监控</td><td>重复性、看板化、给管理层</td></tr>
+          <tr><td>数据可视化</td><td>把信息用图表表达</td><td>是分析的「表达环节」</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>新手误区：</b>把「做图表」当成数据分析的全部。其实图表只是最后一步，前面的「问对问题 + 清洗 + 找规律」才是核心。</div>
+  </div>
+
+  <!-- 第二层 -->
+  <h2 class="section"><span class="layer-tag lt2">第二层</span>知识结构 · 要学什么</h2>
+
+  <div class="card">
+    <h3><span class="num">4</span>前置知识</h3>
+    <div class="compare">
+      <div class="col yes">
+        <h4>必须先掌握（边做边补即可）</h4>
+        <ul>
+          <li>表格概念：行=记录、列=字段</li>
+          <li>基础数学直觉：平均数、占比、增长率</li>
+          <li>会用 Excel / Sheets 看数据</li>
+          <li>能清晰描述你的业务问题</li>
+        </ul>
+      </div>
+      <div class="col no" style="background:var(--blue-soft);">
+        <h4 style="color:var(--blue)">可交给 AI / 后补</h4>
+        <ul>
+          <li>编程语法（Python/SQL，让 AI 写）</li>
+          <li>复杂统计推断（假设检验等）</li>
+          <li>数据库原理</li>
+          <li>可视化库 API（matplotlib 等）</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note"><b>核心心态：</b>不需要先学完编程才能开始。先有一个真实问题和一份数据，剩下的边做边问 AI。</div>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">5</span>核心概念（15 个关键术语）</h3>
+    <div class="tbl-wrap">
+      <table class="grid">
+        <thead><tr><th>术语</th><th>大白话解释</th><th>生活化例子</th></tr></thead>
+        <tbody>
+          <tr><td>数据集 Dataset</td><td>一张或多张表格</td><td>一份 Excel 销售明细</td></tr>
+          <tr><td>字段/变量 Column</td><td>表格的一列</td><td>「销售额」「日期」「城市」</td></tr>
+          <tr><td>记录 Row</td><td>表格的一行</td><td>一笔订单</td></tr>
+          <tr><td>数据清洗 Cleaning</td><td>把脏数据修好</td><td>删重复、补空值、统一格式</td></tr>
+          <tr><td>缺失值 Missing</td><td>该有却空着的格子</td><td>有的订单没填城市</td></tr>
+          <tr><td>EDA 探索性分析</td><td>先随便看看数据长啥样</td><td>先翻翻账本找感觉</td></tr>
+          <tr><td>描述统计</td><td>用几个数字概括一堆数据</td><td>平均客单价、最大单笔</td></tr>
+          <tr><td>分组聚合 Group By</td><td>按某列分类后算汇总</td><td>按城市看各自总销售</td></tr>
+          <tr><td>相关性 Correlation</td><td>两个变量一起变的程度</td><td>广告投入↑ 销售↑</td></tr>
+          <tr><td>趋势 Trend</td><td>随时间的变化方向</td><td>月销售逐月上升</td></tr>
+          <tr><td>异常值 Outlier</td><td>明显不合群的数据点</td><td>某天销售是平时 50 倍</td></tr>
+          <tr><td>维度 vs 指标</td><td>维度=分类角度，指标=被衡量的数</td><td>维度「城市」，指标「销售额」</td></tr>
+          <tr><td>数据透视表 Pivot</td><td>多角度交叉汇总</td><td>Excel 透视表</td></tr>
+          <tr><td>Dashboard 仪表盘</td><td>多个图表组成的监控面板</td><td>老板看的经营大屏</td></tr>
+          <tr><td>数据故事 Storytelling</td><td>用数据讲一个有逻辑的故事</td><td>「下滑→原因→建议」三段式</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">6</span>核心方法与工具</h3>
+    <p class="muted"><b>标准分析流程（记住这 6 步就够）：</b></p>
+    <div class="flowstrip">
+      <div class="node"><div class="b">1 问对问题</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="b">2 取数+清洗</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="b">3 探索 EDA</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="b">4 找规律</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="b">5 可视化</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="b">6 讲结论</div></div>
+    </div>
+
+    <p class="muted" style="margin-top:18px;"><b>选图口诀（看什么 → 用什么图）：</b></p>
+    <div class="tbl-wrap">
+      <table class="grid">
+        <thead><tr><th>你想表达</th><th>推荐图表</th><th>例子</th></tr></thead>
+        <tbody>
+          <tr><td>随时间变化</td><td>折线图</td><td>月销售趋势</td></tr>
+          <tr><td>比较大小</td><td>柱状图 / 条形图</td><td>各城市销售对比</td></tr>
+          <tr><td>占比构成</td><td>饼图 / 堆叠柱</td><td>各产品销售占比</td></tr>
+          <tr><td>两个变量关系</td><td>散点图</td><td>广告投入 vs 销售</td></tr>
+          <tr><td>分布情况</td><td>直方图 / 箱线图</td><td>客单价分布</td></tr>
+          <tr><td>多指标对比</td><td>雷达图 / 热力图</td><td>区域×品类表现</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="muted" style="margin-top:18px;"><b>常用工具（标注 AI 辅助程度）：</b></p>
+    <div class="tbl-wrap">
+      <table class="grid">
+        <thead><tr><th>工具</th><th>用途</th><th>AI 辅助程度</th></tr></thead>
+        <tbody>
+          <tr><td>Excel / Google Sheets</td><td>看数据、简单透视</td><td>⭐⭐ 入门首选</td></tr>
+          <tr><td>Claude / ChatGPT</td><td>传表格让 AI 分析+画图</td><td>⭐⭐⭐⭐⭐ 最推荐起点</td></tr>
+          <tr><td>Python (pandas/matplotlib)</td><td>灵活强大，AI 代写代码</td><td>⭐⭐⭐⭐</td></tr>
+          <tr><td>SQL</td><td>从数据库取数</td><td>⭐⭐⭐⭐ AI 代写</td></tr>
+          <tr><td>BI 工具 (Tableau/Power BI)</td><td>做交互式看板</td><td>⭐⭐⭐</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>推荐路径：</b>Excel 看数据 → Claude 做分析 → 需要更强时让 AI 写 Python。</div>
+  </div>
+
+  <!-- 第三层 -->
+  <h2 class="section"><span class="layer-tag lt3">第三层</span>应用与能力 · 学了能干什么</h2>
+
+  <div class="card">
+    <h3><span class="num">7</span>常见应用场景</h3>
+    <ol class="steps">
+      <li><b>业务复盘：</b>分析季度销售，找出增长点和流失点，给管理层做汇报</li>
+      <li><b>运营优化：</b>分析用户行为，找出哪个环节流失最多</li>
+      <li><b>市场分析：</b>对比不同渠道 / 产品 / 区域的投入产出比</li>
+      <li><b>个人/投资：</b>分析定投收益、记账数据、健康数据</li>
+      <li><b>报告自动化：</b>把每月例行报表交给 AI 半自动生成</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">8</span>能力分级</h3>
+    <div class="tbl-wrap">
+      <table class="grid">
+        <thead><tr><th>能力维度</th><th>入门（听过会看）</th><th>能用（能独立做）</th><th>熟练（有判断力）</th></tr></thead>
+        <tbody>
+          <tr><td>提问</td><td>能说出模糊需求</td><td>能拆成具体问题</td><td>能定义指标和口径</td></tr>
+          <tr><td>清洗</td><td>知道有脏数据</td><td>能让 AI 清洗并检查</td><td>能识别数据陷阱</td></tr>
+          <tr><td>分析</td><td>看得懂图表</td><td>能做分组、对比、趋势</td><td>能区分相关与因果</td></tr>
+          <tr><td>可视化</td><td>会插入图表</td><td>能选对图、讲清楚</td><td>能做数据故事/看板</td></tr>
+          <tr><td>AI 协作</td><td>会让 AI 出结果</td><td>会验证 AI 结果对错</td><td>能设计分析 Prompt 流程</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card core">
+    <h3><span class="num">9</span>学习路径与核心 20%</h3>
+    <p class="muted"><b>最该优先掌握的「核心 20%」（掌握它能解决 80% 的问题）：</b></p>
+    <ul>
+      <li><b>问对问题</b> —— 把「帮我分析下销售」变成「对比 Q1/Q2 各城市销售增长率，找出下滑最多的城市」</li>
+      <li><b>分组聚合（Group By）</b> —— 90% 的业务分析都是「按某个维度算某个指标」</li>
+      <li><b>趋势 + 对比两类图</b> —— 折线（趋势）和柱状（对比）覆盖绝大多数场景</li>
+      <li><b>相关 ≠ 因果</b> —— 避免最常见的分析错误</li>
+      <li><b>让 AI 做、自己验证</b> —— 学会检查 AI 给的数字对不对</li>
+    </ul>
+    <p class="muted" style="margin-top:16px;"><b>由浅入深的学习顺序：</b></p>
+    <div class="pipe">第 1 周：用 Claude 分析一份真实 Excel 表（提问→AI 出结论+图）
+第 2 周：学分组聚合 + 选对图表类型（趋势/对比/占比）
+第 3 周：学数据清洗 + 识别异常值、缺失值
+第 4 周：做一个完整「数据故事」汇报（下滑→原因→建议）
+进阶：让 AI 写 Python 处理更大数据 / 学做交互式 Dashboard</div>
+  </div>
+
+  <!-- 一页纸 -->
+  <h2 class="section">一页纸总结</h2>
+  <div class="tbl-wrap">
+    <table class="grid">
+      <tbody>
+        <tr><td style="width:180px;"><strong>定义</strong></td><td>从数据中找答案（分析），并把答案讲清楚（可视化）</td></tr>
+        <tr><td><strong>价值</strong></td><td>把「一堆看不懂的数据」变成「一个能行动的结论」</td></tr>
+        <tr><td><strong>核心方法</strong></td><td>问对问题 → 取数清洗 → 探索 → 找规律 → 可视化 → 讲结论</td></tr>
+        <tr><td><strong>核心 20%</strong></td><td>问对问题 · 分组聚合 · 趋势/对比图 · 相关≠因果 · 验证 AI 结果</td></tr>
+        <tr><td><strong>典型应用</strong></td><td>业务复盘、运营优化、市场分析、个人投资、报告自动化</td></tr>
+        <tr><td><strong>AI 时代关键能力</strong></td><td>不是会写代码，而是<b>会提问 + 会判断 AI 给的结果对不对</b></td></tr>
+        <tr><td><strong>下一步该练什么</strong></td><td>拿一份手头真实表格，用 Claude 走一遍完整 6 步流程</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 练习 -->
+  <h2 class="section">推荐的第一个练习 · 最小闭环</h2>
+  <div class="callout">
+    <p class="big">拿一份真实表格，把下面这段发给 Claude</p>
+    <p>跑完这一遍，你就完成了从「问问题」到「讲结论」的完整闭环。</p>
+  </div>
+  <div class="prompt"><span class="tag">PROMPT</span>这是我的一份【销售明细】表格（附件）。请帮我：
+1. 先描述这份数据有几行几列、每列是什么、有没有缺失或异常
+2. 按【城市】分组，算出各城市的总销售额和占比，用柱状图展示
+3. 按【月份】看整体销售趋势，用折线图展示，指出增长或下滑
+4. 给我 3 条基于数据的业务结论和建议
+5. 最后告诉我：这份分析里有哪些地方我需要人工核对、不能全信 AI</div>
+
+  <footer>第 6 课延伸 · AI 数据分析与可视化知识地图 · 配套文件 dataanalyze.md</footer>
+</div>
+</body>
+</html>

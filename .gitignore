@@ -27,3 +27,4 @@ env/
 # OS / logs
 Thumbs.db
 *.log
+.gstack/
