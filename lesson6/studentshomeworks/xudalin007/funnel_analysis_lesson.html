@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>漏斗分析自学课：装修公司客户转化案例</title>
+<style>
+  :root {
+    --bg: #eef3f5;
+    --slide: #fbfcfc;
+    --ink: #1d2b2f;
+    --muted: #5c6b70;
+    --line: #d5dfdf;
+    --teal: #1b7f7a;
+    --teal-dark: #115d59;
+    --orange: #d97732;
+    --red: #bd4b45;
+    --blue: #34699a;
+    --green: #4f8a5f;
+    --shadow: 0 18px 50px rgba(24, 43, 49, 0.16);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+  }
+
+  .deck {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 28px 28px 92px;
+  }
+
+  .slide {
+    display: none;
+    width: min(1280px, calc(100vw - 56px));
+    aspect-ratio: 16 / 9;
+    min-height: 620px;
+    background: var(--slide);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 44px 52px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .slide.active {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .slide::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 8px;
+    background: linear-gradient(90deg, var(--teal), var(--orange), var(--blue));
+  }
+
+  .kicker {
+    margin: 0;
+    color: var(--teal-dark);
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  h1, h2, h3, p {
+    margin-top: 0;
+  }
+
+  h1 {
+    max-width: 940px;
+    margin-bottom: 18px;
+    font-size: 48px;
+    line-height: 1.14;
+    letter-spacing: 0;
+  }
+
+  h2 {
+    margin-bottom: 10px;
+    font-size: 34px;
+    line-height: 1.18;
+    letter-spacing: 0;
+  }
+
+  h3 {
+    margin-bottom: 10px;
+    font-size: 21px;
+  }
+
+  p, li, td, th {
+    font-size: 17px;
+    line-height: 1.55;
+  }
+
+  ul, ol {
+    margin: 0;
+    padding-left: 1.2em;
+  }
+
+  li + li {
+    margin-top: 8px;
+  }
+
+  .lead {
+    max-width: 880px;
+    color: var(--muted);
+    font-size: 22px;
+    line-height: 1.55;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 18px;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 26px;
+    align-items: start;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .panel {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 18px 20px;
+  }
+
+  .panel h3 {
+    color: var(--teal-dark);
+  }
+
+  .metric {
+    border-left: 5px solid var(--teal);
+    background: #f7fbfa;
+    padding: 16px 18px;
+  }
+
+  .metric strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 28px;
+    color: var(--ink);
+  }
+
+  .formula {
+    border: 1px solid #b8d7d4;
+    border-radius: 8px;
+    background: #eef8f6;
+    padding: 14px 18px;
+    font-size: 20px;
+    line-height: 1.5;
+    color: #153b39;
+  }
+
+  .formula + .formula {
+    margin-top: 12px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  th, td {
+    border-bottom: 1px solid var(--line);
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background: #eaf3f1;
+    color: #153b39;
+    font-weight: 700;
+  }
+
+  tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .number {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .small-table th,
+  .small-table td {
+    padding: 8px 10px;
+    font-size: 15px;
+  }
+
+  .stage-list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    counter-reset: stage;
+  }
+
+  .stage {
+    min-height: 86px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 14px 14px 12px;
+    position: relative;
+  }
+
+  .stage::before {
+    counter-increment: stage;
+    content: counter(stage);
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    margin-bottom: 10px;
+    border-radius: 50%;
+    background: var(--teal);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .stage strong {
+    display: block;
+    font-size: 18px;
+  }
+
+  .funnel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .funnel-row {
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr) 168px;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .funnel-name {
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .funnel-track {
+    height: 36px;
+    border-radius: 6px;
+    background: #ecf1f1;
+    overflow: hidden;
+  }
+
+  .funnel-bar {
+    min-width: 52px;
+    height: 100%;
+    width: var(--w);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 10px;
+    border-radius: 6px;
+    color: #ffffff;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(90deg, var(--teal), var(--blue));
+  }
+
+  .funnel-note {
+    font-size: 14px;
+    line-height: 1.35;
+    color: var(--muted);
+  }
+
+  .callout {
+    border-left: 6px solid var(--orange);
+    background: #fff7ef;
+    padding: 16px 18px;
+    border-radius: 8px;
+  }
+
+  .warning {
+    border-left-color: var(--red);
+    background: #fff4f3;
+  }
+
+  .success {
+    border-left-color: var(--green);
+    background: #f2f8f3;
+  }
+
+  .note {
+    margin-top: auto;
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .outline-table th,
+  .outline-table td {
+    font-size: 14px;
+    padding: 8px 9px;
+  }
+
+  .controls {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(251, 252, 252, 0.96);
+    box-shadow: 0 10px 28px rgba(24, 43, 49, 0.16);
+    z-index: 20;
+  }
+
+  button {
+    min-width: 96px;
+    height: 38px;
+    border: 1px solid var(--teal-dark);
+    border-radius: 6px;
+    background: var(--teal);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    border-color: #b7c4c5;
+    background: #d7e0e0;
+    color: #738184;
+    cursor: not-allowed;
+  }
+
+  .page-indicator {
+    min-width: 76px;
+    text-align: center;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+
+  @media (max-width: 900px) {
+    .deck {
+      padding: 16px 14px 88px;
+    }
+
+    .slide {
+      width: calc(100vw - 28px);
+      min-height: auto;
+      aspect-ratio: auto;
+      padding: 34px 24px;
+    }
+
+    h1 {
+      font-size: 34px;
+    }
+
+    h2 {
+      font-size: 28px;
+    }
+
+    .lead {
+      font-size: 19px;
+    }
+
+    .grid-2,
+    .grid-3 {
+      grid-template-columns: 1fr;
+    }
+
+    .stage-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .funnel-row {
+      grid-template-columns: 1fr;
+      gap: 5px;
+    }
+
+    .controls {
+      width: calc(100vw - 24px);
+      justify-content: center;
+    }
+
+    button {
+      min-width: 82px;
+    }
+  }
+
+  @media print {
+    body {
+      background: #ffffff;
+    }
+
+    .deck {
+      display: block;
+      padding: 0;
+    }
+
+    .slide {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      page-break-after: always;
+    }
+
+    .controls {
+      display: none;
+    }
+  }
+</style>
+</head>
+<body>
+<main class="deck" aria-live="polite">
+  <section class="slide active">
+    <p class="kicker">第 6 课作业 | 数据分析自学模块</p>
+    <h1>漏斗分析自学课：装修公司客户转化案例</h1>
+    <p class="lead">用一个装修公司从广告曝光到最终签约的真实经营链路，学会看转化率、流失率、整体转化率，并判断哪个环节最值得先优化。</p>
+    <div class="grid-3">
+      <div class="metric">课程对象<strong>分公司经理</strong></div>
+      <div class="metric">学习方式<strong>案例自学</strong></div>
+      <div class="metric">最终目标<strong>找到流失瓶颈</strong></div>
+    </div>
+    <p class="note">讲解备注：先把漏斗分析和经营管理连接起来，不从公式开始，避免初学者一上来觉得抽象。</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">课程大纲</p>
+    <h2>15 页学习路线</h2>
+    <table class="outline-table">
+      <thead>
+        <tr>
+          <th>页码</th>
+          <th>页面标题</th>
+          <th>核心内容</th>
+          <th>是否需要图表</th>
+          <th>讲解备注</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1-3</td><td>主题与经营问题</td><td>明确学习目标，连接装修公司获客和签约场景</td><td>否</td><td>先讲为什么要学</td></tr>
+        <tr><td>4-6</td><td>概念与公式</td><td>解释漏斗分析、转化率、流失率、整体转化率</td><td>是</td><td>公式必须配业务语言</td></tr>
+        <tr><td>7-10</td><td>案例数据分析</td><td>使用模拟数据表、漏斗图、计算表找问题</td><td>是</td><td>重点看流失人数和流失率</td></tr>
+        <tr><td>11-13</td><td>业务原因与优化</td><td>分析为什么流失，提出经营改善动作</td><td>是</td><td>回到分公司管理动作</td></tr>
+        <tr><td>14</td><td>总结</td><td>形成自查方法和学习结论</td><td>否</td><td>让学习者能迁移到自己的数据</td></tr>
+      </tbody>
+    </table>
+    <p class="note">讲解备注：这页相当于 PPT 大纲，学习者知道后面每一部分解决什么问题。</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">从经营问题开始</p>
+    <h2>装修公司最常见的问题不是“没人看见”，而是“人在哪一步走掉”</h2>
+    <div class="grid-2">
+      <div class="panel">
+        <h3>经营现场常见疑问</h3>
+        <ul>
+          <li>广告花了钱，为什么留下电话的人少？</li>
+          <li>客户留资了，为什么客服约不到量房？</li>
+          <li>量房做了，为什么报价后不签约？</li>
+          <li>到底应该先优化广告、客服、设计师，还是报价？</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>漏斗分析能回答</h3>
+        <ul>
+          <li>每一步进来多少客户。</li>
+          <li>每一步留下多少客户。</li>
+          <li>哪一步流失最多。</li>
+          <li>哪一步改善后对结果影响最大。</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">讲解备注：让学习者先看到漏斗分析的价值：它不是做图好看，而是帮助经理决定资源投向。</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">核心概念</p>
+    <h2>什么是漏斗分析</h2>
+    <div class="grid-2">
+      <div>
+        <p class="lead">漏斗分析是把一个完整业务过程拆成连续步骤，观察客户在每一步的保留和流失情况。</p>
+        <div class="callout">
+          对装修公司来说，漏斗不是一个图形，而是一条客户从“看见广告”到“签约装修”的经营路径。
+        </div>
+      </div>
+      <div class="panel">
+        <h3>漏斗分析的三个关键词</h3>
+        <ul>
+          <li><strong>步骤：</strong>客户必须依次经过的业务环节。</li>
+          <li><strong>人数：</strong>每一步还剩多少客户。</li>
+          <li><strong>比例：</strong>从上一步到这一步留下了多少。</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">讲解备注：初学者要先记住“步骤、人数、比例”，暂时不用纠结复杂统计方法。</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">案例链路</p>
+    <h2>装修客户从广告到签约的 8 个步骤</h2>
+    <div class="stage-list">
+      <div class="stage"><strong>广告曝光</strong><span>客户看到推广内容</span></div>
+      <div class="stage"><strong>留下联系方式</strong><span>客户愿意被联系</span></div>
+      <div class="stage"><strong>客服有效沟通</strong><span>确认需求和基本信息</span></div>
+      <div class="stage"><strong>预约量房</strong><span>约定上门时间</span></div>
+      <div class="stage"><strong>实际上门量房</strong><span>客户按约接待</span></div>
+      <div class="stage"><strong>出设计方案</strong><span>形成初步方案</span></div>
+      <div class="stage"><strong>报价沟通</strong><span>解释价格和价值</span></div>
+      <div class="stage"><strong>最终签约</strong><span>客户确认合作</span></div>
+    </div>
+    <p class="note">讲解备注：这 8 步可以按不同公司情况调整，但分析时必须保证步骤顺序一致。</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">计算公式</p>
+    <h2>先掌握 4 个最常用指标</h2>
+    <div class="grid-2">
+      <div>
+        <div class="formula">单步转化率 = 当前步骤人数 / 上一步人数 × 100%</div>
+        <div class="formula">单步流失率 = 1 - 单步转化率</div>
+        <div class="formula">单步流失人数 = 上一步人数 - 当前步骤人数</div>
+        <div class="formula">整体转化率 = 最终签约人数 / 广告曝光人数 × 100%</div>
+      </div>
+      <div class="panel">
+        <h3>用业务语言理解</h3>
+        <ul>
+          <li>转化率：上一环节的人，有多少进入下一环节。</li>
+          <li>流失率：上一环节的人，有多少没有继续往下走。</li>
+          <li>流失人数：这一环节具体丢掉多少客户。</li>
+          <li>整体转化率：最初接触的人里，最终有多少签约。</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">讲解备注：本课所有百分比统一保留 1 位小数，方便初学者对照。</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">模拟数据</p>
+    <h2>装修公司客户转化漏斗数据表</h2>
+    <div class="grid-2">
+      <table>
+        <thead>
+          <tr><th>漏斗步骤</th><th class="number">人数</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>广告曝光</td><td class="number">10000</td></tr>
+          <tr><td>留下联系方式</td><td class="number">800</td></tr>
+          <tr><td>客服有效沟通</td><td class="number">500</td></tr>
+          <tr><td>预约量房</td><td class="number">260</td></tr>
+          <tr><td>实际上门量房</td><td class="number">180</td></tr>
+          <tr><td>出设计方案</td><td class="number">120</td></tr>
+          <tr><td>报价沟通</td><td class="number">90</td></tr>
+          <tr><td>最终签约</td><td class="number">36</td></tr>
+        </tbody>
+      </table>
+      <div class="panel">
+        <h3>第一眼应该看什么</h3>
+        <ul>
+          <li>10000 次曝光最终带来 36 单签约。</li>
+          <li>最终签约人数不只由销售决定，还受前面每一步影响。</li>
+          <li>下一步要把人数变成比例，才能公平比较各环节。</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">讲解备注：只看人数会觉得广告曝光到留资最夸张，但后面还要结合流失率和经营可控性。</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">漏斗图</p>
+    <h2>人数逐步减少，说明客户在不断流失</h2>
+    <div class="funnel" aria-label="装修客户转化漏斗图">
+      <div class="funnel-row"><div class="funnel-name">广告曝光</div><div class="funnel-track"><div class="funnel-bar" style="--w:100%">10000</div></div><div class="funnel-note">起点</div></div>
+      <div class="funnel-row"><div class="funnel-name">留下联系方式</div><div class="funnel-track"><div class="funnel-bar" style="--w:62%">800</div></div><div class="funnel-note">转化率 8.0% | 流失率 92.0%</div></div>
+      <div class="funnel-row"><div class="funnel-name">客服有效沟通</div><div class="funnel-track"><div class="funnel-bar" style="--w:52%">500</div></div><div class="funnel-note">转化率 62.5% | 流失率 37.5%</div></div>
+      <div class="funnel-row"><div class="funnel-name">预约量房</div><div class="funnel-track"><div class="funnel-bar" style="--w:43%">260</div></div><div class="funnel-note">转化率 52.0% | 流失率 48.0%</div></div>
+      <div class="funnel-row"><div class="funnel-name">实际上门量房</div><div class="funnel-track"><div class="funnel-bar" style="--w:35%">180</div></div><div class="funnel-note">转化率 69.2% | 流失率 30.8%</div></div>
+      <div class="funnel-row"><div class="funnel-name">出设计方案</div><div class="funnel-track"><div class="funnel-bar" style="--w:29%">120</div></div><div class="funnel-note">转化率 66.7% | 流失率 33.3%</div></div>
+      <div class="funnel-row"><div class="funnel-name">报价沟通</div><div class="funnel-track"><div class="funnel-bar" style="--w:24%">90</div></div><div class="funnel-note">转化率 75.0% | 流失率 25.0%</div></div>
+      <div class="funnel-row"><div class="funnel-name">最终签约</div><div class="funnel-track"><div class="funnel-bar" style="--w:18%">36</div></div><div class="funnel-note">转化率 40.0% | 流失率 60.0%</div></div>
+    </div>
+    <p class="note">讲解备注：为了保证文字可读，图中宽度做了视觉压缩；准确判断以表格中的人数和比例为准。</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">逐步计算</p>
+    <h2>每一步转化率和流失率</h2>
+    <table class="small-table">
+      <thead>
+        <tr>
+          <th>环节</th>
+          <th class="number">上一步人数</th>
+          <th class="number">当前人数</th>
+          <th class="number">流失人数</th>
+          <th class="number">单步转化率</th>
+          <th class="number">单步流失率</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>广告曝光 → 留下联系方式</td><td class="number">10000</td><td class="number">800</td><td class="number">9200</td><td class="number">8.0%</td><td class="number">92.0%</td></tr>
+        <tr><td>留下联系方式 → 客服有效沟通</td><td class="number">800</td><td class="number">500</td><td class="number">300</td><td class="number">62.5%</td><td class="number">37.5%</td></tr>
+        <tr><td>客服有效沟通 → 预约量房</td><td class="number">500</td><td class="number">260</td><td class="number">240</td><td class="number">52.0%</td><td class="number">48.0%</td></tr>
+        <tr><td>预约量房 → 实际上门量房</td><td class="number">260</td><td class="number">180</td><td class="number">80</td><td class="number">69.2%</td><td class="number">30.8%</td></tr>
+        <tr><td>实际上门量房 → 出设计方案</td><td class="number">180</td><td class="number">120</td><td class="number">60</td><td class="number">66.7%</td><td class="number">33.3%</td></tr>
+        <tr><td>出设计方案 → 报价沟通</td><td class="number">120</td><td class="number">90</td><td class="number">30</td><td class="number">75.0%</td><td class="number">25.0%</td></tr>
+        <tr><td>报价沟通 → 最终签约</td><td class="number">90</td><td class="number">36</td><td class="number">54</td><td class="number">40.0%</td><td class="number">60.0%</td></tr>
+      </tbody>
+    </table>
+    <p class="note">讲解备注：这页是核心计算页。要特别说明“流失人数”和“流失率”是两个不同视角。</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">分析结论</p>
+    <h2>最大流失环节要从两个角度看</h2>
+    <div class="grid-3">
+      <div class="panel">
+        <h3>流失人数最多</h3>
+        <p>广告曝光 → 留下联系方式，流失 <strong>9200 人</strong>。</p>
+        <p>这说明广告、落地页、活动卖点、留资入口可能需要重点检查。</p>
+      </div>
+      <div class="panel">
+        <h3>流失率最高</h3>
+        <p>广告曝光 → 留下联系方式，流失率 <strong>92.0%</strong>。</p>
+        <p>在销售后段中，报价沟通 → 最终签约的流失率也很高，达到 <strong>60.0%</strong>。</p>
+      </div>
+      <div class="panel">
+        <h3>整体转化率</h3>
+        <p class="formula">36 / 10000 × 100% = 0.4%</p>
+        <p>每 10000 次曝光，最终约 36 个客户签约。</p>
+      </div>
+    </div>
+    <div class="callout warning">
+      综合判断：第一优先优化“广告曝光 → 留下联系方式”；销售团队内部要同步盯住“报价沟通 → 最终签约”。
+    </div>
+    <p class="note">讲解备注：如果只看流失人数，容易忽略后段成交问题；如果只看流失率，又可能忽略前端巨大基数。</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">业务原因分析</p>
+    <h2>把数字翻译成经营问题</h2>
+    <div class="grid-2">
+      <div class="panel">
+        <h3>广告曝光 → 留下联系方式</h3>
+        <ul>
+          <li>投放人群不够精准，看到广告的人不是近期装修客户。</li>
+          <li>广告卖点不清楚，只讲优惠，没有建立信任。</li>
+          <li>留资路径太长，客户需要填写的信息过多。</li>
+          <li>页面缺少案例、口碑、服务承诺和价格区间。</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>报价沟通 → 最终签约</h3>
+        <ul>
+          <li>报价解释只讲价格，没有讲材料、工艺和服务差异。</li>
+          <li>设计方案没有充分回应客户真实居住需求。</li>
+          <li>客户对增项、工期、售后仍有疑虑。</li>
+          <li>报价后跟进节奏不稳定，缺少二次沟通机制。</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">讲解备注：漏斗分析不会自动给出原因，但能告诉经理应该优先问哪些问题。</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">优化建议</p>
+    <h2>从“先做什么”开始，而不是一次改所有环节</h2>
+    <div class="grid-3">
+      <div class="panel">
+        <h3>前端获客</h3>
+        <ul>
+          <li>按小区、户型、预算和装修阶段细分投放。</li>
+          <li>落地页突出真实案例、报价范围和服务承诺。</li>
+          <li>减少表单字段，先拿到手机号和装修需求。</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>客服邀约</h3>
+        <ul>
+          <li>建立首响时间要求和话术模板。</li>
+          <li>记录客户面积、预算、入住时间和关注点。</li>
+          <li>对未预约客户设置二次跟进。</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>报价签约</h3>
+        <ul>
+          <li>报价单拆解材料、工艺、人工和服务。</li>
+          <li>给客户准备同户型案例和预算方案。</li>
+          <li>报价后 24 小时内完成一次主动复盘。</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">讲解备注：优化建议要能落到部门动作，例如市场、客服、设计师和店长分别负责什么。</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">经营价值</p>
+    <h2>用一个简单假设看优化价值</h2>
+    <div class="grid-2">
+      <div class="panel">
+        <h3>当前结果</h3>
+        <ul>
+          <li>广告投放成本：30000 元。</li>
+          <li>最终签约客户：36 人。</li>
+          <li>平均合同额：120000 元。</li>
+          <li>获客成本：30000 / 36 = 833.3 元 / 单。</li>
+          <li>签约收入：36 × 120000 = 4320000 元。</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>如果留资率从 8.0% 提升到 10.0%</h3>
+        <ul>
+          <li>留资人数从 800 人变成 1000 人。</li>
+          <li>保持后续转化不变，预计签约约 45 人。</li>
+          <li>比当前多约 9 单。</li>
+          <li>多带来约 1080000 元签约收入。</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout success">
+      漏斗分析的价值不只是“发现问题”，还可以估算“改善一个环节可能多带来多少业务结果”。
+    </div>
+    <p class="note">讲解备注：这里用的是简化估算，真实经营还要考虑毛利、接待能力和客户质量。</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">自学练习</p>
+    <h2>把这套方法迁移到自己的分公司</h2>
+    <div class="grid-2">
+      <div class="panel">
+        <h3>准备数据</h3>
+        <ol>
+          <li>选一个时间段，例如上个月或最近 30 天。</li>
+          <li>列出从曝光、留资到签约的完整步骤。</li>
+          <li>统计每一步人数，口径要保持一致。</li>
+          <li>计算单步转化率、流失率和整体转化率。</li>
+        </ol>
+      </div>
+      <div class="panel">
+        <h3>管理复盘</h3>
+        <ol>
+          <li>找出流失人数最多的环节。</li>
+          <li>找出流失率最高的环节。</li>
+          <li>判断哪个环节最可控、最值得先改。</li>
+          <li>指定负责人、动作和下次复盘时间。</li>
+        </ol>
+      </div>
+    </div>
+    <p class="note">讲解备注：自学结束后，学习者应该能拿自己的业务数据复刻一遍。</p>
+  </section>
+
+  <section class="slide">
+    <p class="kicker">课程总结</p>
+    <h2>掌握漏斗分析，关键是把数据变成动作</h2>
+    <div class="grid-3">
+      <div class="panel">
+        <h3>看清过程</h3>
+        <p>把客户从广告到签约拆成连续步骤，知道每一步还剩多少人。</p>
+      </div>
+      <div class="panel">
+        <h3>算清比例</h3>
+        <p>用转化率、流失率、整体转化率判断问题严重程度。</p>
+      </div>
+      <div class="panel">
+        <h3>定清优先级</h3>
+        <p>同时看流失人数、流失率和经营可控性，决定先优化哪里。</p>
+      </div>
+    </div>
+    <div class="callout">
+      本案例中，优先优化“广告曝光 → 留下联系方式”；销售后段重点改善“报价沟通 → 最终签约”。
+    </div>
+    <p class="note">讲解备注：收尾时强调一个管理原则：数据分析不是为了证明谁错，而是为了让团队知道下一步改哪里。</p>
+  </section>
+</main>
+
+<nav class="controls" aria-label="幻灯片控制">
+  <button id="prevBtn" type="button" title="上一页">‹ 上一页</button>
+  <span class="page-indicator" id="pageIndicator">1 / 15</span>
+  <button id="nextBtn" type="button" title="下一页">下一页 ›</button>
+</nav>
+
+<script>
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const pageIndicator = document.getElementById("pageIndicator");
+  let currentSlide = 0;
+
+  function showSlide(index) {
+    currentSlide = Math.max(0, Math.min(index, slides.length - 1));
+    slides.forEach((slide, i) => {
+      slide.classList.toggle("active", i === currentSlide);
+    });
+    pageIndicator.textContent = `${currentSlide + 1} / ${slides.length}`;
+    prevBtn.disabled = currentSlide === 0;
+    nextBtn.disabled = currentSlide === slides.length - 1;
+  }
+
+  prevBtn.addEventListener("click", () => showSlide(currentSlide - 1));
+  nextBtn.addEventListener("click", () => showSlide(currentSlide + 1));
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft") {
+      showSlide(currentSlide - 1);
+    }
+    if (event.key === "ArrowRight") {
+      showSlide(currentSlide + 1);
+    }
+  });
+
+  showSlide(0);
+</script>
+</body>
+</html>

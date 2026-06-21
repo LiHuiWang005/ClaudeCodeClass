@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>装修公司客户转化漏斗分析案例项目</title>
+<style>
+  :root {
+    --page: #f3f6f6;
+    --paper: #ffffff;
+    --ink: #1e2d31;
+    --muted: #617176;
+    --line: #d7e1e1;
+    --teal: #1f7f79;
+    --teal-dark: #145d58;
+    --blue: #336a9a;
+    --orange: #d87931;
+    --red: #b94a44;
+    --green: #508a5c;
+    --soft-teal: #edf8f6;
+    --soft-orange: #fff6ec;
+    --shadow: 0 18px 44px rgba(24, 43, 49, 0.12);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+  }
+
+  main {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 34px 22px 56px;
+  }
+
+  header {
+    margin-bottom: 24px;
+    border-radius: 8px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    padding: 34px 38px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 8px;
+    background: linear-gradient(90deg, var(--teal), var(--orange), var(--blue));
+  }
+
+  .kicker {
+    margin: 0 0 8px;
+    color: var(--teal-dark);
+    font-weight: 700;
+  }
+
+  h1, h2, h3, p {
+    margin-top: 0;
+  }
+
+  h1 {
+    margin-bottom: 14px;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.14;
+    letter-spacing: 0;
+  }
+
+  h2 {
+    margin-bottom: 14px;
+    font-size: 28px;
+    line-height: 1.22;
+    letter-spacing: 0;
+  }
+
+  h3 {
+    margin-bottom: 10px;
+    font-size: 20px;
+  }
+
+  p, li, td, th {
+    font-size: 16px;
+    line-height: 1.58;
+  }
+
+  .lead {
+    max-width: 890px;
+    margin-bottom: 0;
+    color: var(--muted);
+    font-size: 20px;
+    line-height: 1.55;
+  }
+
+  section {
+    margin-top: 22px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+    padding: 28px 30px;
+    box-shadow: 0 12px 32px rgba(24, 43, 49, 0.08);
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fbfdfd;
+    padding: 18px 20px;
+  }
+
+  .card h3 {
+    color: var(--teal-dark);
+  }
+
+  .metric {
+    border-left: 5px solid var(--teal);
+    background: var(--soft-teal);
+    padding: 16px 18px;
+  }
+
+  .metric span {
+    display: block;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .metric strong {
+    display: block;
+    margin-top: 6px;
+    font-size: 28px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  th, td {
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background: #e8f3f1;
+    color: #153e3b;
+    font-weight: 700;
+  }
+
+  tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .number {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .formula {
+    border: 1px solid #b7d8d4;
+    border-radius: 8px;
+    background: var(--soft-teal);
+    padding: 14px 16px;
+    color: #143c39;
+    font-size: 18px;
+    line-height: 1.55;
+  }
+
+  .formula + .formula {
+    margin-top: 12px;
+  }
+
+  .funnel-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+    gap: 24px;
+    align-items: center;
+  }
+
+  .funnel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .funnel-step {
+    width: var(--w);
+    min-width: 180px;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    color: #ffffff;
+    background: linear-gradient(90deg, var(--teal), var(--blue));
+    box-shadow: 0 8px 18px rgba(31, 127, 121, 0.18);
+  }
+
+  .funnel-step strong,
+  .funnel-step span {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+
+  .funnel-step span {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .legend {
+    display: grid;
+    gap: 10px;
+  }
+
+  .legend-item {
+    border-left: 5px solid var(--teal);
+    background: #f7fbfb;
+    padding: 12px 14px;
+    border-radius: 8px;
+  }
+
+  .legend-item.orange {
+    border-left-color: var(--orange);
+    background: var(--soft-orange);
+  }
+
+  .legend-item.red {
+    border-left-color: var(--red);
+    background: #fff4f3;
+  }
+
+  .callout {
+    margin-top: 16px;
+    border-left: 6px solid var(--orange);
+    border-radius: 8px;
+    background: var(--soft-orange);
+    padding: 16px 18px;
+  }
+
+  .callout.warning {
+    border-left-color: var(--red);
+    background: #fff4f3;
+  }
+
+  .callout.success {
+    border-left-color: var(--green);
+    background: #f2f8f3;
+  }
+
+  ul, ol {
+    margin: 0;
+    padding-left: 1.2em;
+  }
+
+  li + li {
+    margin-top: 8px;
+  }
+
+  .checklist {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .checklist li {
+    margin-top: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fbfdfd;
+    padding: 13px 14px;
+  }
+
+  footer {
+    margin-top: 22px;
+    color: var(--muted);
+    text-align: center;
+    font-size: 14px;
+  }
+
+  @media (max-width: 860px) {
+    main {
+      padding: 18px 14px 42px;
+    }
+
+    header,
+    section {
+      padding: 24px 18px;
+    }
+
+    .grid-2,
+    .grid-3,
+    .funnel-wrap,
+    .checklist {
+      grid-template-columns: 1fr;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    table {
+      min-width: 760px;
+    }
+
+    .funnel-step {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="kicker">第 6 课案例项目</p>
+    <h1>装修公司客户转化漏斗分析</h1>
+    <p class="lead">本项目用一组模拟经营数据，分析装修客户从广告曝光到最终签约的完整转化过程，找出客户流失最多、流失率最高、最值得优先优化的环节，并提出经营改善建议。</p>
+  </header>
+
+  <section>
+    <h2>一、项目背景</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>业务场景</h3>
+        <p>某装修公司分公司做了一轮线上广告投放，希望通过广告获取装修客户线索，再由客服邀约、设计师量房、方案报价，最终完成签约。</p>
+        <p>经理关心的不只是最终签了多少单，还要知道客户主要在哪些环节流失，下一步应该优先改广告、客服邀约、设计方案，还是报价成交。</p>
+      </div>
+      <div class="card">
+        <h3>分析目标</h3>
+        <ul>
+          <li>计算每一步转化率和流失率。</li>
+          <li>计算整体转化率。</li>
+          <li>找出流失人数最多的环节。</li>
+          <li>找出流失率最高的环节。</li>
+          <li>结合经营管理判断优先优化动作。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>二、模拟数据表</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>漏斗步骤</th>
+            <th class="number">人数</th>
+            <th>业务含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>广告曝光</td><td class="number">10000</td><td>客户看到公司广告或活动信息</td></tr>
+          <tr><td>留下联系方式</td><td class="number">800</td><td>客户提交手机号或在线咨询</td></tr>
+          <tr><td>客服有效沟通</td><td class="number">500</td><td>客服成功联系并确认装修需求</td></tr>
+          <tr><td>预约量房</td><td class="number">260</td><td>客户同意预约设计师上门量房</td></tr>
+          <tr><td>实际上门量房</td><td class="number">180</td><td>设计师完成现场量房</td></tr>
+          <tr><td>出设计方案</td><td class="number">120</td><td>设计师完成初步方案</td></tr>
+          <tr><td>报价沟通</td><td class="number">90</td><td>与客户沟通预算和报价</td></tr>
+          <tr><td>最终签约</td><td class="number">36</td><td>客户确认合同并签约</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>三、计算公式</h2>
+    <div class="grid-2">
+      <div>
+        <div class="formula">单步转化率 = 当前步骤人数 / 上一步人数 × 100%</div>
+        <div class="formula">单步流失率 = 1 - 单步转化率</div>
+        <div class="formula">单步流失人数 = 上一步人数 - 当前步骤人数</div>
+        <div class="formula">整体转化率 = 最终签约人数 / 广告曝光人数 × 100%</div>
+      </div>
+      <div class="card">
+        <h3>计算口径说明</h3>
+        <ul>
+          <li>百分比统一保留 1 位小数。</li>
+          <li>每一步只和它的上一环节比较。</li>
+          <li>整体转化率只看起点和终点。</li>
+          <li>流失人数和流失率都要看，不能只看其中一个。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>四、每一步转化率与流失率计算</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>转化环节</th>
+            <th class="number">上一步人数</th>
+            <th class="number">当前人数</th>
+            <th class="number">流失人数</th>
+            <th class="number">单步转化率</th>
+            <th class="number">单步流失率</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>广告曝光 → 留下联系方式</td><td class="number">10000</td><td class="number">800</td><td class="number">9200</td><td class="number">8.0%</td><td class="number">92.0%</td></tr>
+          <tr><td>留下联系方式 → 客服有效沟通</td><td class="number">800</td><td class="number">500</td><td class="number">300</td><td class="number">62.5%</td><td class="number">37.5%</td></tr>
+          <tr><td>客服有效沟通 → 预约量房</td><td class="number">500</td><td class="number">260</td><td class="number">240</td><td class="number">52.0%</td><td class="number">48.0%</td></tr>
+          <tr><td>预约量房 → 实际上门量房</td><td class="number">260</td><td class="number">180</td><td class="number">80</td><td class="number">69.2%</td><td class="number">30.8%</td></tr>
+          <tr><td>实际上门量房 → 出设计方案</td><td class="number">180</td><td class="number">120</td><td class="number">60</td><td class="number">66.7%</td><td class="number">33.3%</td></tr>
+          <tr><td>出设计方案 → 报价沟通</td><td class="number">120</td><td class="number">90</td><td class="number">30</td><td class="number">75.0%</td><td class="number">25.0%</td></tr>
+          <tr><td>报价沟通 → 最终签约</td><td class="number">90</td><td class="number">36</td><td class="number">54</td><td class="number">40.0%</td><td class="number">60.0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>五、整体转化率计算</h2>
+    <div class="grid-3">
+      <div class="metric">
+        <span>广告曝光人数</span>
+        <strong>10000</strong>
+      </div>
+      <div class="metric">
+        <span>最终签约人数</span>
+        <strong>36</strong>
+      </div>
+      <div class="metric">
+        <span>整体转化率</span>
+        <strong>0.4%</strong>
+      </div>
+    </div>
+    <div class="callout">
+      整体转化率 = 36 / 10000 × 100% = 0.4%。这表示每 10000 次广告曝光，最终大约带来 36 个签约客户。
+    </div>
+  </section>
+
+  <section>
+    <h2>六、漏斗图可视化</h2>
+    <div class="funnel-wrap">
+      <div class="funnel" aria-label="装修公司客户转化漏斗图">
+        <div class="funnel-step" style="--w:100%"><strong>广告曝光</strong><span>10000</span></div>
+        <div class="funnel-step" style="--w:86%"><strong>留下联系方式</strong><span>800</span></div>
+        <div class="funnel-step" style="--w:76%"><strong>客服有效沟通</strong><span>500</span></div>
+        <div class="funnel-step" style="--w:66%"><strong>预约量房</strong><span>260</span></div>
+        <div class="funnel-step" style="--w:57%"><strong>实际上门量房</strong><span>180</span></div>
+        <div class="funnel-step" style="--w:48%"><strong>出设计方案</strong><span>120</span></div>
+        <div class="funnel-step" style="--w:40%"><strong>报价沟通</strong><span>90</span></div>
+        <div class="funnel-step" style="--w:32%"><strong>最终签约</strong><span>36</span></div>
+      </div>
+      <div class="legend">
+        <div class="legend-item">
+          <strong>人数越往下越少</strong>
+          <p>说明客户在每个环节都有流失，最终签约人数由所有环节共同决定。</p>
+        </div>
+        <div class="legend-item orange">
+          <strong>图形用于直观理解</strong>
+          <p>为了保证文字可读，图中宽度做了视觉压缩，准确判断以计算表为准。</p>
+        </div>
+        <div class="legend-item red">
+          <strong>重点关注异常变窄处</strong>
+          <p>广告到留资、报价到签约，是本案例中需要重点复盘的两个位置。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>七、关键问题发现</h2>
+    <div class="grid-3">
+      <div class="card">
+        <h3>流失人数最多</h3>
+        <p>广告曝光 → 留下联系方式，流失 9200 人。</p>
+        <p>这是绝对人数最大的流失，说明前端获客质量、广告内容或留资路径存在明显优化空间。</p>
+      </div>
+      <div class="card">
+        <h3>流失率最高</h3>
+        <p>广告曝光 → 留下联系方式，流失率 92.0%。</p>
+        <p>该环节同时是流失人数最多和流失率最高的环节，应列为第一优先级。</p>
+      </div>
+      <div class="card">
+        <h3>后段风险</h3>
+        <p>报价沟通 → 最终签约，流失率 60.0%。</p>
+        <p>虽然流失人数只有 54 人，但这些客户已经走到报价阶段，成交意向更强，不能忽视。</p>
+      </div>
+    </div>
+    <div class="callout warning">
+      结论：第一优先优化“广告曝光 → 留下联系方式”；第二重点优化“报价沟通 → 最终签约”。前者影响流量入口，后者影响成交效率。
+    </div>
+  </section>
+
+  <section>
+    <h2>八、业务原因分析</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>前端留资率低的可能原因</h3>
+        <ul>
+          <li>广告投放人群过宽，很多曝光来自非近期装修客户。</li>
+          <li>广告只强调低价，没有说明设计能力、施工质量和售后保障。</li>
+          <li>落地页案例不足，客户无法快速建立信任。</li>
+          <li>留资表单太复杂，客户还没有足够信任就被要求填写太多信息。</li>
+          <li>缺少明确利益点，例如免费量房、户型方案、预算评估。</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>报价后签约率低的可能原因</h3>
+        <ul>
+          <li>报价单不够透明，客户担心后续增项。</li>
+          <li>方案没有打中客户的居住痛点，只停留在平面布局。</li>
+          <li>设计师没有讲清楚材料、工艺和服务的差异。</li>
+          <li>报价后跟进不及时，客户被竞争对手截流。</li>
+          <li>缺少成交辅助材料，例如样板间、工地参观、客户口碑。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>九、优化建议</h2>
+    <div class="grid-3">
+      <div class="card">
+        <h3>市场投放优化</h3>
+        <ul>
+          <li>按交房小区、户型面积、预算区间细分投放。</li>
+          <li>广告内容加入真实案例、装修前后对比和预算参考。</li>
+          <li>落地页首屏突出“免费量房 + 初步预算 + 同小区案例”。</li>
+          <li>留资表单只保留手机号、房屋面积、装修时间三个核心字段。</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>客服邀约优化</h3>
+        <ul>
+          <li>设置 5 分钟内首次联系的响应要求。</li>
+          <li>建立统一话术，先确认需求，再推动预约。</li>
+          <li>对未接通、未预约客户设置二次和三次跟进。</li>
+          <li>记录客户预算、风格、入住时间和核心顾虑。</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>报价成交优化</h3>
+        <ul>
+          <li>报价单拆分材料、工艺、人工、设计和售后内容。</li>
+          <li>为客户准备同户型案例和不同预算档位方案。</li>
+          <li>报价沟通后 24 小时内复盘客户疑虑。</li>
+          <li>邀请高意向客户参观样板间或在施工地。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>十、经营指标分析</h2>
+    <div class="grid-3">
+      <div class="metric">
+        <span>广告投放成本</span>
+        <strong>30000 元</strong>
+      </div>
+      <div class="metric">
+        <span>平均合同额</span>
+        <strong>120000 元</strong>
+      </div>
+      <div class="metric">
+        <span>签约客户数</span>
+        <strong>36 单</strong>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-top: 18px;">
+      <div class="formula">获客成本 = 30000 / 36 = 833.3 元 / 单</div>
+      <div class="formula">签约收入 = 36 × 120000 = 4320000 元</div>
+    </div>
+    <div class="callout">
+      说明：这里的获客成本只计算广告投放成本，没有计入人工、门店、设计和交付成本。实际经营中还应继续计算毛利和净利润。
+    </div>
+  </section>
+
+  <section>
+    <h2>十一、关键环节改善模拟</h2>
+    <p>假设先优化“广告曝光 → 留下联系方式”，把留资率从 8.0% 提升到 10.0%，后续各环节转化率保持不变。</p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>指标</th>
+            <th class="number">当前情况</th>
+            <th class="number">改善后估算</th>
+            <th class="number">变化</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>留下联系方式人数</td><td class="number">800</td><td class="number">1000</td><td class="number">+200</td></tr>
+          <tr><td>预计最终签约人数</td><td class="number">36</td><td class="number">45</td><td class="number">+9</td></tr>
+          <tr><td>预计签约收入</td><td class="number">4320000 元</td><td class="number">5400000 元</td><td class="number">+1080000 元</td></tr>
+          <tr><td>广告获客成本</td><td class="number">833.3 元 / 单</td><td class="number">666.7 元 / 单</td><td class="number">下降 166.6 元 / 单</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout success">
+      经营意义：如果广告预算不变，只提升前端留资率，就可能带来更多签约客户，并降低单个签约客户的广告获客成本。
+    </div>
+  </section>
+
+  <section>
+    <h2>十二、优先优化环节判断</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>为什么先优化前端留资</h3>
+        <ul>
+          <li>该环节流失人数最多：9200 人。</li>
+          <li>该环节流失率最高：92.0%。</li>
+          <li>前端基数最大，小幅提升也会影响后续所有环节。</li>
+          <li>优化动作相对明确，可以从投放人群、广告内容、落地页和表单开始。</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>为什么同步关注报价签约</h3>
+        <ul>
+          <li>报价阶段客户意向更强，已投入客服和设计师时间。</li>
+          <li>流失率达到 60.0%，说明成交环节仍有明显问题。</li>
+          <li>改善报价解释和跟进机制，通常比继续加广告更可控。</li>
+          <li>该环节直接影响最终签约，不应只归因于客源质量。</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout">
+      管理建议：市场部先负责提升留资率；销售和设计团队同步提升报价签约率。每周复盘一次同一张漏斗表，观察改善是否真正传导到签约人数。
+    </div>
+  </section>
+
+  <section>
+    <h2>十三、项目总结</h2>
+    <ul class="checklist">
+      <li><strong>看数据：</strong>10000 次广告曝光最终带来 36 单签约，整体转化率为 0.4%。</li>
+      <li><strong>找问题：</strong>广告曝光到留下联系方式流失 9200 人，流失率 92.0%。</li>
+      <li><strong>看后段：</strong>报价沟通到最终签约流失率 60.0%，说明成交能力仍需提升。</li>
+      <li><strong>定优先级：</strong>第一优先优化前端留资，第二重点优化报价签约。</li>
+      <li><strong>算价值：</strong>留资率从 8.0% 提升到 10.0%，预计多 9 单，多 1080000 元签约收入。</li>
+      <li><strong>管理动作：</strong>用同一张漏斗表持续复盘市场、客服、设计、销售各环节表现。</li>
+    </ul>
+    <div class="callout success">
+      本案例说明：漏斗分析适合经营管理者用来发现客户流失位置、判断优化优先级，并把数据分析结果转化为具体经营动作。
+    </div>
+  </section>
+
+  <footer>装修公司客户转化漏斗分析案例项目 | HTML 离线版</footer>
+</main>
+</body>
+</html>
