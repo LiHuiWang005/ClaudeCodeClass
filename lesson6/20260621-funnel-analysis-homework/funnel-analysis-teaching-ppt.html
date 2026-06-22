@@ -1,0 +1,1136 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>漏斗分析教学PPT教案</title>
+  <style>
+    :root {
+      --primary: #1f4e79;
+      --secondary: #2e86ab;
+      --accent: #f28c28;
+      --danger: #d9534f;
+      --success: #4caf50;
+      --bg: #f6f8fa;
+      --text: #2f3a45;
+      --muted: #6b7785;
+      --line: #d9e2ec;
+      --card: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 24px;
+      background: rgba(255, 255, 255, 0.95);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+
+    .toolbar-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 14px;
+      color: var(--primary);
+      background: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.primary {
+      color: #fff;
+      border-color: var(--primary);
+      background: var(--primary);
+    }
+
+    button:disabled {
+      color: #9aa6b2;
+      background: #eef2f6;
+      cursor: not-allowed;
+    }
+
+    .page-indicator {
+      min-width: 58px;
+      text-align: center;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .deck {
+      width: min(1180px, calc(100vw - 40px));
+      margin: 28px auto 48px;
+    }
+
+    .slide {
+      display: none;
+      position: relative;
+      aspect-ratio: 16 / 9;
+      min-height: 620px;
+      padding: 42px 50px;
+      overflow: hidden;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 18px 50px rgba(31, 78, 121, 0.12);
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+    }
+
+    .slide-number {
+      position: absolute;
+      right: 34px;
+      bottom: 26px;
+      color: #92a0ad;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .kicker {
+      margin: 0 0 10px;
+      color: var(--secondary);
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      color: var(--primary);
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: 42px;
+      line-height: 1.18;
+    }
+
+    h2 {
+      font-size: 34px;
+      line-height: 1.2;
+    }
+
+    h3 {
+      font-size: 21px;
+      line-height: 1.35;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.65;
+    }
+
+    ul,
+    ol {
+      margin: 0;
+      padding-left: 22px;
+      line-height: 1.65;
+    }
+
+    li {
+      margin: 5px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--primary);
+      background: #edf4fa;
+      font-weight: 800;
+    }
+
+    td:last-child,
+    th:last-child {
+      text-align: left;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 26px;
+      margin-top: 26px;
+      align-items: stretch;
+    }
+
+    .two-col.wide-left {
+      grid-template-columns: 1.08fr 0.92fr;
+    }
+
+    .content-stack {
+      display: grid;
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .card {
+      padding: 20px;
+      background: #fbfdff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .card h3 {
+      margin-bottom: 12px;
+    }
+
+    .note {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-left: 5px solid var(--accent);
+      background: #fff8ef;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    .note strong {
+      color: #9d560f;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .tag {
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: var(--primary);
+      background: #eaf3f9;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .hero-layout {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 34px;
+      align-items: center;
+      height: calc(100% - 28px);
+    }
+
+    .subtitle {
+      margin-top: 14px;
+      color: var(--secondary);
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .outcomes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .outcome {
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f9fbfd;
+      font-weight: 700;
+    }
+
+    .funnel {
+      display: grid;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .funnel-row {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 50px;
+      margin: 0 auto;
+      padding: 10px 18px;
+      color: #fff;
+      background: var(--primary);
+      border-radius: 6px;
+      font-weight: 800;
+      box-shadow: inset 0 -16px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .funnel-row:nth-child(2) {
+      background: #286996;
+    }
+
+    .funnel-row:nth-child(3) {
+      background: var(--secondary);
+    }
+
+    .funnel-row:nth-child(4) {
+      background: #50a2bd;
+    }
+
+    .funnel-row:nth-child(5) {
+      background: var(--accent);
+    }
+
+    .funnel-row:nth-child(6) {
+      background: var(--success);
+    }
+
+    .funnel-row small {
+      margin-left: 8px;
+      font-size: 14px;
+      opacity: 0.92;
+    }
+
+    .funnel-100 { width: 100%; }
+    .funnel-80 { width: 84%; }
+    .funnel-50 { width: 64%; }
+    .funnel-30 { width: 48%; }
+    .funnel-15 { width: 34%; }
+    .funnel-8 { width: 24%; }
+
+    .mini-funnel {
+      display: grid;
+      gap: 9px;
+      padding: 22px;
+      background: #f5f9fc;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .definition-box {
+      padding: 24px;
+      border-radius: 8px;
+      background: #f5f9fc;
+      border: 1px solid var(--line);
+    }
+
+    .definition-box strong {
+      color: var(--primary);
+      font-size: 20px;
+    }
+
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .scenario {
+      min-height: 126px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+
+    .scenario h3 {
+      margin-bottom: 8px;
+      font-size: 19px;
+    }
+
+    .scenario .path {
+      color: var(--secondary);
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .formula-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .formula-card {
+      min-height: 118px;
+      padding: 18px;
+      border-radius: 8px;
+      background: #f9fbfd;
+      border: 1px solid var(--line);
+    }
+
+    .formula-card h3 {
+      margin-bottom: 10px;
+      font-size: 19px;
+    }
+
+    .formula {
+      color: var(--primary);
+      font-weight: 800;
+      line-height: 1.55;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .step {
+      min-height: 110px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+
+    .step-number {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      margin-bottom: 10px;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--primary);
+      font-weight: 800;
+    }
+
+    .process {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 20px;
+      align-items: center;
+    }
+
+    .process-node {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      color: #fff;
+      background: var(--primary);
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .process-node:nth-child(2n) {
+      background: var(--secondary);
+    }
+
+    .data-table td:nth-child(2),
+    .data-table th:nth-child(2) {
+      text-align: right;
+    }
+
+    .highlight {
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    .analysis-card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+
+    .analysis-card h3 {
+      margin-bottom: 8px;
+      font-size: 19px;
+    }
+
+    .compact th,
+    .compact td {
+      padding: 8px 9px;
+      font-size: 13px;
+    }
+
+    .warn-cell {
+      color: var(--danger);
+      font-weight: 900;
+      background: #fff2f2;
+    }
+
+    .accent-cell {
+      color: #a45a10;
+      font-weight: 900;
+      background: #fff8ef;
+    }
+
+    .insight-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .insight {
+      padding: 18px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fbfdff;
+    }
+
+    .insight strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--primary);
+      font-size: 20px;
+    }
+
+    .ai-prompt {
+      white-space: pre-wrap;
+      margin: 14px 0 0;
+      padding: 16px;
+      color: #213547;
+      background: #f1f5f9;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .loop {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .loop-step {
+      min-height: 118px;
+      padding: 18px;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--primary);
+      font-weight: 800;
+    }
+
+    .loop-step:nth-child(2) {
+      background: var(--secondary);
+    }
+
+    .loop-step:nth-child(3) {
+      background: var(--accent);
+    }
+
+    .loop-step:nth-child(4) {
+      background: var(--success);
+    }
+
+    .project-report {
+      width: min(1050px, calc(100vw - 40px));
+      margin: 0 auto 56px;
+      padding: 44px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 18px 50px rgba(31, 78, 121, 0.10);
+    }
+
+    .project-report h2 {
+      margin-bottom: 22px;
+    }
+
+    .project-report h3 {
+      margin: 28px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .project-report p {
+      margin-bottom: 10px;
+    }
+
+    .report-funnel {
+      max-width: 760px;
+      margin: 16px auto;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f5f9fc;
+    }
+
+    @media (max-width: 900px) {
+      .toolbar {
+        padding: 10px 12px;
+      }
+
+      .toolbar-title {
+        display: none;
+      }
+
+      .deck {
+        width: calc(100vw - 20px);
+        margin-top: 12px;
+      }
+
+      .slide {
+        aspect-ratio: auto;
+        min-height: auto;
+        padding: 30px 22px 58px;
+      }
+
+      .hero-layout,
+      .two-col,
+      .two-col.wide-left,
+      .scenario-grid,
+      .formula-grid,
+      .analysis-grid,
+      .insight-row,
+      .loop,
+      .steps,
+      .process,
+      .outcomes {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 32px;
+      }
+
+      h2 {
+        font-size: 27px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .toolbar {
+        display: none;
+      }
+
+      .deck {
+        width: 100%;
+        margin: 0;
+      }
+
+      .slide {
+        display: block !important;
+        min-height: 100vh;
+        margin: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="toolbar" aria-label="PPT controls">
+    <div class="toolbar-title">漏斗分析教学PPT教案</div>
+    <div class="toolbar-actions">
+      <button id="prevBtn" type="button">上一页</button>
+      <span class="page-indicator" id="pageIndicator">1 / 12</span>
+      <button id="nextBtn" class="primary" type="button">下一页</button>
+      <button type="button" onclick="window.print()">打印 / 导出 PDF</button>
+    </div>
+  </nav>
+
+  <main class="deck">
+    <section class="slide active">
+      <div class="hero-layout">
+        <div>
+          <p class="kicker">Funnel Analysis 入门课程</p>
+          <h1>漏斗分析<br>教学PPT教案</h1>
+          <p class="subtitle">以暖通空调维保合同销售为例</p>
+          <div class="outcomes">
+            <div class="outcome">会看漏斗</div>
+            <div class="outcome">会算转化</div>
+            <div class="outcome">会找流失</div>
+            <div class="outcome">会提建议</div>
+          </div>
+          <div class="note">
+            <strong>讲解说明：</strong>本课程使用售后维保合同销售流程做案例，把抽象的数据分析方法放回熟悉的业务场景中理解。
+          </div>
+        </div>
+        <div class="mini-funnel" aria-label="维保合同销售漏斗示意图">
+          <div class="funnel">
+            <div class="funnel-row funnel-100">目标客户 <small>100</small></div>
+            <div class="funnel-row funnel-80">客户拜访 <small>80</small></div>
+            <div class="funnel-row funnel-50">提交报价 <small>50</small></div>
+            <div class="funnel-row funnel-30">技术交流 <small>30</small></div>
+            <div class="funnel-row funnel-15">商务谈判 <small>15</small></div>
+            <div class="funnel-row funnel-8">签订合同 <small>8</small></div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-number">1 / 12</div>
+    </section>
+
+    <section class="slide">
+      <p class="kicker">概念理解</p>
+      <h2>什么是漏斗分析</h2>
+      <div class="two-col wide-left">
+        <div class="content-stack">
+          <div class="definition-box">
+            <p><strong>漏斗分析</strong>是一种分析客户在多阶段流程中逐步流失与转化的方法。</p>
+          </div>
+          <ul>
+            <li>每一层代表业务流程中的一个关键步骤。</li>
+            <li>每一层的数量表示仍然留在流程中的客户数。</li>
+            <li>通过比较相邻阶段，可以发现哪里流失最多、哪里需要优化。</li>
+          </ul>
+          <div class="note">
+            <strong>讲解说明：</strong>可以把它理解为“很多潜在客户进入流程，经过拜访、报价、谈判后，最后只有一部分签约”。重点不是画图，而是发现业务改进点。
+          </div>
+        </div>
+        <div class="mini-funnel">
+          <div class="funnel">
+            <div class="funnel-row funnel-100">潜在客户多</div>
+            <div class="funnel-row funnel-80">进入跟进</div>
+            <div class="funnel-row funnel-50">产生需求</div>
+            <div class="funnel-row funnel-30">深入沟通</div>
+            <div class="funnel-row funnel-15">进入谈判</div>
+            <div class="funnel-row funnel-8">最终成交少</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-number">2 / 12</div>
+    </section>
+
+    <section class="slide">
+      <p class="kicker">应用场景</p>
+      <h2>漏斗分析适合哪些业务</h2>
+      <div class="scenario-grid">
+        <div class="scenario">
+          <h3>销售转化</h3>
+          <p class="path">线索 → 拜访 → 报价 → 成交</p>
+          <p>用于提升成交率，判断客户在哪一步离开。</p>
+        </div>
+        <div class="scenario">
+          <h3>售后服务</h3>
+          <p class="path">报修 → 派工 → 到场 → 完成</p>
+          <p>用于缩短服务周期，发现响应或处理瓶颈。</p>
+        </div>
+        <div class="scenario">
+          <h3>设备维保</h3>
+          <p class="path">设备清单 → 客户沟通 → 方案 → 合同</p>
+          <p>用于提升续约率和维保合同转化效率。</p>
+        </div>
+        <div class="scenario">
+          <h3>项目跟进</h3>
+          <p class="path">需求确认 → 方案设计 → 报价 → 签约</p>
+          <p>用于识别方案、预算、决策链条中的阻塞点。</p>
+        </div>
+      </div>
+      <div class="note">
+        <strong>讲解说明：</strong>只要业务有明确步骤，就可以使用漏斗分析。暖通空调行业中的售后维保、续约销售、报价转化和项目推进都很适合。
+      </div>
+      <div class="slide-number">3 / 12</div>
+    </section>
+
+    <section class="slide">
+      <p class="kicker">核心指标</p>
+      <h2>转化率、流失率和总体转化率</h2>
+      <div class="formula-grid">
+        <div class="formula-card">
+          <h3>阶段转化率</h3>
+          <p class="formula">下一阶段客户数 ÷ 当前阶段客户数 × 100%</p>
+        </div>
+        <div class="formula-card">
+          <h3>阶段流失率</h3>
+          <p class="formula">1 - 阶段转化率</p>
+        </div>
+        <div class="formula-card">
+          <h3>流失客户数</h3>
+          <p class="formula">当前阶段客户数 - 下一阶段客户数</p>
+        </div>
+        <div class="formula-card">
+          <h3>总体转化率</h3>
+          <p class="formula">最终签约客户数 ÷ 初始目标客户数 × 100%</p>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <h3>示例</h3>
+          <p>客户拜访 80 家，提交报价 50 家。</p>
+          <p>阶段转化率 = 50 ÷ 80 = <span class="highlight">62.5%</span></p>
+          <p>流失率 = 1 - 62.5% = <span class="highlight">37.5%</span></p>
+          <p>流失客户数 = 80 - 50 = <span class="highlight">30 家</span></p>
+        </div>
+        <div class="note">
+          <strong>讲解说明：</strong>转化率回答“有多少客户进入下一步”，流失率回答“有多少客户没有继续走下去”。两个指标一起看，才能判断流程效率。
+        </div>
+      </div>
+      <div class="slide-number">4 / 12</div>
+    </section>
+
+    <section class="slide">
+      <p class="kicker">图表解读</p>
+      <h2>漏斗图的构成和解读</h2>
+      <div class="two-col wide-left">
+        <div>
+          <div class="card">
+            <h3>漏斗图通常包含</h3>
+            <ul>
+              <li>阶段名称，例如目标客户、客户拜访、提交报价。</li>
+              <li>每阶段客户数量，用于判断规模变化。</li>
+              <li>阶段转化率或占比，用于判断推进效率。</li>
+              <li>流失数量，用于定位损失最大的环节。</li>
+              <li>异常标记，用于提示重点关注位置。</li>
+            </ul>
+          </div>
+          <div class="steps">
+            <div class="step"><span class="step-number">1</span><p>先看总体转化率</p></div>
+            <div class="step"><span class="step-number">2</span><p>再看阶段转化率</p></div>
+            <div class="step"><span class="step-number">3</span><p>找最大流失环节</p></div>
+            <div class="step"><span class="step-number">4</span><p>结合业务解释原因</p></div>
+            <div class="step"><span class="step-number">5</span><p>提出可执行动作</p></div>
+          </div>
+        </div>
+        <div class="mini-funnel">
+          <div class="funnel">
+            <div class="funnel-row funnel-100">目标客户 <small>100</small></div>
+            <div class="funnel-row funnel-80">客户拜访 <small>80</small></div>
+            <div class="funnel-row funnel-50">提交报价 <small>50</small></div>
+            <div class="funnel-row funnel-30">技术交流 <small>30</small></div>
+            <div class="funnel-row funnel-15">商务谈判 <small>15</small></div>
+            <div class="funnel-row funnel-8">签订合同 <small>8</small></div>
+          </div>
+          <div class="note">
+            <strong>讲解说明：</strong>不能只看最后签约 8 家，还要看客户在哪个阶段掉得最多。数字负责发现问题，业务经验负责解释原因。
+          </div>
+        </div>
+      </div>
+      <div class="slide-number">5 / 12</div>
+    </section>
+
+    <section class="slide">
+      <p class="kicker">案例介绍</p>
+      <h2>维保合同销售漏斗分析</h2>
+      <div class="content-stack">
+        <div class="card">
+          <h3>案例背景</h3>
+          <p>某暖通空调服务团队希望提升年度维保合同签约数量。团队整理了一个季度内 100 家目标客户的跟进记录，用漏斗分析查找客户流失环节。</p>
+        </div>
+        <div>
+          <h3>销售流程</h3>
+          <div class="process" aria-label="维保合同销售流程">
+            <div class="process-node">目标客户</div>
+            <div class="process-node">客户拜访</div>
+            <div class="process-node">提交报价</div>
+            <div class="process-node">技术交流</div>
+            <div class="process-node">商务谈判</div>
+            <div class="process-node">签订合同</div>
+          </div>
+        </div>
+        <div class="two-col">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>阶段</th>
+                <th>客户数</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>目标客户</td><td>100</td></tr>
+              <tr><td>客户拜访</td><td>80</td></tr>
+              <tr><td>提交报价</td><td>50</td></tr>
+              <tr><td>技术交流</td><td>30</td></tr>
+              <tr><td>商务谈判</td><td>15</td></tr>
+              <tr><td>签订合同</td><td>8</td></tr>
+            </tbody>
+          </table>
+          <div class="note">
+            <strong>讲解说明：</strong>这组数据是模拟数据，但符合售后维保销售常见情况。学员要关注每一阶段客户减少是否合理，并为下一步计算转化率做准备。
+          </div>
+        </div>
+      </div>
+      <div class="slide-number">6 / 12</div>
+    </section>
+
+    <section class="slide">
+      <p class="kicker">案例分析过程</p>
+      <h2>从业务问题到数据分析步骤</h2>
+      <div class="analysis-grid">
+        <div class="analysis-card">
+          <h3>1. 明确业务目标</h3>
+          <p>提升维保合同签约率，找出客户在哪些阶段流失。</p>
+        </div>
+        <div class="analysis-card">
+          <h3>2. 确认漏斗阶段</h3>
+          <p>目标客户 → 客户拜访 → 提交报价 → 技术交流 → 商务谈判 → 签订合同。</p>
+        </div>
+        <div class="analysis-card">
+          <h3>3. 整理客户数量</h3>
+          <p>记录每个阶段剩余客户数，保证阶段口径一致。</p>
+        </div>
+        <div class="analysis-card">
+          <h3>4. 计算关键指标</h3>
+          <p>计算转化率、流失率、流失客户数和总体转化率。</p>
+        </div>
+        <div class="analysis-card">
+          <h3>5. 找出流失环节</h3>
+          <p>同时看绝对流失客户数和阶段流失率。</p>
+        </div>
+        <div class="analysis-card">
+          <h3>6. 输出优化建议</h3>
+          <p>结合销售跟进、技术方案、客户预算和决策链分析原因。</p>
+        </div>
+      </div>
+      <div class="note">
+        <strong>讲解说明：</strong>漏斗分析要先定义阶段顺序，否则计算没有意义。AI 可以帮助整理表格和生成初稿，但阶段口径和业务解释必须由人来确认。
+      </div>
+      <div class="slide-number">7 / 12</div>
+    </section>
+
+    <section class="slide">
+      <p class="kicker">指标计算</p>
+      <h2>转化率和流失率计算结果</h2>
+      <table class="compact">
+        <thead>
+          <tr>
+            <th>当前阶段</th>
+            <th>下一阶段</th>
+            <th>当前客户数</th>
+            <th>下一阶段客户数</th>
+            <th>转化率</th>
+            <th>流失客户数</th>
+            <th>流失率</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>目标客户</td><td>客户拜访</td><td>100</td><td>80</td><td>80.0%</td><td>20</td><td>20.0%</td></tr>
+          <tr><td>客户拜访</td><td>提交报价</td><td>80</td><td>50</td><td>62.5%</td><td class="accent-cell">30</td><td>37.5%</td></tr>
+          <tr><td>提交报价</td><td>技术交流</td><td>50</td><td>30</td><td>60.0%</td><td>20</td><td>40.0%</td></tr>
+          <tr><td>技术交流</td><td>商务谈判</td><td>30</td><td>15</td><td>50.0%</td><td>15</td><td class="warn-cell">50.0%</td></tr>
+          <tr><td>商务谈判</td><td>签订合同</td><td>15</td><td>8</td><td>53.3%</td><td>7</td><td>46.7%</td></tr>
+        </tbody>
+      </table>
+      <div class="insight-row">
+        <div class="insight">
+          <strong>总体转化率</strong>
+          <p>8 ÷ 100 × 100% = <span class="highlight">8.0%</span></p>
+        </div>
+        <div class="insight">
+          <strong>最大流失客户数</strong>
+          <p>客户拜访 → 提交报价，流失 <span class="highlight">30家</span>。</p>
+        </div>
+        <div class="insight">
+          <strong>最高流失率</strong>
+          <p>技术交流 → 商务谈判，流失率 <span class="highlight">50.0%</span>。</p>
+        </div>
+      </div>
+      <div class="note">
+        <strong>讲解说明：</strong>绝对流失客户数用于判断损失规模，流失率用于判断阶段效率。两种角度都要看，不能只盯一个数字。
+      </div>
+      <div class="slide-number">8 / 12</div>
+    </section>
+
+    <section class="slide">
+      <p class="kicker">问题诊断</p>
+      <h2>问题发现与原因分析</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>问题环节</th>
+            <th>数据表现</th>
+            <th>可能原因</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>客户拜访 → 提交报价</td>
+            <td class="accent-cell">流失30家</td>
+            <td>客户需求不明确、预算不足、拜访后跟进不及时、设备资料不完整。</td>
+          </tr>
+          <tr>
+            <td>技术交流 → 商务谈判</td>
+            <td class="warn-cell">流失率50.0%</td>
+            <td>技术方案价值没有讲清，节能收益未量化，决策人未参与，竞争对手介入。</td>
+          </tr>
+          <tr>
+            <td>商务谈判 → 签订合同</td>
+            <td>流失率46.7%</td>
+            <td>价格异议、合同条款分歧、付款周期较长、客户审批流程复杂。</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <strong>讲解说明：</strong>数据只能指出“哪里有问题”，不能自动说明“为什么”。原因分析要结合现场沟通、客户类型、设备状态、报价策略和竞争环境。
+      </div>
+      <div class="slide-number">9 / 12</div>
+    </section>
+
+    <section class="slide">
+      <p class="kicker">改进动作</p>
+      <h2>围绕关键流失环节提出优化建议</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>环节</th>
+            <th>优化建议</th>
+            <th>预期效果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>拜访后未报价</td><td>设计标准需求确认表；拜访后48小时内输出初步方案。</td><td>提高报价推进率。</td></tr>
+          <tr><td>技术交流流失</td><td>增加节能测算、故障风险、停机损失说明。</td><td>提高客户认可度。</td></tr>
+          <tr><td>商务谈判流失</td><td>设置基础版、标准版、保障版三档维保套餐。</td><td>降低价格沟通难度。</td></tr>
+          <tr><td>决策链复杂</td><td>识别使用部门、设备部门、采购部门和财务部门。</td><td>提高推进效率。</td></tr>
+          <tr><td>跟进不连续</td><td>建立客户跟进台账和下次行动日期。</td><td>减少沉默客户。</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <strong>讲解说明：</strong>优化建议要具体，不能只写“加强沟通”。每条建议都要对应一个数据问题，最好能落到表单、时限、话术、方案或管理机制。
+      </div>
+      <div class="slide-number">10 / 12</div>
+    </section>
+
+    <section class="slide">
+      <p class="kicker">课后练习</p>
+      <h2>练习与AI辅助分析</h2>
+      <div class="two-col">
+        <div>
+          <h3>练习数据</h3>
+          <table class="compact">
+            <thead><tr><th>阶段</th><th>客户数</th></tr></thead>
+            <tbody>
+              <tr><td>目标客户</td><td>120</td></tr>
+              <tr><td>客户拜访</td><td>90</td></tr>
+              <tr><td>提交报价</td><td>54</td></tr>
+              <tr><td>技术交流</td><td>36</td></tr>
+              <tr><td>商务谈判</td><td>20</td></tr>
+              <tr><td>签订合同</td><td>12</td></tr>
+            </tbody>
+          </table>
+          <ol>
+            <li>计算每阶段转化率和流失率。</li>
+            <li>找出最大流失客户数环节。</li>
+            <li>找出最高流失率环节。</li>
+            <li>写出3条业务优化建议。</li>
+          </ol>
+        </div>
+        <div>
+          <h3>AI提示词</h3>
+          <div class="ai-prompt">你是一名数据分析顾问。请根据以下暖通空调维保合同销售漏斗数据，计算各阶段转化率、流失率、流失客户数，找出最大流失环节，并从销售管理、技术方案、客户预算、竞争环境四个角度分析原因，最后给出可执行优化建议。
+
+数据：目标客户120家，客户拜访90家，提交报价54家，技术交流36家，商务谈判20家，签订合同12家。</div>
+        </div>
+      </div>
+      <div class="note">
+        <strong>讲解说明：</strong>AI 可以辅助计算和写报告，但学员必须检查公式是否正确，并把 AI 输出和手工计算结果进行对照。
+      </div>
+      <div class="slide-number">11 / 12</div>
+    </section>
+
+    <section class="slide">
+      <p class="kicker">课程总结</p>
+      <h2>掌握漏斗分析的完整闭环</h2>
+      <div class="loop">
+        <div class="loop-step">看数据<br><br>整理每个阶段客户数</div>
+        <div class="loop-step">找问题<br><br>计算转化率和流失率</div>
+        <div class="loop-step">分原因<br><br>结合业务经验解释流失</div>
+        <div class="loop-step">做优化<br><br>提出可执行改进动作</div>
+      </div>
+      <div class="content-stack">
+        <div class="card">
+          <h3>本案例最终结论</h3>
+          <ul>
+            <li>总体转化率：<span class="highlight">8.0%</span>。</li>
+            <li>最大流失客户数环节：客户拜访 → 提交报价。</li>
+            <li>最高流失率环节：技术交流 → 商务谈判。</li>
+            <li>后续重点：需求确认、报价速度、方案价值表达、决策人参与和客户跟进机制。</li>
+          </ul>
+        </div>
+        <div class="note">
+          <strong>讲解说明：</strong>未来可以把同样方法用于续约率分析、报价转化分析、服务响应流程分析和重点客户跟进复盘。
+        </div>
+      </div>
+      <div class="slide-number">12 / 12</div>
+    </section>
+  </main>
+<script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const pageIndicator = document.getElementById("pageIndicator");
+    let currentIndex = 0;
+
+    function renderSlide() {
+      slides.forEach((slide, index) => {
+        slide.classList.toggle("active", index === currentIndex);
+      });
+      pageIndicator.textContent = `${currentIndex + 1} / ${slides.length}`;
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.disabled = currentIndex === slides.length - 1;
+    }
+
+    function moveSlide(offset) {
+      currentIndex = Math.min(Math.max(currentIndex + offset, 0), slides.length - 1);
+      renderSlide();
+    }
+
+    prevBtn.addEventListener("click", () => moveSlide(-1));
+    nextBtn.addEventListener("click", () => moveSlide(1));
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") moveSlide(-1);
+      if (event.key === "ArrowRight") moveSlide(1);
+    });
+
+    renderSlide();
+  </script>
+</body>
+</html>

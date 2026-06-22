@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>案例项目报告：维保合同销售漏斗分析</title>
+  <style>
+    :root {
+      --primary: #1f4e79;
+      --secondary: #2e86ab;
+      --accent: #f28c28;
+      --danger: #d9534f;
+      --success: #4caf50;
+      --bg: #f6f8fa;
+      --text: #2f3a45;
+      --muted: #6b7785;
+      --line: #d9e2ec;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.7;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: rgba(255, 255, 255, 0.95);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+
+    .toolbar strong {
+      color: var(--primary);
+    }
+
+    button {
+      border: 1px solid var(--primary);
+      border-radius: 6px;
+      padding: 8px 14px;
+      color: #fff;
+      background: var(--primary);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    main {
+      width: min(1040px, calc(100vw - 40px));
+      margin: 28px auto 56px;
+      padding: 48px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 18px 50px rgba(31, 78, 121, 0.10);
+    }
+
+    .cover {
+      padding-bottom: 26px;
+      margin-bottom: 28px;
+      border-bottom: 4px solid var(--primary);
+    }
+
+    .kicker {
+      margin: 0 0 8px;
+      color: var(--secondary);
+      font-weight: 800;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      color: var(--primary);
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: 38px;
+      line-height: 1.2;
+    }
+
+    h2 {
+      margin-top: 30px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+      font-size: 24px;
+    }
+
+    p {
+      margin: 10px 0;
+    }
+
+    ol,
+    ul {
+      margin: 10px 0;
+      padding-left: 24px;
+    }
+
+    table {
+      width: 100%;
+      margin: 14px 0;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--primary);
+      background: #edf4fa;
+      font-weight: 800;
+    }
+
+    td:nth-child(n+2):not(:last-child),
+    th:nth-child(n+2):not(:last-child) {
+      text-align: right;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .summary-card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f9fbfd;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .summary-card strong {
+      display: block;
+      margin-top: 6px;
+      color: var(--primary);
+      font-size: 28px;
+      line-height: 1.15;
+    }
+
+    .summary-card.final strong {
+      color: var(--success);
+    }
+
+    .funnel-wrap {
+      max-width: 780px;
+      margin: 18px auto;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f5f9fc;
+    }
+
+    .funnel {
+      display: grid;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .funnel-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      margin: 0 auto;
+      padding: 10px 18px;
+      color: #fff;
+      border-radius: 6px;
+      background: var(--primary);
+      font-weight: 800;
+    }
+
+    .funnel-row:nth-child(2) { background: #286996; }
+    .funnel-row:nth-child(3) { background: var(--secondary); }
+    .funnel-row:nth-child(4) { background: #50a2bd; }
+    .funnel-row:nth-child(5) { background: var(--accent); }
+    .funnel-row:nth-child(6) { background: var(--success); }
+
+    .funnel-row small {
+      margin-left: 8px;
+      opacity: 0.92;
+    }
+
+    .funnel-100 { width: 100%; }
+    .funnel-80 { width: 84%; }
+    .funnel-50 { width: 64%; }
+    .funnel-30 { width: 48%; }
+    .funnel-15 { width: 34%; }
+    .funnel-8 { width: 24%; }
+
+    .highlight {
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    .warning {
+      color: var(--danger);
+      font-weight: 900;
+    }
+
+    .note {
+      margin-top: 16px;
+      padding: 16px 18px;
+      border-left: 5px solid var(--accent);
+      border-radius: 6px;
+      background: #fff8ef;
+    }
+
+    @media (max-width: 760px) {
+      main {
+        width: calc(100vw - 20px);
+        padding: 28px 20px;
+      }
+
+      .toolbar {
+        padding: 10px 12px;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .toolbar {
+        display: none;
+      }
+
+      main {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="toolbar">
+    <strong>案例项目报告</strong>
+    <button type="button" onclick="window.print()">打印 / 导出 PDF</button>
+  </nav>
+
+  <main>
+    <section class="cover">
+      <p class="kicker">暖通空调售后服务销售场景</p>
+      <h1>案例项目报告：维保合同销售漏斗分析</h1>
+      <div class="summary-grid">
+        <div class="summary-card">目标客户<strong>100家</strong></div>
+        <div class="summary-card">签订合同<strong>8家</strong></div>
+        <div class="summary-card final">总体转化率<strong>8.0%</strong></div>
+      </div>
+    </section>
+
+    <h2>一、项目背景</h2>
+    <p>某暖通空调服务团队希望提升维保合同销售效率。为了找出客户在销售流程中的主要流失环节，团队对一个季度内的目标客户跟进数据进行漏斗分析。</p>
+
+    <h2>二、数据说明</h2>
+    <p>本项目使用模拟数据，流程为：目标客户 → 客户拜访 → 提交报价 → 技术交流 → 商务谈判 → 签订合同。</p>
+    <table>
+      <thead>
+        <tr><th>阶段</th><th>客户数</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>目标客户</td><td>100</td></tr>
+        <tr><td>客户拜访</td><td>80</td></tr>
+        <tr><td>提交报价</td><td>50</td></tr>
+        <tr><td>技术交流</td><td>30</td></tr>
+        <tr><td>商务谈判</td><td>15</td></tr>
+        <tr><td>签订合同</td><td>8</td></tr>
+      </tbody>
+    </table>
+
+    <h2>三、数据分析过程</h2>
+    <ol>
+      <li>定义维保合同销售流程。</li>
+      <li>汇总每个阶段的客户数量。</li>
+      <li>计算阶段转化率、流失客户数和流失率。</li>
+      <li>绘制销售漏斗图。</li>
+      <li>识别最大流失客户数环节和最高流失率环节。</li>
+      <li>结合业务经验分析原因，并提出优化建议。</li>
+    </ol>
+
+    <h2>四、计算结果</h2>
+    <table>
+      <thead>
+        <tr><th>当前阶段</th><th>下一阶段</th><th>转化率</th><th>流失客户数</th><th>流失率</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>目标客户</td><td>客户拜访</td><td>80.0%</td><td>20</td><td>20.0%</td></tr>
+        <tr><td>客户拜访</td><td>提交报价</td><td>62.5%</td><td class="highlight">30</td><td>37.5%</td></tr>
+        <tr><td>提交报价</td><td>技术交流</td><td>60.0%</td><td>20</td><td>40.0%</td></tr>
+        <tr><td>技术交流</td><td>商务谈判</td><td>50.0%</td><td>15</td><td class="warning">50.0%</td></tr>
+        <tr><td>商务谈判</td><td>签订合同</td><td>53.3%</td><td>7</td><td>46.7%</td></tr>
+      </tbody>
+    </table>
+    <p>总体转化率 = 8 ÷ 100 × 100% = <strong>8.0%</strong>。</p>
+
+    <h2>五、漏斗图</h2>
+    <div class="funnel-wrap">
+      <div class="funnel">
+        <div class="funnel-row funnel-100">目标客户 <small>100家</small></div>
+        <div class="funnel-row funnel-80">客户拜访 <small>80家</small></div>
+        <div class="funnel-row funnel-50">提交报价 <small>50家</small></div>
+        <div class="funnel-row funnel-30">技术交流 <small>30家</small></div>
+        <div class="funnel-row funnel-15">商务谈判 <small>15家</small></div>
+        <div class="funnel-row funnel-8">签订合同 <small>8家</small></div>
+      </div>
+    </div>
+
+    <h2>六、问题分析</h2>
+    <p>从绝对流失客户数看，最大流失环节是 <strong>客户拜访 → 提交报价</strong>，流失 <span class="highlight">30 家</span>。可能原因包括客户需求没有被清晰量化、报价输出速度慢、客户设备资料不完整、客户预算不明确。</p>
+    <p>从阶段流失率看，最高流失环节是 <strong>技术交流 → 商务谈判</strong>，流失率 <span class="warning">50.0%</span>。可能原因包括技术方案没有转化为客户能理解的经济价值，节能收益、停机风险、维保保障价值表达不足，关键决策人未参与技术交流。</p>
+    <p>商务谈判到签订合同的流失率为 46.7%，也需要关注价格异议、合同条款、付款周期和客户审批流程。</p>
+
+    <h2>七、优化建议</h2>
+    <ol>
+      <li>建立拜访需求确认表，统一采集设备数量、型号、使用年限、故障记录和客户预算。</li>
+      <li>规定拜访后 48 小时内输出初步维保方案或报价。</li>
+      <li>报价中增加节能收益、故障风险、停机损失和维保价值说明。</li>
+      <li>设计基础版、标准版、保障版三档维保套餐。</li>
+      <li>技术交流阶段邀请设备负责人、采购负责人和关键决策人共同参与。</li>
+      <li>建立客户跟进台账，记录每家客户的下一步动作和预计完成时间。</li>
+      <li>对流失客户进行原因分类，形成月度复盘机制。</li>
+    </ol>
+
+    <h2>八、项目总结</h2>
+    <p>本次漏斗分析显示，该团队从 100 家目标客户最终签订 8 家维保合同，总体转化率为 8.0%。前期“客户拜访 → 提交报价”环节流失客户数最多，说明拜访后的需求确认和报价推进效率需要提升；中后期“技术交流 → 商务谈判”环节流失率最高，说明技术方案需要更好地转化为客户能理解的经济价值和风险控制价值。</p>
+    <div class="note">后续应重点优化需求确认、报价速度、方案表达、决策人参与和客户跟进机制，并每月复盘流失原因。</div>
+  </main>
+</body>
+</html>
