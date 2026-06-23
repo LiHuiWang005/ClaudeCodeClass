@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>用户转化漏斗分析 · 可视化图表</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #060b15;
+  color: #e4e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+}
+h1 {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00c8f0, #7b5cf0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.subtitle {
+  font-size: 16px;
+  color: #96a0b8;
+  text-align: center;
+}
+.chart-row {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 1200px;
+  width: 100%;
+}
+.chart-card {
+  background: #0c1222;
+  border: 1px solid #172033;
+  border-radius: 12px;
+  padding: 24px 20px 16px;
+  flex: 1;
+  min-width: 360px;
+  max-width: 580px;
+}
+.chart-title {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+  color: #e4e8f0;
+}
+.chart-card svg { width: 100%; height: auto; display: block; }
+
+/* Data summary table */
+.summary-table {
+  background: #0c1222;
+  border: 1px solid #172033;
+  border-radius: 12px;
+  padding: 24px 28px;
+  max-width: 900px;
+  width: 100%;
+}
+.summary-table h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #e4e8f0;
+}
+.summary-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+.summary-table th {
+  background: rgba(0,200,240,0.06);
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: #00c8f0;
+  border-bottom: 1px solid #1a2848;
+}
+.summary-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(20,32,60,0.6);
+  color: #96a0b8;
+}
+.summary-table .num { text-align: right; font-weight: 600; color: #e4e8f0; }
+.summary-table .rate-good { color: #0eb87e; font-weight: 700; text-align: right; }
+.summary-table .rate-warn { color: #f09000; font-weight: 700; text-align: right; }
+.summary-table .rate-bad  { color: #ef4444; font-weight: 700; text-align: right; }
+
+.insight-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 1200px;
+  width: 100%;
+}
+.insight-card {
+  background: #0c1222;
+  border: 1px solid #172033;
+  border-left: 3px solid;
+  border-radius: 8px;
+  padding: 16px 20px;
+  flex: 1;
+  min-width: 260px;
+  max-width: 380px;
+}
+.insight-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.insight-card p { font-size: 15px; line-height: 1.6; color: #96a0b8; }
+.insight-card .big-num { font-size: 32px; font-weight: 900; margin: 6px 0 4px; }
+
+.footer {
+  font-size: 13px;
+  color: #606c84;
+  text-align: center;
+  margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<h1>📊 SaaS 产品用户转化漏斗分析</h1>
+<p class="subtitle">五阶段转化 · 整体转化率 2.8% · 最大瓶颈：访问→注册</p>
+
+<!-- ====== 图表行 1：漏斗图 + 转化率柱状图 ====== -->
+<div class="chart-row">
+
+  <!-- === 漏斗图 === -->
+  <div class="chart-card">
+    <div class="chart-title">🔽 用户转化漏斗图</div>
+    <svg viewBox="0 0 480 340" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g-f1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00c8f0"/><stop offset="90%" stop-color="#00c8f0"/></linearGradient>
+        <linearGradient id="g-f2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#7b5cf0"/><stop offset="90%" stop-color="#7b5cf0"/></linearGradient>
+        <linearGradient id="g-f3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#0eb87e"/><stop offset="90%" stop-color="#0eb87e"/></linearGradient>
+        <linearGradient id="g-f4" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f09000"/><stop offset="90%" stop-color="#f09000"/></linearGradient>
+        <linearGradient id="g-f5" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#e04288"/><stop offset="90%" stop-color="#e04288"/></linearGradient>
+      </defs>
+
+      <!-- 访问 (100% width = 440) -->
+      <rect x="20" y="12" width="440" height="42" rx="5" fill="url(#g-f1)" opacity="0.88">
+        <animate attributeName="width" from="0" to="440" dur="0.6s" fill="freeze"/>
+      </rect>
+      <text x="240" y="39" fill="#fff" font-size="15" text-anchor="middle" font-weight="bold">① 访问首页 ▸ 10,000 人</text>
+      <text x="460" y="39" fill="#00c8f0" font-size="12" text-anchor="end" font-weight="600">100%</text>
+
+      <!-- 注册 (35% width = 154) -->
+      <rect x="163" y="68" width="154" height="42" rx="5" fill="url(#g-f2)" opacity="0.88">
+        <animate attributeName="width" from="0" to="154" dur="0.6s" begin="0.12s" fill="freeze"/>
+      </rect>
+      <text x="240" y="95" fill="#fff" font-size="15" text-anchor="middle" font-weight="bold">② 注册账号 ▸ 3,500 人</text>
+      <text x="460" y="95" fill="#7b5cf0" font-size="12" text-anchor="end" font-weight="600">35.0%</text>
+
+      <!-- 试用 (12% width = 53) -->
+      <rect x="214" y="124" width="53" height="42" rx="5" fill="url(#g-f3)" opacity="0.88">
+        <animate attributeName="width" from="0" to="53" dur="0.6s" begin="0.24s" fill="freeze"/>
+      </rect>
+      <text x="240" y="151" fill="#fff" font-size="15" text-anchor="middle" font-weight="bold">③ 开始试用 ▸ 1,200 人</text>
+      <text x="460" y="151" fill="#0eb87e" font-size="12" text-anchor="end" font-weight="600">12.0%</text>
+
+      <!-- 付费 (4.5% width = 20) -->
+      <rect x="230" y="180" width="20" height="42" rx="5" fill="url(#g-f4)" opacity="0.88">
+        <animate attributeName="width" from="0" to="20" dur="0.6s" begin="0.36s" fill="freeze"/>
+      </rect>
+      <text x="240" y="207" fill="#fff" font-size="15" text-anchor="middle" font-weight="bold">④ 完成付费 ▸ 450 人</text>
+      <text x="460" y="207" fill="#f09000" font-size="12" text-anchor="end" font-weight="600">4.5%</text>
+
+      <!-- 续费 (2.8% width = 12) -->
+      <rect x="234" y="236" width="12" height="42" rx="5" fill="url(#g-f5)" opacity="0.88">
+        <animate attributeName="width" from="0" to="12" dur="0.6s" begin="0.48s" fill="freeze"/>
+      </rect>
+      <text x="240" y="263" fill="#fff" font-size="15" text-anchor="middle" font-weight="bold">⑤ 续费 ▸ 280 人</text>
+      <text x="460" y="263" fill="#e04288" font-size="12" text-anchor="end" font-weight="600">2.8%</text>
+
+      <!-- 流失标注 -->
+      <g font-size="11" fill="#ef4444" text-anchor="start">
+        <text x="465" y="56">⬅ 流失 6,500</text>
+        <text x="323" y="112">⬅ 流失 2,300</text>
+        <text x="272" y="168">⬅ 流失 750</text>
+        <text x="255" y="224">⬅ 流失 170</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- === 转化率柱状图 === -->
+  <div class="chart-card">
+    <div class="chart-title">📊 各环节转化率对比</div>
+    <svg viewBox="0 0 480 340" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bar-1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00c8f0"/><stop offset="100%" stop-color="#0078b8"/></linearGradient>
+        <linearGradient id="bar-2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7b5cf0"/><stop offset="100%" stop-color="#4a2ee0"/></linearGradient>
+        <linearGradient id="bar-3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0eb87e"/><stop offset="100%" stop-color="#07805a"/></linearGradient>
+        <linearGradient id="bar-4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f09000"/><stop offset="100%" stop-color="#c07000"/></linearGradient>
+      </defs>
+
+      <!-- 坐标轴 -->
+      <line x1="90" y1="18" x2="90" y2="250" stroke="#172033" stroke-width="1.5"/>
+      <line x1="90" y1="250" x2="460" y2="250" stroke="#172033" stroke-width="1.5"/>
+
+      <!-- Y 轴刻度 + 网格 -->
+      <g stroke="#172033" stroke-width="0.5" stroke-dasharray="4,4">
+        <line x1="90" y1="18" x2="455" y2="18"/>
+        <line x1="90" y1="76" x2="455" y2="76"/>
+        <line x1="90" y1="134" x2="455" y2="134"/>
+        <line x1="90" y1="192" x2="455" y2="192"/>
+      </g>
+
+      <text x="82" y="24" fill="#606c84" font-size="12" text-anchor="end">100%</text>
+      <text x="82" y="81" fill="#606c84" font-size="12" text-anchor="end">75%</text>
+      <text x="82" y="139" fill="#606c84" font-size="12" text-anchor="end">50%</text>
+      <text x="82" y="197" fill="#606c84" font-size="12" text-anchor="end">25%</text>
+      <text x="82" y="254" fill="#606c84" font-size="12" text-anchor="end">0%</text>
+
+      <!-- 柱状图 - y 轴映射: 0%→250, 100%→18 -->
+      <!-- 35.0% → 250 - (250-18)*0.35 = 250 - 81.2 = 168.8 -->
+      <rect x="110" y="168.8" width="60" height="81" rx="4" fill="url(#bar-1)" opacity="0.9">
+        <animate attributeName="height" from="0" to="81" dur="0.5s" fill="freeze"/>
+        <animate attributeName="y" from="250" to="168.8" dur="0.5s" fill="freeze"/>
+      </rect>
+      <text x="140" y="161" fill="#00c8f0" font-size="15" text-anchor="middle" font-weight="bold">35.0%</text>
+      <text x="140" y="272" fill="#96a0b8" font-size="12" text-anchor="middle">访问→注册</text>
+
+      <!-- 34.3% → 250 - 232*0.343 = 250 - 79.5 = 170.5 -->
+      <rect x="200" y="170.5" width="60" height="79" rx="4" fill="url(#bar-2)" opacity="0.9">
+        <animate attributeName="height" from="0" to="79" dur="0.5s" begin="0.1s" fill="freeze"/>
+        <animate attributeName="y" from="250" to="170.5" dur="0.5s" begin="0.1s" fill="freeze"/>
+      </rect>
+      <text x="230" y="163" fill="#7b5cf0" font-size="15" text-anchor="middle" font-weight="bold">34.3%</text>
+      <text x="230" y="272" fill="#96a0b8" font-size="12" text-anchor="middle">注册→试用</text>
+
+      <!-- 37.5% → 250 - 232*0.375 = 250 - 87 = 163 -->
+      <rect x="290" y="163" width="60" height="87" rx="4" fill="url(#bar-3)" opacity="0.9">
+        <animate attributeName="height" from="0" to="87" dur="0.5s" begin="0.2s" fill="freeze"/>
+        <animate attributeName="y" from="250" to="163" dur="0.5s" begin="0.2s" fill="freeze"/>
+      </rect>
+      <text x="320" y="155" fill="#0eb87e" font-size="15" text-anchor="middle" font-weight="bold">37.5%</text>
+      <text x="320" y="272" fill="#96a0b8" font-size="12" text-anchor="middle">试用→付费</text>
+
+      <!-- 62.2% → 250 - 232*0.622 = 250 - 144.3 = 105.7 -->
+      <rect x="380" y="105.7" width="60" height="144" rx="4" fill="url(#bar-4)" opacity="0.9">
+        <animate attributeName="height" from="0" to="144" dur="0.5s" begin="0.3s" fill="freeze"/>
+        <animate attributeName="y" from="250" to="105.7" dur="0.5s" begin="0.3s" fill="freeze"/>
+      </rect>
+      <text x="410" y="98" fill="#f09000" font-size="15" text-anchor="middle" font-weight="bold">62.2%</text>
+      <text x="410" y="272" fill="#96a0b8" font-size="12" text-anchor="middle">付费→续费</text>
+
+      <!-- 行业基准线 -->
+      <line x1="90" y1="95" x2="455" y2="95" stroke="#606c84" stroke-width="1" stroke-dasharray="8,4"/>
+      <text x="455" y="90" fill="#606c84" font-size="11" text-anchor="end">← SaaS 行业基准 (60%)</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ====== 图表行 2：流失分析图 ====== -->
+<div class="chart-row">
+  <div class="chart-card" style="max-width:100%;">
+    <div class="chart-title">📉 各环节用户流失分析</div>
+    <svg viewBox="0 0 960 280" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- 4个流失块 -->
+      <!-- 1. 访问→注册 流失6500 -->
+      <rect x="30" y="40" width="200" height="180" rx="8" fill="#00c8f0" opacity="0.12"/>
+      <rect x="30" y="70" width="200" height="150" rx="8" fill="#00c8f0" opacity="0.25">
+        <animate attributeName="height" from="0" to="150" dur="0.7s" fill="freeze"/>
+        <animate attributeName="y" from="220" to="70" dur="0.7s" fill="freeze"/>
+      </rect>
+      <text x="130" y="55" fill="#e4e8f0" font-size="15" text-anchor="middle" font-weight="bold">环节 ①</text>
+      <text x="130" y="130" fill="#00c8f0" font-size="36" text-anchor="middle" font-weight="900">6,500</text>
+      <text x="130" y="155" fill="#96a0b8" font-size="14" text-anchor="middle">人流失</text>
+      <text x="130" y="210" fill="#ef4444" font-size="14" text-anchor="middle" font-weight="600">占比 65.0%</text>
+      <text x="130" y="240" fill="#606c84" font-size="12" text-anchor="middle">访问 → 注册</text>
+
+      <!-- 2. 注册→试用 流失2300 -->
+      <rect x="260" y="40" width="200" height="180" rx="8" fill="#7b5cf0" opacity="0.12"/>
+      <rect x="260" y="130" width="200" height="90" rx="8" fill="#7b5cf0" opacity="0.25">
+        <animate attributeName="height" from="0" to="90" dur="0.7s" begin="0.15s" fill="freeze"/>
+        <animate attributeName="y" from="220" to="130" dur="0.7s" begin="0.15s" fill="freeze"/>
+      </rect>
+      <text x="360" y="55" fill="#e4e8f0" font-size="15" text-anchor="middle" font-weight="bold">环节 ②</text>
+      <text x="360" y="160" fill="#7b5cf0" font-size="28" text-anchor="middle" font-weight="900">2,300</text>
+      <text x="360" y="180" fill="#96a0b8" font-size="14" text-anchor="middle">人流失</text>
+      <text x="360" y="210" fill="#f09000" font-size="14" text-anchor="middle" font-weight="600">占比 65.7%</text>
+      <text x="360" y="240" fill="#606c84" font-size="12" text-anchor="middle">注册 → 试用</text>
+
+      <!-- 3. 试用→付费 流失750 -->
+      <rect x="490" y="40" width="200" height="180" rx="8" fill="#0eb87e" opacity="0.12"/>
+      <rect x="490" y="170" width="200" height="50" rx="8" fill="#0eb87e" opacity="0.25">
+        <animate attributeName="height" from="0" to="50" dur="0.7s" begin="0.3s" fill="freeze"/>
+        <animate attributeName="y" from="220" to="170" dur="0.7s" begin="0.3s" fill="freeze"/>
+      </rect>
+      <text x="590" y="55" fill="#e4e8f0" font-size="15" text-anchor="middle" font-weight="bold">环节 ③</text>
+      <text x="590" y="193" fill="#0eb87e" font-size="20" text-anchor="middle" font-weight="900">750</text>
+      <text x="590" y="210" fill="#96a0b8" font-size="14" text-anchor="middle">人流失</text>
+      <text x="590" y="240" fill="#f09000" font-size="14" text-anchor="middle" font-weight="600">占比 62.5%</text>
+
+      <!-- 4. 付费→续费 流失170 -->
+      <rect x="720" y="40" width="200" height="180" rx="8" fill="#e04288" opacity="0.12"/>
+      <rect x="720" y="195" width="200" height="25" rx="8" fill="#e04288" opacity="0.25">
+        <animate attributeName="height" from="0" to="25" dur="0.7s" begin="0.45s" fill="freeze"/>
+        <animate attributeName="y" from="220" to="195" dur="0.7s" begin="0.45s" fill="freeze"/>
+      </rect>
+      <text x="820" y="55" fill="#e4e8f0" font-size="15" text-anchor="middle" font-weight="bold">环节 ④</text>
+      <text x="820" y="175" fill="#e04288" font-size="20" text-anchor="middle" font-weight="900">170</text>
+      <text x="820" y="195" fill="#96a0b8" font-size="14" text-anchor="middle">人流失</text>
+      <text x="820" y="240" fill="#0eb87e" font-size="14" text-anchor="middle" font-weight="600">占比 37.8% ✅</text>
+
+      <!-- 箭头标注 -->
+      <text x="130" y="268" fill="#ef4444" font-size="14" text-anchor="middle">🔴 最大瓶颈</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ====== 数据总表 ====== -->
+<div class="summary-table">
+  <h2>📋 漏斗数据总表</h2>
+  <table>
+    <thead>
+      <tr><th>阶段</th><th class="num">用户数</th><th class="num">转化率（相对上一层）</th><th class="num">流失率</th><th class="num">留存率（相对顶部）</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>① 访问首页</td><td class="num">10,000</td><td class="num">—</td><td class="num">—</td><td class="num">100%</td></tr>
+      <tr><td>② 注册账号</td><td class="num">3,500</td><td class="rate-bad">35.0%</td><td class="rate-bad">65.0% ⚠️</td><td class="num">35.0%</td></tr>
+      <tr><td>③ 开始试用</td><td class="num">1,200</td><td class="rate-warn">34.3%</td><td class="num">65.7%</td><td class="num">12.0%</td></tr>
+      <tr><td>④ 完成付费</td><td class="num">450</td><td class="rate-warn">37.5%</td><td class="num">62.5%</td><td class="num">4.5%</td></tr>
+      <tr><td>⑤ 续费</td><td class="num">280</td><td class="rate-good">62.2%</td><td class="rate-good">37.8% ✅</td><td class="num">2.8%</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ====== 核心洞察卡片 ====== -->
+<div class="insight-row">
+  <div class="insight-card" style="border-left-color:#ef4444;">
+    <h3 style="color:#ef4444;">🔴 最大瓶颈</h3>
+    <div class="big-num" style="color:#ef4444;">65%</div>
+    <p>访问→注册环节流失率最高。6,500 人来了就走，注册门槛过高是首要问题。</p>
+  </div>
+  <div class="insight-card" style="border-left-color:#f09000;">
+    <h3 style="color:#f09000;">🟡 优化优先级</h3>
+    <div class="big-num" style="color:#f09000;">+43%</div>
+    <p>仅需将访问→注册从 35% 提升至 50%，付费用户即可从 450 增至 643。</p>
+  </div>
+  <div class="insight-card" style="border-left-color:#0eb87e;">
+    <h3 style="color:#0eb87e;">🟢 最佳环节</h3>
+    <div class="big-num" style="color:#0eb87e;">62.2%</div>
+    <p>付费→续费转化率最高，说明产品核心价值被付费用户认可，续费体验良好。</p>
+  </div>
+</div>
+
+<p class="footer">生成于 2026-06-23 · Claude Code 数据分析演示 · 可直接放入 PPT</p>
+
+</body>
+</html>

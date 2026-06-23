@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第6课：使用 Claude Code 进行数据分析、处理与可视化</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/theme/black.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/highlight/monokai.css">
+<style>
+/* ============================================================
+   CSS Variables
+   ============================================================ */
+:root {
+  --bg: #060b15;
+  --bg-card: #0c1222;
+  --border: #172033;
+  --text: #e4e8f0;
+  --text2: #96a0b8;
+  --text3: #606c84;
+  --cyan: #00c8f0;
+  --purple: #7b5cf0;
+  --green: #0eb87e;
+  --orange: #f09000;
+  --pink: #e04288;
+  --red: #ef4444;
+  --blue: #3b82f6;
+}
+
+/* ============================================================
+   Reveal.js Base
+   ============================================================ */
+.reveal { background: var(--bg); }
+.reveal .slides section {
+  padding: 38px 60px;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+/* ===== Font Hierarchy ===== */
+.reveal h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.5px; color: #fff; line-height: 1.2; margin: 0; }
+.reveal h2 { font-size: 29px; font-weight: 700; letter-spacing: -0.3px; color: #fff; line-height: 1.25; margin: 0 0 2px; }
+.reveal h3 { font-size: 23px; font-weight: 600; color: #e4e8f0; line-height: 1.3; margin: 0; }
+.reveal h4 { font-size: 20px; font-weight: 600; color: #e4e8f0; line-height: 1.3; margin: 0 0 4px; }
+.reveal p  { font-size: 18px; line-height: 1.6; color: var(--text2); margin: 0 0 6px; }
+.reveal li { font-size: 18px; line-height: 1.6; color: var(--text2); }
+
+/* ===== Section underline ===== */
+.section-line {
+  width: 44px; height: 3px;
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  border-radius: 2px;
+  margin-bottom: 12px;
+}
+
+/* ===== Chapter tag ===== */
+.ch-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.ch-tag.c1 { background: rgba(0,200,240,0.1); color: var(--cyan); }
+.ch-tag.c2 { background: rgba(123,92,240,0.1); color: var(--purple); }
+.ch-tag.c3 { background: rgba(224,66,136,0.1); color: var(--pink); }
+.ch-tag.sp { background: rgba(14,184,126,0.1); color: var(--green); }
+
+/* ============================================================
+   Cover
+   ============================================================ */
+.cover-slide {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center !important;
+  background: linear-gradient(150deg, #040913 0%, #090e22 40%, #0b0d30 70%, #060b18 100%);
+}
+.cover-badge {
+  display: inline-block;
+  padding: 5px 18px;
+  border-radius: 20px;
+  background: rgba(0,200,240,0.08);
+  border: 1px solid rgba(0,200,240,0.22);
+  color: var(--cyan);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  margin-bottom: 18px;
+}
+.cover-title {
+  font-size: 42px !important;
+  font-weight: 900 !important;
+  background: linear-gradient(135deg, #fff 0%, #00c8f0 45%, #7b5cf0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2 !important;
+  margin-bottom: 14px !important;
+}
+.cover-sub {
+  font-size: 18px;
+  color: var(--text2);
+  margin-bottom: 22px;
+}
+.cover-meta {
+  display: flex;
+  gap: 30px;
+  font-size: 15px;
+  color: var(--text3);
+}
+.cover-meta span { display: flex; align-items: center; gap: 6px; }
+
+/* ============================================================
+   Two-Column
+   ============================================================ */
+.col2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+.col2-6 { grid-template-columns: 6fr 4fr; }
+.col2-55 { grid-template-columns: 55fr 45fr; }
+
+/* ============================================================
+   Card Grid
+   ============================================================ */
+.cg { display: grid; gap: 14px; }
+.cg2 { grid-template-columns: repeat(2, 1fr); }
+.cg3 { grid-template-columns: repeat(3, 1fr); }
+.cg4 { grid-template-columns: repeat(4, 1fr); }
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 18px;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: rgba(0,200,240,0.25); }
+.card h4 { font-size: 19px; margin-bottom: 5px; color: var(--text); }
+.card p  { font-size: 16px; line-height: 1.55; margin: 0; }
+.card .ci {
+  width: 30px; height: 30px;
+  border-radius: 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 16px; margin-bottom: 6px;
+}
+.ci-cyan   { background: rgba(0,200,240,0.1); color: var(--cyan); }
+.ci-purple { background: rgba(123,92,240,0.1); color: var(--purple); }
+.ci-green  { background: rgba(14,184,126,0.1); color: var(--green); }
+.ci-orange { background: rgba(240,144,0,0.1); color: var(--orange); }
+.ci-pink   { background: rgba(224,66,136,0.1); color: var(--pink); }
+
+.card-top-cyan   { border-top: 2px solid var(--cyan); }
+.card-top-purple { border-top: 2px solid var(--purple); }
+.card-top-green  { border-top: 2px solid var(--green); }
+.card-top-orange { border-top: 2px solid var(--orange); }
+.card-top-pink   { border-top: 2px solid var(--pink); }
+
+/* ============================================================
+   Prompt Box
+   ============================================================ */
+.pb {
+  background: #080e1a;
+  border: 1px solid #142040;
+  border-left: 3px solid var(--cyan);
+  border-radius: 6px;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  font-family: 'SF Mono','Fira Code','Cascadia Code',monospace;
+  font-size: 16px;
+  line-height: 1.55;
+  color: #a2d4f0;
+}
+.pb .pb-label {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--cyan);
+  margin-bottom: 4px;
+  font-family: inherit;
+  font-weight: 800;
+}
+
+/* ============================================================
+   Code Block
+   ============================================================ */
+.reveal pre {
+  background: #080e1a !important;
+  border: 1px solid #142040;
+  border-radius: 6px;
+  font-size: 15px !important;
+  margin: 0 0 10px;
+  box-shadow: none;
+}
+.reveal pre code {
+  padding: 10px 15px;
+  line-height: 1.55;
+  font-family: 'SF Mono','Fira Code','Cascadia Code',monospace;
+  max-height: 340px;
+}
+.reveal code:not(.hljs) {
+  font-size: 15px;
+}
+
+/* ============================================================
+   Chart Wrapper
+   ============================================================ */
+.chart {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.chart .ct {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  text-align: center;
+}
+.chart svg { width: 100%; height: auto; }
+
+/* ============================================================
+   Insight Box
+   ============================================================ */
+.ins {
+  background: rgba(14,184,126,0.05);
+  border: 1px solid rgba(14,184,126,0.15);
+  border-left: 3px solid var(--green);
+  border-radius: 6px;
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  font-size: 16px;
+  line-height: 1.55;
+  color: #b0f0d6;
+}
+.ins strong { color: var(--green); }
+
+/* ============================================================
+   Stat Row / Item
+   ============================================================ */
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 17px;
+}
+.stat-k { color: var(--text3); }
+.stat-v-c { color: var(--cyan); font-weight: 700; }
+.stat-v-p { color: var(--purple); font-weight: 700; }
+.stat-v-g { color: var(--green); font-weight: 700; }
+.stat-v-o { color: var(--orange); font-weight: 700; }
+.stat-v-r { color: var(--red); font-weight: 700; }
+.stat-v-w { color: #fff; font-weight: 700; }
+
+/* ============================================================
+   Tip
+   ============================================================ */
+.tip {
+  background: rgba(0,200,240,0.04);
+  border: 1px solid rgba(0,200,240,0.1);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 15px;
+  color: #80ccf0;
+  margin-top: 8px;
+}
+.tip::before { content: "💡 "; color: var(--cyan); font-weight: 700; }
+
+/* ============================================================
+   Table
+   ============================================================ */
+.dt {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+.dt th {
+  background: rgba(0,200,240,0.05);
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--cyan);
+  border-bottom: 1px solid #1a2848;
+}
+.dt td {
+  padding: 7px 12px;
+  border-bottom: 1px solid rgba(20,32,60,0.6);
+  color: var(--text2);
+}
+
+/* ============================================================
+   Flow Row
+   ============================================================ */
+.flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+.flow-s {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 10px 16px;
+  text-align: center;
+  min-width: 74px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+.flow-a { color: var(--cyan); font-size: 1.1em; margin: 0 4px; font-weight: bold; }
+
+/* ============================================================
+   TOC
+   ============================================================ */
+.toc {
+  list-style: none;
+  padding: 0;
+  counter-reset: t;
+  margin: 0;
+}
+.toc li {
+  counter-increment: t;
+  padding: 10px 18px;
+  margin: 4px 0;
+  border-radius: 7px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 18px;
+  transition: border-color 0.2s;
+}
+.toc li::before {
+  content: "0" counter(t);
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--cyan);
+  min-width: 28px;
+}
+.toc li:hover { border-color: var(--cyan); }
+
+/* ============================================================
+   Funnel (horizontal)
+   ============================================================ */
+.fh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 14px 0;
+}
+.fh-s {
+  text-align: center;
+  padding: 10px 18px;
+  border-radius: 8px;
+  min-width: 74px;
+}
+.fh-n { font-size: 22px; font-weight: 800; }
+.fh-l { font-size: 13px; color: var(--text2); margin-top: 2px; }
+.fh-a { color: var(--text3); font-size: 16px; margin: 0 4px; }
+
+/* ============================================================
+   Helpers
+   ============================================================ */
+.mt6  { margin-top: 6px; }
+.mt8  { margin-top: 8px; }
+.mt10 { margin-top: 10px; }
+.mt12 { margin-top: 12px; }
+.mt14 { margin-top: 14px; }
+.mb6  { margin-bottom: 6px; }
+.mb10 { margin-bottom: 10px; }
+.mr4  { margin-right: 4px; }
+.tc   { text-align: center !important; }
+.fcol { display: flex; flex-direction: column; gap: 8px; }
+.fcol-s { display: flex; flex-direction: column; gap: 6px; }
+.tag-s { background: rgba(123,92,240,0.15); color: #b8a4f8; padding: 2px 8px; border-radius: 4px; font-size: 13px; margin-left: 6px; }
+.hl { font-weight: 600; }
+.hl-c { color: var(--cyan); }
+.hl-p { color: var(--purple); }
+.hl-g { color: var(--green); }
+.hl-r { color: var(--red); }
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 768px) {
+  .reveal .slides section { padding: 22px 28px; }
+  .col2, .col2-6, .col2-55 { grid-template-columns: 1fr; }
+  .cg3, .cg4 { grid-template-columns: repeat(2, 1fr); }
+  .cover-title { font-size: 28px !important; }
+  .reveal h1 { font-size: 28px; }
+  .reveal h2 { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- === S1 封面 === -->
+<section class="cover-slide">
+  <div class="cover-badge">📊 AI 课 · 第 6 课</div>
+  <h1 class="cover-title">使用 Claude Code<br>数据分析 · 处理 · 可视化</h1>
+  <p class="cover-sub">案例驱动教学 &nbsp;|&nbsp; 三个真实数据集 &nbsp;|&nbsp; 从数据到业务洞察</p>
+  <div class="cover-meta">
+    <span>🕐 90 分钟</span>
+    <span>📊 3 个实战案例</span>
+    <span>🎯 基础 → 进阶</span>
+  </div>
+</section>
+
+<!-- === S2 目录 === -->
+<section>
+  <h2>📋 课程目录</h2>
+  <div class="section-line"></div>
+  <ol class="toc mt12">
+    <li>课程导入 —— 为什么用 Claude Code 做数据分析</li>
+    <li>案例一：电商销售分析（Superstore）</li>
+    <li>案例二：用户转化漏斗分析 <span class="tag-s">⭐ 重点案例</span></li>
+    <li>案例三：Netflix 内容分析</li>
+    <li>⚡ 独立章节：5 分钟完成完整数据分析</li>
+    <li>课程总结 &amp; 课后练习</li>
+  </ol>
+</section>
+
+<!-- === S3 为什么用 Claude Code === -->
+<section>
+  <h2>🤔 为什么用 Claude Code 做数据分析？</h2>
+  <div class="section-line"></div>
+  <div class="cg cg3 mt12">
+    <div class="card">
+      <div class="ci ci-cyan">🗣️</div>
+      <h4>自然语言驱动</h4>
+      <p>用中文描述需求，自动生成 Python 代码并执行。无需记忆 API 或函数签名。</p>
+    </div>
+    <div class="card">
+      <div class="ci ci-purple">⚡</div>
+      <h4>迭代式探索</h4>
+      <p>看到结果不满意？一句话就能调整。从"写代码"变成"对话式分析"。</p>
+    </div>
+    <div class="card">
+      <div class="ci ci-green">🔄</div>
+      <h4>端到端闭环</h4>
+      <p>从 CSV 导入到清洗、分析、可视化、报告输出，一个对话完成全流程。</p>
+    </div>
+  </div>
+  <p class="tc mt14" style="font-size:17px; color:var(--text3);">
+    三个案例 × 六个步骤 = 可复用于任何数据集的标准工作流
+  </p>
+</section>
+
+<!-- === S4 六步法 === -->
+<section>
+  <h2>🔄 数据分析六步法</h2>
+  <div class="section-line"></div>
+  <div class="flow mt14">
+    <div class="flow-s">📥<br>数据导入</div><div class="flow-a">→</div>
+    <div class="flow-s">🧹<br>数据清洗</div><div class="flow-a">→</div>
+    <div class="flow-s">🔍<br>数据分析</div><div class="flow-a">→</div>
+    <div class="flow-s">📊<br>可视化</div><div class="flow-a">→</div>
+    <div class="flow-s">💡<br>洞察输出</div>
+  </div>
+  <p class="tc mt14" style="font-size:17px; color:var(--text3);">
+    每个案例严格遵循此流程 → 形成任何数据分析任务的标准模板
+  </p>
+</section>
+
+<!-- === S5 CASE1 介绍 === -->
+<section>
+  <span class="ch-tag c1">CASE 1 · 电商销售分析</span>
+  <h2>🛒 Superstore 电商销售分析</h2>
+  <div class="section-line"></div>
+  <div class="col2-55 mt10">
+    <div>
+      <h4 style="color:var(--cyan); margin-bottom:6px;">📦 数据集概览</h4>
+      <table class="dt">
+        <tr><th>字段</th><th>说明</th><th>字段</th><th>说明</th></tr>
+        <tr><td>Order Date</td><td>订单日期</td><td>Sales</td><td>销售额 ($)</td></tr>
+        <tr><td>Profit</td><td>利润 ($)</td><td>Category</td><td>产品类别</td></tr>
+        <tr><td>Region</td><td>销售地区</td><td>Quantity</td><td>销售数量</td></tr>
+      </table>
+      <p style="font-size:15px; color:var(--text3); margin-top:4px;">9,994 行 × 21 列 · Kaggle 经典数据集</p>
+    </div>
+    <div>
+      <h4 style="color:var(--purple); margin-bottom:6px;">🎯 分析目标</h4>
+      <div class="fcol-s">
+        <div class="card" style="border-left:2px solid var(--cyan); padding:10px 14px;">
+          <p style="font-size:17px;">✅ 总销售额 &amp; 利润趋势</p></div>
+        <div class="card" style="border-left:2px solid var(--purple); padding:10px 14px;">
+          <p style="font-size:17px;">✅ 按类别 / 地区分类汇总</p></div>
+        <div class="card" style="border-left:2px solid var(--green); padding:10px 14px;">
+          <p style="font-size:17px;">✅ TOP10 高利润产品识别</p></div>
+        <div class="card" style="border-left:2px solid var(--orange); padding:10px 14px;">
+          <p style="font-size:17px;">✅ 亏损产品分析 &amp; 优化建议</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- === S6 CASE1 Step1-2 === -->
+<section>
+  <span class="ch-tag c1">CASE 1 · STEP 1-2</span>
+  <h2>📥 数据导入 &amp; 🧹 数据清洗</h2>
+  <div class="section-line"></div>
+  <div class="col2-55 mt10">
+    <div>
+      <div class="pb">
+        <div class="pb-label">🔑 Claude Prompt</div>
+        读取 superstore_sales.csv，显示前10行。检查缺失值、重复行和异常值（如负销售额）。如有问题请自动清洗并报告结果。
+      </div>
+      <pre><code class="language-python">import pandas as pd
+df = pd.read_csv('superstore_sales.csv', encoding='latin1')
+print(f"数据集: {df.shape}")
+print(df.head(10))
+
+# 数据质量检查
+print(df.isnull().sum())
+print(f"重复行: {df.duplicated().sum()}")
+
+# 自动清洗
+df = df.drop_duplicates()
+df = df[df['Sales'] >= 0]
+print(f"清洗后数据: {df.shape}")
+# → 9,966 行</code></pre>
+    </div>
+    <div>
+      <h4 style="margin-bottom:8px;">🧹 清洗结果报告</h4>
+      <div class="card mb10">
+        <p style="font-size:16px; line-height:2;">
+          📊 原始数据: <b style="color:#fff;">9,994 行 × 21 列</b><br>
+          🗑️ 重复行: <span class="hl-r">17 行 → 已删除</span><br>
+          ⚠️ 异常数据: <span class="hl-r">11 行负销售额 → 已移除</span><br>
+          ✅ 缺失值: <span class="hl-g">0</span>（数据完整）<br>
+          ✅ 清洗后: <b style="color:#fff;">9,966 行</b> 可用
+        </p>
+      </div>
+      <div class="tip">自然语言描述需求 → Claude 自动选择 Pandas 方法</div>
+    </div>
+  </div>
+</section>
+
+<!-- === S7 CASE1 Step3-4 === -->
+<section>
+  <span class="ch-tag c1">CASE 1 · STEP 3-4</span>
+  <h2>🔍 销售分析 &amp; 分类汇总</h2>
+  <div class="section-line"></div>
+  <div class="col2-55 mt10">
+    <div>
+      <div class="pb">
+        <div class="pb-label">🔑 Claude Prompt</div>
+        按类别汇总销售额和利润；按地区统计总销售额；找出利润 TOP10 产品；识别亏损产品。
+      </div>
+      <pre><code class="language-python"># 按类别汇总
+cat = df.groupby('Category').agg({'Sales':'sum','Profit':'sum'})
+
+# 按地区汇总
+reg = df.groupby('Region')['Sales'].sum().sort_values(ascending=False)
+
+# TOP10 产品
+top10 = df.groupby('Product Name')['Profit'].sum() \
+    .sort_values(ascending=False).head(10)
+
+# 亏损产品
+losers = df[df['Profit']<0].groupby('Product Name')['Profit'] \
+    .sum().sort_values().head(5)</code></pre>
+    </div>
+    <div>
+      <h4 style="margin-bottom:8px;">📊 分析结果</h4>
+      <div class="fcol-s">
+        <div class="stat-item"><span class="stat-k">🏆 最高销售额类别</span><span class="stat-v-c">Technology</span></div>
+        <div class="stat-item"><span class="stat-k">📈 最高利润类别</span><span class="stat-v-p">Technology</span></div>
+        <div class="stat-item"><span class="stat-k">🌍 最大销售地区</span><span class="stat-v-g">West 地区</span></div>
+        <div class="stat-item"><span class="stat-k">⚠️ 亏损产品数量</span><span class="stat-v-r">1,871 个</span></div>
+        <div class="stat-item"><span class="stat-k">💰 销售总额</span><span class="stat-v-w">$2,297,200</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- === S8 CASE1 可视化 === -->
+<section>
+  <span class="ch-tag c1">CASE 1 · STEP 5</span>
+  <h2>📊 可视化：销售额 &amp; 利润图表</h2>
+  <div class="section-line"></div>
+  <div class="col2 mt10">
+    <!-- 柱状图 -->
+    <div class="chart">
+      <div class="ct">📊 各类别销售额对比</div>
+      <svg viewBox="0 0 380 230" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00c8f0"/><stop offset="100%" stop-color="#0078b8"/></linearGradient></defs>
+        <g stroke="#172033" stroke-width="0.5">
+          <line x1="60" y1="30" x2="365" y2="30"/><line x1="60" y1="72" x2="365" y2="72"/>
+          <line x1="60" y1="114" x2="365" y2="114"/><line x1="60" y1="156" x2="365" y2="156"/><line x1="60" y1="198" x2="365" y2="198"/>
+        </g>
+        <text x="55" y="36" fill="#606c84" font-size="11" text-anchor="end">$800K</text>
+        <text x="55" y="77" fill="#606c84" font-size="11" text-anchor="end">$600K</text>
+        <text x="55" y="119" fill="#606c84" font-size="11" text-anchor="end">$400K</text>
+        <text x="55" y="161" fill="#606c84" font-size="11" text-anchor="end">$200K</text>
+        <text x="55" y="202" fill="#606c84" font-size="11" text-anchor="end">$0</text>
+        <rect x="85" y="56" width="60" height="142" rx="3" fill="url(#g1)" opacity="0.9"><animate attributeName="height" from="0" to="142" dur="0.6s" fill="freeze"/><animate attributeName="y" from="198" to="56" dur="0.6s" fill="freeze"/></rect>
+        <rect x="165" y="77" width="60" height="121" rx="3" fill="#7b5cf0" opacity="0.85"><animate attributeName="height" from="0" to="121" dur="0.6s" begin="0.12s" fill="freeze"/><animate attributeName="y" from="198" to="77" dur="0.6s" begin="0.12s" fill="freeze"/></rect>
+        <rect x="245" y="85" width="60" height="113" rx="3" fill="#0eb87e" opacity="0.85"><animate attributeName="height" from="0" to="113" dur="0.6s" begin="0.24s" fill="freeze"/><animate attributeName="y" from="198" to="85" dur="0.6s" begin="0.24s" fill="freeze"/></rect>
+        <text x="115" y="216" fill="#96a0b8" font-size="12" text-anchor="middle">Technology</text>
+        <text x="195" y="216" fill="#96a0b8" font-size="12" text-anchor="middle">Furniture</text>
+        <text x="275" y="216" fill="#96a0b8" font-size="12" text-anchor="middle">Office Supplies</text>
+        <text x="115" y="50" fill="#00c8f0" font-size="13" text-anchor="middle" font-weight="bold">$836K</text>
+        <text x="195" y="71" fill="#7b5cf0" font-size="13" text-anchor="middle" font-weight="bold">$742K</text>
+        <text x="275" y="79" fill="#0eb87e" font-size="13" text-anchor="middle" font-weight="bold">$719K</text>
+      </svg>
+    </div>
+    <!-- 饼图 -->
+    <div class="chart">
+      <div class="ct">🥧 各地区利润占比</div>
+      <svg viewBox="0 0 370 230" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="130" cy="110" r="74" fill="none" stroke="#00c8f0" stroke-width="40" stroke-dasharray="156 408" stroke-dashoffset="0" opacity="0.9"/>
+        <circle cx="130" cy="110" r="74" fill="none" stroke="#7b5cf0" stroke-width="40" stroke-dasharray="120 444" stroke-dashoffset="-156" opacity="0.9"/>
+        <circle cx="130" cy="110" r="74" fill="none" stroke="#0eb87e" stroke-width="40" stroke-dasharray="90 474" stroke-dashoffset="-276" opacity="0.9"/>
+        <circle cx="130" cy="110" r="74" fill="none" stroke="#f09000" stroke-width="40" stroke-dasharray="60 504" stroke-dashoffset="-366" opacity="0.9"/>
+        <circle cx="130" cy="110" r="44" fill="#0c1222"/>
+        <text x="130" y="106" fill="#e4e8f0" font-size="16" text-anchor="middle" font-weight="bold">Profit</text>
+        <text x="130" y="124" fill="#606c84" font-size="11" text-anchor="middle">by Region</text>
+        <g transform="translate(230, 55)">
+          <rect x="0" y="0" width="12" height="12" rx="3" fill="#00c8f0"/><text x="18" y="11" fill="#96a0b8" font-size="13">West 32%</text>
+          <rect x="0" y="24" width="12" height="12" rx="3" fill="#7b5cf0"/><text x="18" y="35" fill="#96a0b8" font-size="13">East 28%</text>
+          <rect x="0" y="48" width="12" height="12" rx="3" fill="#0eb87e"/><text x="18" y="59" fill="#96a0b8" font-size="13">Central 22%</text>
+          <rect x="0" y="72" width="12" height="12" rx="3" fill="#f09000"/><text x="18" y="83" fill="#96a0b8" font-size="13">South 18%</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- === S9 CASE1 洞察 === -->
+<section>
+  <span class="ch-tag c1">CASE 1 · STEP 6</span>
+  <h2>💡 业务洞察 &amp; 销售增长建议</h2>
+  <div class="section-line"></div>
+  <div class="col2 mt10">
+    <div class="fcol-s">
+      <div class="ins"><strong>🔍 核心发现 1</strong> Technology 类别贡献最高销售额 ($836K) 和利润，应作为核心品类重点运营。</div>
+      <div class="ins"><strong>⚠️ 核心发现 2</strong> 1,871 个产品亏损，集中在 Furniture 的 Tables &amp; Bookcases。建议重新定价或优化供应链。</div>
+      <div class="ins"><strong>🌍 核心发现 3</strong> West 地区贡献 32% 利润，是最大盈利市场。Central 地区利润率偏低，需深入分析原因。</div>
+    </div>
+    <div>
+      <h4 style="margin-bottom:8px;">📋 增长建议</h4>
+      <div class="fcol-s">
+        <div class="card" style="border-left:2px solid var(--cyan); padding:12px 15px;">
+          <p style="font-size:17px;">① 增加 Technology 品类营销预算，提升高利润品占比</p></div>
+        <div class="card" style="border-left:2px solid var(--orange); padding:12px 15px;">
+          <p style="font-size:17px;">② 亏损产品启动"清仓+重新定价"，设利润率底线</p></div>
+        <div class="card" style="border-left:2px solid var(--purple); padding:12px 15px;">
+          <p style="font-size:17px;">③ Central 地区推促销活动，提升客单价和利润率</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- === S10 CASE2 介绍 === -->
+<section>
+  <span class="ch-tag c2">CASE 2 · <span style="color:#b8a4f8;">⭐ 重点案例</span></span>
+  <h2>🔄 用户转化漏斗分析</h2>
+  <div class="section-line"></div>
+  <div class="fh mt10">
+    <div class="fh-s" style="background:rgba(0,200,240,0.07);">
+      <div class="fh-n" style="color:var(--cyan);">10,000</div>
+      <div class="fh-l">访问用户</div>
+    </div>
+    <div class="fh-a">→</div>
+    <div class="fh-s" style="background:rgba(123,92,240,0.07);">
+      <div class="fh-n" style="color:#b8a4f8;">3,500</div>
+      <div class="fh-l">注册用户</div>
+    </div>
+    <div class="fh-a">→</div>
+    <div class="fh-s" style="background:rgba(14,184,126,0.07);">
+      <div class="fh-n" style="color:#6ee7b7;">1,200</div>
+      <div class="fh-l">试用用户</div>
+    </div>
+    <div class="fh-a">→</div>
+    <div class="fh-s" style="background:rgba(240,144,0,0.07);">
+      <div class="fh-n" style="color:#fcd34d;">450</div>
+      <div class="fh-l">付费用户</div>
+    </div>
+    <div class="fh-a">→</div>
+    <div class="fh-s" style="background:rgba(224,66,136,0.07);">
+      <div class="fh-n" style="color:#f9a8d4;">280</div>
+      <div class="fh-l">续费用户</div>
+    </div>
+  </div>
+  <p class="tc mt14" style="font-size:17px; color:var(--text3);">
+    五阶段转化漏斗 · 每一层都是增长优化的机会 · <span class="hl-r">整体转化率仅 2.8%</span>
+  </p>
+</section>
+
+<!-- === S11 CASE2 分析 === -->
+<section>
+  <span class="ch-tag c2">CASE 2 · STEP 1-3</span>
+  <h2>📥 导入 &amp; 🔍 转化率计算</h2>
+  <div class="section-line"></div>
+  <div class="pb mb10">
+    <div class="pb-label">🔑 Claude Prompt</div>
+    读取 funnel_data.csv（visitors, registrations, trials, payments, renewals）。计算每层转化率（相对上一层）和整体转化率（访问→续费），识别流失最严重环节。
+  </div>
+  <div class="col2-55">
+    <pre><code class="language-python">import pandas as pd
+df = pd.read_csv('funnel_data.csv')
+stages = ['visitors','registrations','trials','payments','renewals']
+vals = [df[s].sum() for s in stages]
+
+for i in range(1, len(stages)):
+    rate = vals[i] / vals[i-1] * 100
+    print(f"{stages[i]}: {rate:.1f}% (流失 {100-rate:.1f}%)")
+
+total = vals[-1] / vals[0] * 100
+print(f"整体转化率: {total:.2f}%")</code></pre>
+    <div>
+      <h4 style="margin-bottom:6px;">📊 转化率结果</h4>
+      <table class="dt">
+        <tr><th>转化环节</th><th>转化率</th><th>流失率</th></tr>
+        <tr><td>访问 → 注册</td><td style="color:#fcd34d;font-weight:700;">35.0%</td><td style="color:var(--red);font-weight:700;">65.0% ⚠️</td></tr>
+        <tr><td>注册 → 试用</td><td style="color:#6ee7b7;font-weight:700;">34.3%</td><td>65.7%</td></tr>
+        <tr><td>试用 → 付费</td><td style="color:#6ee7b7;font-weight:700;">37.5%</td><td>62.5%</td></tr>
+        <tr><td>付费 → 续费</td><td style="color:#6ee7b7;font-weight:700;">62.2%</td><td style="color:var(--green);">37.8% ✅</td></tr>
+      </table>
+      <p style="font-size:15px; color:var(--red); margin-top:6px;">⚠️ 最大流失环节：访问 → 注册（65% 访客流失）</p>
+    </div>
+  </div>
+</section>
+
+<!-- === S12 CASE2 可视化 === -->
+<section>
+  <span class="ch-tag c2">CASE 2 · STEP 5</span>
+  <h2>📊 可视化：漏斗图 &amp; 转化率对比</h2>
+  <div class="section-line"></div>
+  <div class="col2 mt10">
+    <!-- 漏斗图 -->
+    <div class="chart">
+      <div class="ct">🔽 用户转化漏斗图</div>
+      <svg viewBox="0 0 380 240" xmlns="http://www.w3.org/2000/svg">
+        <rect x="30" y="6" width="320" height="28" rx="4" fill="#00c8f0" opacity="0.85"><animate attributeName="width" from="0" to="320" dur="0.5s" fill="freeze"/></rect>
+        <text x="190" y="26" fill="#fff" font-size="13" text-anchor="middle" font-weight="bold">访问用户 10,000（100%）</text>
+        <rect x="86" y="44" width="208" height="28" rx="4" fill="#7b5cf0" opacity="0.85"><animate attributeName="width" from="0" to="208" dur="0.5s" begin="0.1s" fill="freeze"/></rect>
+        <text x="190" y="64" fill="#fff" font-size="13" text-anchor="middle" font-weight="bold">注册用户 3,500（35.0%）</text>
+        <rect x="128" y="82" width="124" height="28" rx="4" fill="#0eb87e" opacity="0.85"><animate attributeName="width" from="0" to="124" dur="0.5s" begin="0.2s" fill="freeze"/></rect>
+        <text x="190" y="102" fill="#fff" font-size="13" text-anchor="middle" font-weight="bold">试用用户 1,200（12.0%）</text>
+        <rect x="151" y="120" width="78" height="28" rx="4" fill="#f09000" opacity="0.85"><animate attributeName="width" from="0" to="78" dur="0.5s" begin="0.3s" fill="freeze"/></rect>
+        <text x="190" y="140" fill="#fff" font-size="13" text-anchor="middle" font-weight="bold">付费用户 450（4.5%）</text>
+        <rect x="162" y="158" width="56" height="28" rx="4" fill="#e04288" opacity="0.85"><animate attributeName="width" from="0" to="56" dur="0.5s" begin="0.4s" fill="freeze"/></rect>
+        <text x="190" y="178" fill="#fff" font-size="13" text-anchor="middle" font-weight="bold">续费用户 280（2.8%）</text>
+        <text x="190" y="215" fill="#606c84" font-size="12" text-anchor="middle">⬇ 整体转化率 2.8%</text>
+      </svg>
+    </div>
+    <!-- 转化率柱状图 -->
+    <div class="chart">
+      <div class="ct">📊 各环节转化率对比</div>
+      <svg viewBox="0 0 380 240" xmlns="http://www.w3.org/2000/svg">
+        <line x1="65" y1="18" x2="65" y2="200" stroke="#172033" stroke-width="1"/>
+        <text x="60" y="24" fill="#606c84" font-size="10" text-anchor="end">100%</text>
+        <text x="60" y="64" fill="#606c84" font-size="10" text-anchor="end">75%</text>
+        <text x="60" y="109" fill="#606c84" font-size="10" text-anchor="end">50%</text>
+        <text x="60" y="154" fill="#606c84" font-size="10" text-anchor="end">25%</text>
+        <text x="60" y="204" fill="#606c84" font-size="10" text-anchor="end">0%</text>
+        <g stroke="#172033" stroke-width="0.5" stroke-dasharray="3">
+          <line x1="65" y1="63" x2="365" y2="63"/><line x1="65" y1="108" x2="365" y2="108"/><line x1="65" y1="153" x2="365" y2="153"/>
+        </g>
+        <rect x="85" y="148" width="44" height="52" rx="3" fill="#00c8f0" opacity="0.85"><animate attributeName="height" from="0" to="52" dur="0.4s" fill="freeze"/><animate attributeName="y" from="200" to="148" dur="0.4s" fill="freeze"/></rect>
+        <rect x="157" y="150" width="44" height="50" rx="3" fill="#7b5cf0" opacity="0.85"><animate attributeName="height" from="0" to="50" dur="0.4s" begin="0.08s" fill="freeze"/><animate attributeName="y" from="200" to="150" dur="0.4s" begin="0.08s" fill="freeze"/></rect>
+        <rect x="229" y="143" width="44" height="57" rx="3" fill="#0eb87e" opacity="0.85"><animate attributeName="height" from="0" to="57" dur="0.4s" begin="0.16s" fill="freeze"/><animate attributeName="y" from="200" to="143" dur="0.4s" begin="0.16s" fill="freeze"/></rect>
+        <rect x="301" y="71" width="44" height="129" rx="3" fill="#f09000" opacity="0.85"><animate attributeName="height" from="0" to="129" dur="0.4s" begin="0.24s" fill="freeze"/><animate attributeName="y" from="200" to="71" dur="0.4s" begin="0.24s" fill="freeze"/></rect>
+        <text x="107" y="140" fill="#00c8f0" font-size="12" text-anchor="middle" font-weight="bold">35.0%</text>
+        <text x="179" y="142" fill="#7b5cf0" font-size="12" text-anchor="middle" font-weight="bold">34.3%</text>
+        <text x="251" y="135" fill="#0eb87e" font-size="12" text-anchor="middle" font-weight="bold">37.5%</text>
+        <text x="323" y="63" fill="#f09000" font-size="12" text-anchor="middle" font-weight="bold">62.2%</text>
+        <text x="107" y="218" fill="#96a0b8" font-size="10" text-anchor="middle">访问→注册</text>
+        <text x="179" y="218" fill="#96a0b8" font-size="10" text-anchor="middle">注册→试用</text>
+        <text x="251" y="218" fill="#96a0b8" font-size="10" text-anchor="middle">试用→付费</text>
+        <text x="323" y="218" fill="#96a0b8" font-size="10" text-anchor="middle">付费→续费</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- === S13 CASE2 策略 === -->
+<section>
+  <span class="ch-tag c2">CASE 2 · STEP 6</span>
+  <h2>💡 提升转化率方案</h2>
+  <div class="section-line"></div>
+  <div class="cg cg2 mt10">
+    <div class="card card-top-cyan">
+      <div class="ci ci-cyan">🚪</div>
+      <h4>环节 1：访问 → 注册（35.0%）</h4>
+      <p><b>问题</b>：65% 访客流失，注册门槛过高<br><b>策略</b>：简化表单（3→1字段）+ 社交登录 + 首页 Social Proof</p>
+    </div>
+    <div class="card card-top-purple">
+      <div class="ci ci-purple">🎯</div>
+      <h4>环节 2：注册 → 试用（34.3%）</h4>
+      <p><b>问题</b>：注册后缺乏引导，用户不知下一步<br><b>策略</b>：弹窗引导试用 + 邮件自动化 Onboarding 序列</p>
+    </div>
+    <div class="card card-top-orange">
+      <div class="ci ci-orange">💳</div>
+      <h4>环节 3：试用 → 付费（37.5%）</h4>
+      <p><b>问题</b>：试用结束未感知核心价值<br><b>策略</b>：试用期内推送功能引导 + 限时优惠促转化</p>
+    </div>
+    <div class="card card-top-green">
+      <div class="ci ci-green">🔄</div>
+      <h4>环节 4：付费 → 续费（62.2%）</h4>
+      <p><b>问题</b>：续费率较好，仍可优化<br><b>策略</b>：年付折扣 + 续费提醒 + 会员权益升级</p>
+    </div>
+  </div>
+  <div class="ins mt10"><strong>🎯 核心结论：</strong>优先优化 <b>访问→注册</b> 环节。将 35% 提升至 50%，整体付费用户可增长 <b>43%</b>。</div>
+</section>
+
+<!-- === S14 CASE3 介绍 === -->
+<section>
+  <span class="ch-tag c3">CASE 3 · 内容分析</span>
+  <h2>🎬 Netflix 内容分析</h2>
+  <div class="section-line"></div>
+  <div class="col2-55 mt10">
+    <div>
+      <h4 style="color:var(--pink); margin-bottom:6px;">📦 Netflix Movies &amp; TV Shows</h4>
+      <table class="dt">
+        <tr><th>字段</th><th>说明</th><th>字段</th><th>说明</th></tr>
+        <tr><td>type</td><td>电影 / 剧集</td><td>country</td><td>制作国家</td></tr>
+        <tr><td>release_year</td><td>发行年份</td><td>rating</td><td>内容分级</td></tr>
+        <tr><td>date_added</td><td>上线日期</td><td>listed_in</td><td>题材分类</td></tr>
+      </table>
+      <p style="font-size:15px; color:var(--text3); margin-top:4px;">5,374 部作品 · Kaggle 公开数据集</p>
+    </div>
+    <div>
+      <h4 style="color:var(--cyan); margin-bottom:6px;">🎯 分析问题</h4>
+      <div class="fcol-s">
+        <div class="card" style="border-left:2px solid var(--pink); padding:10px 14px;"><p style="font-size:17px;">🎬 电影 vs 剧集，哪种更多？</p></div>
+        <div class="card" style="border-left:2px solid var(--cyan); padding:10px 14px;"><p style="font-size:17px;">🌍 哪些国家的作品最多？</p></div>
+        <div class="card" style="border-left:2px solid var(--purple); padding:10px 14px;"><p style="font-size:17px;">📅 内容上线趋势如何？</p></div>
+        <div class="card" style="border-left:2px solid var(--green); padding:10px 14px;"><p style="font-size:17px;">🏷️ 最热门的题材是哪些？</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- === S15 CASE3 分析 === -->
+<section>
+  <span class="ch-tag c3">CASE 3 · STEP 3-5</span>
+  <h2>📊 Netflix 数据分析 &amp; 可视化</h2>
+  <div class="section-line"></div>
+  <div class="col2-55 mt10">
+    <div>
+      <div class="pb mb10">
+        <div class="pb-label">🔑 Claude Prompt</div>
+        读取 netflix_titles.csv，分析：内容类型分布、Top10 国家、年度趋势、热门题材。生成对应可视化图表。
+      </div>
+      <pre><code class="language-python"># 内容类型分布
+type_counts = df['type'].value_counts()
+
+# 国家 Top10
+top10 = df['country'].value_counts().head(10)
+
+# 年度趋势
+yearly = df.groupby('release_year').size()
+
+# 热门题材（拆分多标签）
+genres = df['listed_in'].str.split(', ').explode()
+top_genres = genres.value_counts().head(8)</code></pre>
+    </div>
+    <div>
+      <h4 style="margin-bottom:8px;">📊 分析结果</h4>
+      <div class="fcol-s">
+        <div class="stat-item"><span class="stat-k">🎬 电影占比</span><span class="stat-v-c">69.7%</span></div>
+        <div class="stat-item"><span class="stat-k">📺 剧集占比</span><span class="stat-v-p">30.3%</span></div>
+        <div class="stat-item"><span class="stat-k">🌍 最多产国家</span><span class="stat-v-o">🇺🇸 United States</span></div>
+        <div class="stat-item"><span class="stat-k">📅 内容高峰年</span><span class="stat-v-g">2018 年</span></div>
+        <div class="stat-item"><span class="stat-k">🏷️ 最热题材</span><span style="font-weight:700; color:var(--pink);">International Movies</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- === S16 CASE3 图表 === -->
+<section>
+  <span class="ch-tag c3">CASE 3 · 可视化</span>
+  <h2>📊 Netflix 可视化图表</h2>
+  <div class="section-line"></div>
+  <div class="col2 mt10">
+    <!-- 环形图 -->
+    <div class="chart">
+      <div class="ct">🎬 内容类型占比</div>
+      <svg viewBox="0 0 350 220" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="125" cy="105" r="68" fill="none" stroke="#00c8f0" stroke-width="34" stroke-dasharray="298 130" stroke-dashoffset="0" opacity="0.9"/>
+        <circle cx="125" cy="105" r="68" fill="none" stroke="#7b5cf0" stroke-width="34" stroke-dasharray="130 298" stroke-dashoffset="-298" opacity="0.9"/>
+        <circle cx="125" cy="105" r="40" fill="#0c1222"/>
+        <text x="125" y="100" fill="#e4e8f0" font-size="15" text-anchor="middle" font-weight="bold">5,374</text>
+        <text x="125" y="118" fill="#606c84" font-size="10" text-anchor="middle">部作品</text>
+        <g transform="translate(215, 52)">
+          <rect x="0" y="0" width="13" height="13" rx="3" fill="#00c8f0"/><text x="19" y="12" fill="#96a0b8" font-size="14">Movie 69.7%</text>
+          <rect x="0" y="26" width="13" height="13" rx="3" fill="#7b5cf0"/><text x="19" y="38" fill="#96a0b8" font-size="14">TV Show 30.3%</text>
+        </g>
+      </svg>
+    </div>
+    <!-- 趋势图 -->
+    <div class="chart">
+      <div class="ct">📈 每年新增内容趋势（2008-2021）</div>
+      <svg viewBox="0 0 380 220" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="ag2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00c8f0" stop-opacity="0.18"/><stop offset="100%" stop-color="#00c8f0" stop-opacity="0.01"/></linearGradient></defs>
+        <g stroke="#172033" stroke-width="0.5" stroke-dasharray="3">
+          <line x1="45" y1="28" x2="365" y2="28"/><line x1="45" y1="70" x2="365" y2="70"/>
+          <line x1="45" y1="114" x2="365" y2="114"/><line x1="45" y1="156" x2="365" y2="156"/><line x1="45" y1="198" x2="365" y2="198"/>
+        </g>
+        <polygon points="45,198 75,184 105,166 135,153 165,142 195,128 225,108 255,90 285,78 315,68 345,58 365,52 365,198" fill="url(#ag2)"/>
+        <polyline points="45,198 75,184 105,166 135,153 165,142 195,128 225,108 255,90 285,78 315,68 345,58 365,52" fill="none" stroke="#00c8f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <animate attributeName="stroke-dasharray" from="0 500" to="500 0" dur="1s" fill="freeze"/>
+        </polyline>
+        <circle cx="195" cy="128" r="3.5" fill="#00c8f0"/>
+        <circle cx="255" cy="90" r="3.5" fill="#00c8f0"/>
+        <circle cx="315" cy="68" r="3.5" fill="#00c8f0"/>
+        <circle cx="345" cy="58" r="4.5" fill="#fff" stroke="#00c8f0" stroke-width="1.5"/>
+        <circle cx="365" cy="52" r="4.5" fill="#fff" stroke="#00c8f0" stroke-width="1.5"/>
+        <text x="45" y="212" fill="#606c84" font-size="10">2008</text><text x="120" y="212" fill="#606c84" font-size="10">2012</text>
+        <text x="195" y="212" fill="#606c84" font-size="10">2016</text><text x="280" y="212" fill="#606c84" font-size="10">2019</text>
+        <text x="360" y="212" fill="#00c8f0" font-size="10">2021</text>
+        <text x="363" y="45" fill="#00c8f0" font-size="11" font-weight="bold">↑ 峰值</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- === S17 CASE3 洞察 === -->
+<section>
+  <span class="ch-tag c3">CASE 3 · STEP 6</span>
+  <h2>💡 Netflix 内容战略洞察</h2>
+  <div class="section-line"></div>
+  <div class="cg cg2 mt10">
+    <div class="card card-top-pink">
+      <div class="ci ci-pink">🎬</div>
+      <h4>洞察 1：电影占主导，剧集正追赶</h4>
+      <p>电影 69.7%，剧集 30.3%。但近年剧集占比持续上升，反映用户偏好从"快餐内容"向"深度追剧"转变。</p>
+    </div>
+    <div class="card card-top-cyan">
+      <div class="ci ci-cyan">🌍</div>
+      <h4>洞察 2：美国主导，印度崛起</h4>
+      <p>美国内容最多，印度、英国、日本紧随其后。Netflix 全球化战略加速非美市场的本地化内容生产。</p>
+    </div>
+    <div class="card card-top-purple">
+      <div class="ci ci-purple">📈</div>
+      <h4>洞察 3：2015-2019 是黄金增长期</h4>
+      <p>2015 年后内容量爆发式增长，2018 年达峰值。2020 年后增速放缓，战略从"数量扩张"转向"质量深耕"。</p>
+    </div>
+    <div class="card card-top-green">
+      <div class="ci ci-green">🏷️</div>
+      <h4>洞察 4：国际化内容与剧情类最热</h4>
+      <p>"International Movies"和"Dramas"是最热门题材，全球化内容策略与用户需求高度匹配。</p>
+    </div>
+  </div>
+</section>
+
+<!-- === S18 5分钟 概览 === -->
+<section>
+  <span class="ch-tag sp">⚡ 独立章节</span>
+  <h2>⏱️ 5 分钟完成完整数据分析</h2>
+  <div class="section-line"></div>
+  <p class="tc mt10" style="font-size:17px; color:var(--text2);">一条 Prompt，五分钟闭环 —— Claude Code 端到端完成数据分析全流程</p>
+  <div class="flow mt12">
+    <div class="flow-s">📥<br>上传 CSV</div><div class="flow-a">→</div>
+    <div class="flow-s">🧹<br>数据清洗</div><div class="flow-a">→</div>
+    <div class="flow-s">🔍<br>分析统计</div><div class="flow-a">→</div>
+    <div class="flow-s">📊<br>生成图表</div><div class="flow-a">→</div>
+    <div class="flow-s">📝<br>分析报告</div><div class="flow-a">→</div>
+    <div class="flow-s" style="border:2px solid rgba(0,200,240,0.3);">📄<br>导出</div>
+  </div>
+  <div class="pb mt14">
+    <div class="pb-label">🔑 万能分析 Prompt（可直接复用）</div>
+    请分析我上传的 CSV：① 数据质量检查并自动清洗 ② 生成描述性统计 ③ 自动识别关键字段做分组汇总 ④ 生成柱状图、趋势图、分布图各一 ⑤ 输出 3-5 条业务洞察 ⑥ 整理为 Markdown 报告并导出
+  </div>
+</section>
+
+<!-- === S19 5分钟 技巧 === -->
+<section>
+  <span class="ch-tag sp">⚡ 五分钟分析 · 实操指南</span>
+  <h2>🚀 一条 Prompt 搞定的关键技巧</h2>
+  <div class="section-line"></div>
+  <div class="col2 mt12">
+    <div>
+      <h4 style="color:var(--green); margin-bottom:8px;">✅ 你将获得</h4>
+      <div class="fcol-s">
+        <div class="card" style="border-left:2px solid var(--cyan); padding:12px 15px;"><p style="font-size:17px;">📄 <b>数据质量报告</b>（含清洗记录）</p></div>
+        <div class="card" style="border-left:2px solid var(--purple); padding:12px 15px;"><p style="font-size:17px;">📊 <b>3 张专业图表</b>（自动保存为 PNG）</p></div>
+        <div class="card" style="border-left:2px solid var(--green); padding:12px 15px;"><p style="font-size:17px;">📝 <b>Markdown 分析报告</b>（可直接分享）</p></div>
+      </div>
+    </div>
+    <div>
+      <h4 style="color:var(--orange); margin-bottom:8px;">💡 三个关键技巧</h4>
+      <div class="fcol-s">
+        <div class="card" style="border-left:2px solid var(--orange); padding:12px 15px;"><p style="font-size:17px;">① CSV 文件直接拖入 Claude Code 对话框</p></div>
+        <div class="card" style="border-left:2px solid var(--pink); padding:12px 15px;"><p style="font-size:17px;">② Prompt 越具体，输出质量越高</p></div>
+        <div class="card" style="border-left:2px solid var(--cyan); padding:12px 15px;"><p style="font-size:17px;">③ 结果不满意？一句话要求 Claude 调整</p></div>
+      </div>
+      <div class="tip mt10">这个"万能 Prompt"模板适用于任何 CSV 数据集</div>
+    </div>
+  </div>
+</section>
+
+<!-- === S20 总结 === -->
+<section>
+  <h2>📋 课程核心收获</h2>
+  <div class="section-line"></div>
+  <div class="cg cg3 mt10">
+    <div class="card">
+      <div class="ci ci-cyan">🛠️</div>
+      <h4>六步分析法</h4>
+      <p>导入→清洗→分析→可视化→洞察→建议，一套标准工作流适用于任何数据集。</p>
+    </div>
+    <div class="card">
+      <div class="ci ci-purple">💬</div>
+      <h4>Prompt 驱动分析</h4>
+      <p>用自然语言描述需求，Claude Code 自动生成代码、执行分析、输出图表。</p>
+    </div>
+    <div class="card">
+      <div class="ci ci-green">📊</div>
+      <h4>三种核心可视化</h4>
+      <p>柱状图对比 · 折线图趋势 · 饼图占比 —— 覆盖 90% 分析场景。</p>
+    </div>
+    <div class="card">
+      <div class="ci ci-orange">🔄</div>
+      <h4>漏斗分析方法</h4>
+      <p>转化漏斗构建、转化率计算、流失环节识别与增长策略制定。</p>
+    </div>
+    <div class="card">
+      <div class="ci ci-pink">🎯</div>
+      <h4>数据驱动决策</h4>
+      <p>从"看数据"到"用数据"，输出可执行的业务建议而非仅仅数字。</p>
+    </div>
+    <div class="card">
+      <div class="ci ci-cyan">⚡</div>
+      <h4>五分钟闭环分析</h4>
+      <p>一条 Prompt 端到端完成，效率提升 10 倍，可复用于任何项目。</p>
+    </div>
+  </div>
+</section>
+
+<!-- === S21 课后练习 === -->
+<section>
+  <h2>🎯 课后练习</h2>
+  <div class="section-line"></div>
+  <div class="cg cg2 mt10">
+    <div class="card card-top-cyan">
+      <h4>练习 1：电商销售分析 <span style="color:var(--cyan); font-size:15px;">（必做）</span></h4>
+      <p>使用 Superstore 数据集：<br>① 导入并清洗数据 ② 按月汇总销售额生成趋势图 ③ 按地区分析利润率差异 ④ 找出 Top5 产品并给出推广建议 ⑤ 输出 1 页 Markdown 报告</p>
+    </div>
+    <div class="card card-top-purple">
+      <h4>练习 2：转化漏斗分析 <span style="color:var(--purple); font-size:15px;">（必做）</span></h4>
+      <p>自选 SaaS 产品场景或使用课上数据：<br>① 构建 5 层转化漏斗 ② 计算各层转化率与流失率 ③ 绘制漏斗图 ④ 识别最大瓶颈 ⑤ 写出 3 条提升方案</p>
+    </div>
+    <div class="card card-top-pink">
+      <h4>练习 3：Netflix 内容分析 <span style="color:var(--green); font-size:15px;">（选做）</span></h4>
+      <p>使用 Netflix 数据集（Kaggle 可下载）：<br>① 分析评分分布 ② 对比不同国家热门题材差异 ③ 分析近 5 年内容策略变化 ④ 给出战略建议</p>
+    </div>
+    <div class="card card-top-green">
+      <h4>挑战题：5 分钟实战 <span style="color:var(--orange); font-size:15px;">（加分）</span></h4>
+      <p>找一份感兴趣的真实数据集：<br>① 使用"万能 Prompt"模板 ② 5 分钟内完成端到端分析 ③ 记录 Prompt 的不足与改进 ④ 分享报告到班级群</p>
+    </div>
+  </div>
+</section>
+
+<!-- === S22 结课 === -->
+<section class="cover-slide">
+  <div class="cover-badge">📊 AI 课 · 第 6 课 · 结课</div>
+  <h1 class="cover-title" style="font-size:38px !important;">数据驱动决策<br>从这里开始</h1>
+  <p class="cover-sub" style="font-size:16px; max-width:560px;">
+    三个案例 · 六步方法 · 五项核心技能<br>你已经具备用 Claude Code 完成专业数据分析的能力
+  </p>
+  <div class="cover-meta">
+    <span>📝 完成课后练习</span>
+    <span>💬 分享分析报告</span>
+    <span>🚀 下节课见</span>
+  </div>
+</section>
+
+</div>
+</div>
+
+<script type="module">
+import Reveal from 'https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.esm.js';
+import Highlight from 'https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/highlight/highlight.esm.js';
+
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  width: 1280,
+  height: 720,
+  margin: 0.04,
+  minScale: 0.2,
+  maxScale: 2.0,
+  transition: 'slide',
+  transitionSpeed: 'default',
+  backgroundTransition: 'fade',
+  plugins: [Highlight],
+  highlight: { highlightOnLoad: true, escapeHTML: false }
+});
+</script>
+</body>
+</html>
