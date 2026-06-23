@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>漏斗分析自学教案 — 室内家装设计师的成长之路</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --accent: #38bdf8;
+    --accent2: #a78bfa;
+    --gold: #fbbf24;
+    --green: #34d399;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #334155;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+  }
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 24px; background: rgba(15,23,42,0.95);
+    border-bottom: 1px solid var(--border); backdrop-filter: blur(20px); z-index: 100;
+  }
+  .header .logo {
+    font-size: 18px; font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .header .meta { font-size: 13px; color: var(--muted); }
+  .progress-wrap { height: 3px; background: var(--border); }
+  .progress-bar {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease;
+  }
+  .slide-container { flex: 1; position: relative; overflow: hidden; }
+  .slide {
+    position: absolute; inset: 0; padding: 36px 56px;
+    display: flex; flex-direction: column; justify-content: center;
+    opacity: 0; transform: translateX(60px);
+    transition: all 0.45s cubic-bezier(0.4,0,0.2,1);
+    pointer-events: none; overflow-y: auto;
+  }
+  .slide.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+  .slide h1 {
+    font-size: 42px; font-weight: 800; margin-bottom: 24px;
+    background: linear-gradient(135deg, #fff 30%, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .slide h2 { font-size: 28px; font-weight: 700; margin-bottom: 18px; color: #fff; }
+  .slide h3 { font-size: 19px; font-weight: 600; margin-bottom: 10px; color: var(--accent); }
+  .slide p, .slide li { font-size: 15px; line-height: 1.75; color: var(--muted); }
+  .slide ul { padding-left: 22px; }
+  .slide ul li { margin-bottom: 6px; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 14px; margin-top: 18px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px; transition: all 0.3s;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(56,189,248,0.1); }
+  .card .icon { font-size: 32px; margin-bottom: 10px; }
+  .card h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+  .card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .funnel-visual { display: flex; flex-direction: column; align-items: center; gap: 0; margin: 16px 0; }
+  .funnel-stage {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 22px; color: #fff; font-weight: 600; font-size: 14px;
+    border-radius: 8px; margin-bottom: 3px; transition: all 0.3s; cursor: default;
+  }
+  .funnel-stage:hover { filter: brightness(1.2); transform: scale(1.02); }
+  .funnel-stage .pct { font-size: 12px; opacity: 0.85; }
+  .stat-row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 18px; }
+  .stat-box {
+    flex: 1; min-width: 130px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px; text-align: center;
+  }
+  .stat-box .num { font-size: 34px; font-weight: 800; color: var(--accent); }
+  .stat-box .label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .timeline { position: relative; padding-left: 30px; margin-top: 14px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; margin-bottom: 22px; }
+  .timeline-item::before {
+    content: ''; position: absolute; left: -26px; top: 5px; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--accent); border: 3px solid var(--bg);
+  }
+  .timeline-item h4 { color: #fff; font-size: 15px; margin-bottom: 4px; }
+  .timeline-item p { font-size: 13px; color: var(--muted); }
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(56,189,248,0.1), rgba(167,139,250,0.1));
+    border: 1px solid rgba(56,189,248,0.3); border-radius: 14px; padding: 22px; margin-top: 16px;
+  }
+  .highlight-box h4 { color: var(--accent); margin-bottom: 6px; }
+  .controls {
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    padding: 14px 24px; background: rgba(15,23,42,0.95);
+    border-top: 1px solid var(--border); backdrop-filter: blur(20px); z-index: 100;
+  }
+  .btn {
+    padding: 10px 22px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card); color: #fff; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; font-family: inherit;
+  }
+  .btn:hover { border-color: var(--accent); background: rgba(56,189,248,0.1); }
+  .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; color: #0f172a; }
+  .btn.primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .page-indicator { font-size: 14px; color: var(--muted); min-width: 60px; text-align: center; }
+  .data-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 13px; }
+  .data-table th { background: var(--card); color: var(--accent); padding: 10px 14px; text-align: left; font-weight: 600; border-bottom: 2px solid var(--border); }
+  .data-table td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--muted); }
+  .data-table tr:hover td { background: rgba(56,189,248,0.05); color: #fff; }
+  .data-table .num-col { text-align: right; font-family: "SF Mono","JetBrains Mono",monospace; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .badge-green { background: rgba(52,211,153,0.15); color: var(--green); }
+  .badge-yellow { background: rgba(251,191,36,0.15); color: var(--gold); }
+  .badge-red { background: rgba(248,113,113,0.15); color: var(--red); }
+  .badge-blue { background: rgba(56,189,248,0.15); color: var(--accent); }
+  .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .exercise-input {
+    width: 100%; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; color: #fff; font-size: 15px; font-family: inherit; transition: border-color 0.2s;
+  }
+  .exercise-input:focus { outline: none; border-color: var(--accent); }
+  .calc-result { background: var(--card); border-radius: 12px; padding: 20px; margin-top: 14px; font-size: 14px; line-height: 1.8; min-height: 60px; }
+  @media (max-width: 768px) {
+    .slide { padding: 20px 18px; }
+    .slide h1 { font-size: 26px; }
+    .slide h2 { font-size: 20px; }
+    .card-grid { grid-template-columns: 1fr; }
+    .stat-row { flex-direction: column; }
+  }
+  @media print {
+    body { overflow: visible; background: white; color: black; }
+    .slide { position: static; opacity: 1; transform: none; page-break-after: always; }
+    .controls, .progress-wrap { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="logo">🏠 漏斗分析 · 自学教案</span>
+  <span class="meta">室内家装设计师专属 · 苏州 · 2026</span>
+</div>
+<div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:5%"></div></div>
+
+<div class="slide-container" id="slideContainer">
+
+  <!-- Slide 0: Cover -->
+  <div class="slide active" data-slide="0">
+    <div style="text-align:center;">
+      <div style="font-size:72px;margin-bottom:20px;">🏠</div>
+      <h1 style="font-size:48px;">漏斗分析<br>Funnel Analysis</h1>
+      <p style="font-size:20px;color:var(--muted);margin-top:16px;">
+        用数据思维，让更多业主找到你、选择你、推荐你
+      </p>
+      <div class="tag-row" style="justify-content:center;margin-top:24px;">
+        <span class="badge badge-blue">室内家装设计师专属</span>
+        <span class="badge badge-green">家装行业案例数据</span>
+        <span class="badge badge-yellow">苏州本土案例</span>
+      </div>
+      <p style="margin-top:40px;color:var(--muted);font-size:14px;">
+        共 12 页 · 预计学习时间 50 分钟 · 含实操项目
+      </p>
+    </div>
+  </div>
+
+  <!-- Slide 1: 什么是漏斗分析 -->
+  <div class="slide" data-slide="1">
+    <h2>📐 什么是漏斗分析？</h2>
+    <p>漏斗分析就是把<strong style="color:#fff;">业主从"看到你的作品"到"签约付款"再到"介绍新客户"</strong>的完整路径拆解成多个阶段，量化每个阶段的转化与流失。</p>
+
+    <div class="funnel-visual" style="margin-top:24px;">
+      <div class="funnel-stage" style="width:100%;background:linear-gradient(90deg,#38bdf8,#0ea5e9);">
+        📱 刷到你的内容<span class="pct">100% · 曝光层</span>
+      </div>
+      <div class="funnel-stage" style="width:72%;background:linear-gradient(90deg,#0ea5e9,#0284c7);">
+        👀 关注/收藏<span class="pct">~50% · 兴趣层</span>
+      </div>
+      <div class="funnel-stage" style="width:35%;background:linear-gradient(90deg,#0284c7,#0369a1);">
+        💬 私信咨询<span class="pct">~18% · 考虑层</span>
+      </div>
+      <div class="funnel-stage" style="width:14%;background:linear-gradient(90deg,#0369a1,#075985);">
+        📐 量房/见面<span class="pct">~6% · 意向层</span>
+      </div>
+      <div class="funnel-stage" style="width:5%;background:linear-gradient(90deg,#075985,#0c4a6e);">
+        ✍️ 签约开工<span class="pct">~2.5% · 转化层</span>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="margin-top:20px;">
+      <h4>💡 对家装设计师的核心意义</h4>
+      <p>家装设计是<strong style="color:#fff;">高客单价、低频次、长决策周期</strong>的服务。每个签约客户背后，有40-60个潜在业主在漏斗中流失。找到流失最严重的环节，比拼命发内容涨粉更有 ROI。</p>
+    </div>
+  </div>
+
+  <!-- Slide 2: 漏斗分析的核心指标 -->
+  <div class="slide" data-slide="2">
+    <h2>📏 漏斗分析三大核心指标</h2>
+    <div class="card-grid">
+      <div class="card">
+        <div class="icon">📊</div>
+        <h4>1. 环节转化率</h4>
+        <p>从上一阶段成功进入下一阶段的业主比例。<br>
+        <strong style="color:var(--accent);">公式：本阶段人数 ÷ 上阶段人数 × 100%</strong><br>
+        例：50人咨询 → 15人量房 = 30% 转化率<br>
+        <span style="color:var(--gold);">家装行业参考：咨询→量房 25%~40%</span></p>
+      </div>
+      <div class="card">
+        <div class="icon">📉</div>
+        <h4>2. 流失率</h4>
+        <p>在某一阶段离开、未进入下一阶段的比例。<br>
+        <strong style="color:var(--red);">公式：1 - 转化率</strong><br>
+        例：咨询→量房转化率30%→流失率70%<br>
+        <span style="color:var(--gold);">关注流失原因比关注流失人数更重要</span></p>
+      </div>
+      <div class="card">
+        <div class="icon">⏱️</div>
+        <h4>3. 阶段停留时长</h4>
+        <p>业主在某个阶段的平均停留天数。<br>
+        <strong style="color:var(--gold);">家装决策周期：初次咨询到签约平均 15-45 天</strong><br>
+        停留过长 = 业主在比价/犹豫/不信任<br>
+        停留过短但未成交 = 报价劝退/需求错配</p>
+      </div>
+    </div>
+    <div class="highlight-box" style="margin-top:16px;">
+      <h4>🎯 家装设计师最该盯的指标</h4>
+      <p><strong style="color:var(--green);">"量房→签约"转化率</strong>是判断设计能力+沟通能力+报价能力的综合指标。苏州优秀独立设计师该环节通常维持在 <strong style="color:var(--accent);">40%~65%</strong>。</p>
+    </div>
+  </div>
+
+  <!-- Slide 3: 家装设计师的7层漏斗 -->
+  <div class="slide" data-slide="3">
+    <h2>🏠 室内家装设计师的7层业务漏斗</h2>
+    <p>基于家装行业"低频高客单价+长决策链+重信任"的特点，定制漏斗模型：</p>
+    <table class="data-table" style="margin-top:16px;">
+      <thead><tr><th>层级</th><th>阶段</th><th>典型渠道</th><th>健康转化率</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge badge-blue">L1</span></td><td><strong>曝光</strong> — 业主刷到你的内容</td><td>小红书/视频号/公众号/好好住/住小帮/抖音</td><td class="num-col">—</td></tr>
+        <tr><td><span class="badge badge-blue">L2</span></td><td><strong>关注</strong> — 关注/收藏你的账号</td><td>各平台粉丝+收藏+公众号订阅</td><td class="num-col">20~40%</td></tr>
+        <tr><td><span class="badge badge-yellow">L3</span></td><td><strong>咨询</strong> — 私信/评论/加微信</td><td>小红书私信、微信、公众号留言</td><td class="num-col">3~8%</td></tr>
+        <tr><td><span class="badge badge-yellow">L4</span></td><td><strong>量房/见面</strong> — 上门量房、深度沟通</td><td>线下到业主家、面对面沟通</td><td class="num-col">25~40%</td></tr>
+        <tr><td><span class="badge badge-yellow">L5</span></td><td><strong>方案报价</strong> — 出平面方案+效果图+报价</td><td>设计提案、PPT/PDF方案书</td><td class="num-col">50~70%</td></tr>
+        <tr><td><span class="badge badge-green">L6</span></td><td><strong>签约</strong> — 签设计合同+付定金</td><td>电子合同、对公/个人收款</td><td class="num-col">40~60%</td></tr>
+        <tr><td><span class="badge badge-green">L7</span></td><td><strong>转介绍</strong> — 业主推荐新客户</td><td>口碑传播、小区业主群、朋友圈晒家</td><td class="num-col">20~35%</td></tr>
+      </tbody>
+    </table>
+    <div class="highlight-box" style="margin-top:12px;">
+      <h4>🔑 家装行业的关键特征</h4>
+      <p>不同于品牌设计，家装设计有<strong style="color:#fff;">"量房"这个天然见面机会</strong>——一旦业主同意你上门，信任已建立一半。L3→L4（咨询→量房）是最被低估的转化杠杆。</p>
+    </div>
+  </div>
+
+  <!-- Slide 4: 真实数据案例 -->
+  <div class="slide" data-slide="4">
+    <h2>📋 模拟案例：家装设计师粉丝数据 × 苏州家装市场</h2>
+    <p>以一个典型苏州家装设计师的社交媒体数据为例，推算各阶段漏斗人数：</p>
+
+    <div class="stat-row">
+      <div class="stat-box"><div class="num">1,200</div><div class="label">小红书粉丝</div></div>
+      <div class="stat-box"><div class="num">1,800</div><div class="label">公众号粉丝</div></div>
+      <div class="stat-box"><div class="num">400</div><div class="label">视频号粉丝</div></div>
+      <div class="stat-box"><div class="num" style="color:var(--accent2);">3,400</div><div class="label">合计粉丝池</div></div>
+    </div>
+
+    <table class="data-table" style="margin-top:16px;">
+      <thead><tr><th>阶段</th><th>估算人数/月</th><th>转化率</th><th>流失</th><th>诊断</th></tr></thead>
+      <tbody>
+        <tr><td>📱 月度曝光</td><td class="num-col">~25,000</td><td class="num-col">—</td><td class="num-col">—</td><td><span class="badge badge-blue">基准</span></td></tr>
+        <tr><td>👀 新增关注</td><td class="num-col">~400</td><td class="num-col">1.6%</td><td class="num-col">24,600</td><td><span class="badge badge-red">首图吸引力不足</span></td></tr>
+        <tr><td>💬 咨询</td><td class="num-col">~25</td><td class="num-col">6.3%</td><td class="num-col">375</td><td><span class="badge badge-yellow">CTA引导不够</span></td></tr>
+        <tr><td>📐 量房/见面</td><td class="num-col">~10</td><td class="num-col">40.0%</td><td class="num-col">15</td><td><span class="badge badge-green">沟通能力不错</span></td></tr>
+        <tr><td>📋 方案报价</td><td class="num-col">~10</td><td class="num-col">100%</td><td class="num-col">0</td><td><span class="badge badge-green">量房后基本都出方案</span></td></tr>
+        <tr><td>✍️ 签约</td><td class="num-col">~4</td><td class="num-col">40.0%</td><td class="num-col">6</td><td><span class="badge badge-yellow">报价/方案优化空间大</span></td></tr>
+        <tr><td>💎 转介绍</td><td class="num-col">~1</td><td class="num-col">25.0%</td><td class="num-col">3</td><td><span class="badge badge-yellow">转介绍机制未建立</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="stat-row">
+      <div class="stat-box"><div class="num">0.016%</div><div class="label">整体转化率（曝光→签约）</div></div>
+      <div class="stat-box"><div class="num">6.3%</div><div class="label">最大瓶颈（关注→咨询）</div></div>
+      <div class="stat-box"><div class="num" style="color:var(--green);">¥40,000</div><div class="label">预估月收入（4单×均¥10,000）</div></div>
+    </div>
+  </div>
+
+  <!-- Slide 5: 诊断分析 -->
+  <div class="slide" data-slide="5">
+    <h2>🔬 案例诊断：你的漏斗卡在哪里？</h2>
+    <div class="card-grid">
+      <div class="card" style="border-left:4px solid var(--red);">
+        <h4>🚨 最大瓶颈：曝光→关注 (1.6%)</h4>
+        <p>25,000曝光只换来400新增关注。<strong>可能原因：</strong></p>
+        <ul style="margin-top:6px;">
+          <li>封面图不够"抓人"——家装内容的封面是第一竞争力</li>
+          <li>标题没有戳中业主痛点（"我家也要这样"的冲动）</li>
+          <li>账号定位不够清晰——什么风格？什么户型？什么预算？</li>
+          <li>发布频率不稳定，算法推荐权重低</li>
+        </ul>
+        <p style="margin-top:6px;color:var(--accent);">→ 优化到3%，关注可翻倍至800/月</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--gold);">
+        <h4>⚠️ 次要瓶颈：关注→咨询 (6.3%)</h4>
+        <p>400人关注，仅25人咨询。<strong>可能原因：</strong></p>
+        <ul style="margin-top:6px;">
+          <li>账号没有明确"怎么找我设计"的引导路径</li>
+          <li>缺少服务介绍和价格参考（业主怕问了也"请不起"）</li>
+          <li>案例展示不完整——只有效果图，没有"改造前后对比+业主反馈"</li>
+          <li>私信回复不够及时/专业</li>
+        </ul>
+        <p style="margin-top:6px;color:var(--accent);">→ 优化到10%，月咨询可达40人</p>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h4>💡 ICE 优化优先级评分</h4>
+      <p><strong>I</strong>mpact × <strong>C</strong>onfidence × <strong>E</strong>ase（每项1-10分）</p>
+      <table class="data-table" style="margin-top:10px;">
+        <tr><th>优化项</th><th>I</th><th>C</th><th>E</th><th style="color:var(--gold);">ICE分</th></tr>
+        <tr><td>优化封面图+标题（Before/After对比）</td><td class="num-col">9</td><td class="num-col">9</td><td class="num-col">8</td><td class="num-col" style="color:var(--gold);">648 ⭐</td></tr>
+        <tr><td>置顶"服务介绍+价格区间"</td><td class="num-col">8</td><td class="num-col">8</td><td class="num-col">10</td><td class="num-col">640 ⭐</td></tr>
+        <tr><td>每周3条高质量案例内容</td><td class="num-col">7</td><td class="num-col">7</td><td class="num-col">6</td><td class="num-col">294</td></tr>
+        <tr><td>建立转介绍激励机制</td><td class="num-col">8</td><td class="num-col">6</td><td class="num-col">7</td><td class="num-col">336</td></tr>
+        <tr><td>方案报价模板化（提效+专业感）</td><td class="num-col">6</td><td class="num-col">8</td><td class="num-col">8</td><td class="num-col">384</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Slide 6: 苏州家装设计师成长路径（上） -->
+  <div class="slide" data-slide="6">
+    <h2>🌉 苏州家装设计师成长路径（上）</h2>
+    <p>基于苏州房地产市场特性（新房交付量大+旧房翻新需求旺盛+业主审美升级），梳理可复制的成长路线：</p>
+    <div class="timeline">
+      <div class="timeline-item">
+        <h4>🎓 阶段一：技能打磨期（0→1.5年）</h4>
+        <p><strong>目标：</strong>建立扎实的设计能力+完整的落地案例。<br>
+        <strong>苏州策略：</strong>① 进入苏州本地装修公司/设计工作室积累实战经验 ② 重点掌握苏州主流户型（园区89-120㎡/吴中吴江大平层/姑苏老房改造）③ 积累3-5个从设计到落地的完整案例 ④ 打通苏州本地供应链（施工队、材料商、定制工厂）。<br>
+        <span class="badge badge-blue">月均收入参考：¥5,000-12,000（助理/初级设计师）</span></p>
+      </div>
+      <div class="timeline-item">
+        <h4>🌱 阶段二：独立获客期（1.5→3年）</h4>
+        <p><strong>目标：</strong>离开平台/公司，建立独立获客能力。<br>
+        <strong>苏州策略：</strong>① 聚焦1-2个擅长风格（如：现代简约/法式奶油/新中式/原木日式）② 深耕小红书+好好住双平台 ③ 利用苏州新房交付潮——园区、科技城、高铁新城楼盘交付期集中获客 ④ 与1-2个苏州本地施工队建立稳定合作。<br>
+        <span class="badge badge-yellow">月均收入参考：¥12,000-25,000</span></p>
+      </div>
+      <div class="timeline-item">
+        <h4>🚀 阶段三：口碑裂变期（3→5年）</h4>
+        <p><strong>目标：</strong>靠转介绍和口碑实现稳定客源。<br>
+        <strong>苏州策略：</strong>① 每个项目打造成"样板间级"作品——苏州小区业主群是最强传播渠道 ② 建立标准化服务SOP（量房→方案→报价→签约→施工跟进→交付）③ 与2-3个苏州本地中介/房产博主合作导流 ④ 开始做视频号/公众号深度内容建立专业IP。<br>
+        <span class="badge badge-green">月均收入参考：¥25,000-60,000</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 7: 成长路径（下） -->
+  <div class="slide" data-slide="7">
+    <h2>🌟 苏州家装设计师成长路径（下）</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <h4>🏛️ 阶段四：工作室/品牌化（5→8年）</h4>
+        <p><strong>目标：</strong>从"一个人"到"一个团队"，客单价跃升。<br>
+        <strong>苏州策略：</strong>① 注册设计工作室（苏州工业园区有文创产业扶持政策）② 招1-2名助理设计师分担执行 ③ 定位高端或特色细分市场（如：苏州园林式私宅/太湖度假别墅/老洋房改造）④ 设计费从¥150/㎡逐步提升到¥300-500/㎡。<br>
+        <span class="badge badge-green">月均收入参考：¥60,000-150,000</span></p>
+      </div>
+      <div class="timeline-item">
+        <h4>💎 阶段五：IP化/多重收入（8年+）</h4>
+        <p><strong>目标：</strong>行业影响力+被动收入。<br>
+        <strong>苏州策略：</strong>① 开设家装设计课程/工作坊（线上+线下）② 开发设计工具包/模板/供应链资源包销售 ③ 成为本地高校（苏大/苏工艺）客座讲师 ④ 与苏州高端楼盘/开发商合作样板间设计。<br>
+        <span class="badge badge-yellow">月均收入参考：¥100,000-500,000+</span></p>
+      </div>
+    </div>
+    <div class="highlight-box">
+      <h4>🗺️ 苏州家装设计师的独特优势</h4>
+      <div class="card-grid" style="margin-top:10px;">
+        <div class="card"><h4>🏗️ 新房交付量大</h4><p>苏州年均新房交付8-10万套。园区、新区、相城、吴江持续有新盘交付——每个楼盘都是获客金矿。</p></div>
+        <div class="card"><h4>🏘️ 旧房翻新蓝海</h4><p>姑苏区/老新村大量80-00年代房屋进入翻新周期。旧房改造客单价高、竞争相对小。</p></div>
+        <div class="card"><h4>🏡 别墅/大宅市场</h4><p>太湖度假区、阳澄湖、金鸡湖周边别墅区聚集高净值业主。设计费天花板高。</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 8: 实操工具介绍 -->
+  <div class="slide" data-slide="8">
+    <h2>🛠️ 实操：搭建你的家装漏斗追踪系统</h2>
+    <p>不需要CRM软件。一张 Excel 或飞书多维表格就够了：</p>
+    <table class="data-table" style="margin-top:14px;">
+      <thead><tr><th>日期</th><th>业主称呼</th><th>来源渠道</th><th>楼盘/小区</th><th>户型面积</th><th>当前阶段</th><th>阶段停留(天)</th><th>预估设计费</th><th>备注</th></tr></thead>
+      <tbody>
+        <tr><td>6/3</td><td>张女士</td><td>小红书</td><td>园区·铂悦犀湖</td><td>128㎡</td><td><span class="badge badge-green">已签约</span></td><td class="num-col">22</td><td class="num-col">¥19,200</td><td>现代简约</td></tr>
+        <tr><td>6/8</td><td>李先生</td><td>公众号</td><td>吴中·太湖新城</td><td>143㎡</td><td><span class="badge badge-yellow">方案中</span></td><td class="num-col">13</td><td class="num-col">¥21,450</td><td>法式奶油</td></tr>
+        <tr><td>6/12</td><td>王姐</td><td>朋友介绍</td><td>姑苏·老房改造</td><td>89㎡</td><td><span class="badge badge-blue">待量房</span></td><td class="num-col">9</td><td class="num-col">¥15,000</td><td>旧房翻新</td></tr>
+        <tr><td>6/15</td><td>陈总</td><td>视频号</td><td>相城·高铁新城</td><td>118㎡</td><td><span class="badge badge-red">已流失</span></td><td class="num-col">31</td><td class="num-col">¥17,700</td><td>嫌贵选施工队</td></tr>
+      </tbody>
+    </table>
+    <div class="highlight-box" style="margin-top:14px;">
+      <h4>📝 每周15分钟漏斗复盘清单</h4>
+      <ul>
+        <li>✅ 本周新增多少咨询？来自哪个渠道？（小红书/公众号/视频号/转介绍/其他）</li>
+        <li>✅ 哪些业主推进到了量房/方案阶段？哪些卡住了？多久没联系了？</li>
+        <li>✅ 流失的业主，原因归类（预算不够/找施工队了/选了别的设计师/还在观望/其他）</li>
+        <li>✅ 当前漏斗里的<strong>潜在签约金额</strong>总和，够不够未来2-3个月的收入目标？</li>
+        <li>✅ 本周有没有可以"推动一把"的业主？（方案出了还没跟进/量房了一直没报价）</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Slide 9: 进阶方法 + 互动练习 -->
+  <div class="slide" data-slide="9">
+    <h2>📐 漏斗分析进阶方法</h2>
+    <div class="card-grid">
+      <div class="card">
+        <h4>🔍 1. 按渠道切片（Cohort）</h4>
+        <p>把漏斗按<strong>获客渠道</strong>拆开对比。</p>
+        <p style="margin-top:6px;color:var(--accent);">例：小红书咨询转化率 4% vs 转介绍咨询转化率 80% → "信任"是核心变量 → 内容策略要围绕建立信任</p>
+      </div>
+      <div class="card">
+        <h4>⏱️ 2. 按户型/预算切片</h4>
+        <p>不同户型、不同预算的业主，决策链完全不同。</p>
+        <p style="margin-top:6px;color:var(--accent);">例：89㎡刚需业主决策快（7-14天），143㎡改善型业主反复比较（20-40天）→ 策略要区分</p>
+      </div>
+      <div class="card">
+        <h4>🧪 3. A/B 测试</h4>
+        <p>每次只改<strong>一个变量</strong>，对比前后漏斗数据。</p>
+        <p style="margin-top:6px;color:var(--accent);">例：小红书简介加了"设计费¥150-300/㎡"后，咨询率从4%→8%（+100%！降低咨询心理门槛的效果立竿见影）</p>
+      </div>
+    </div>
+    <div style="margin-top:20px;background:var(--card);border-radius:14px;padding:22px;">
+      <h4 style="color:var(--accent);">🧮 互动练习：转化率优化的收入杠杆</h4>
+      <p style="margin-bottom:10px;">假设你目前月曝光25,000、月签约4单、均单设计费¥10,000。<br>如果把"关注→咨询"转化率从 6.3% 优化到 10%，每月能多赚多少？</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input type="number" id="exInput" class="exercise-input" placeholder="输入你的答案（元）" style="flex:1;min-width:200px;">
+        <button class="btn primary" onclick="checkExercise()">验证答案</button>
+        <button class="btn" onclick="showAnswer()">显示答案</button>
+      </div>
+      <div id="exResult" class="calc-result" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- Slide 10: 苏州家装市场数据 -->
+  <div class="slide" data-slide="10">
+    <h2>🏙️ 苏州家装设计市场全景</h2>
+    <div class="stat-row">
+      <div class="stat-box"><div class="num">8-10万</div><div class="label">苏州年均新房交付套数</div></div>
+      <div class="stat-box"><div class="num">300万+</div><div class="label">存量住宅总量</div></div>
+      <div class="stat-box"><div class="num">¥150-500</div><div class="label">独立设计师设计费/㎡</div></div>
+    </div>
+    <div class="card-grid" style="margin-top:16px;">
+      <div class="card">
+        <h4>🔥 苏州家装高需求赛道</h4>
+        <ul>
+          <li>园区/新区 89-120㎡婚房设计（刚需量大）</li>
+          <li>吴中/吴江 120-160㎡改善型住宅</li>
+          <li>姑苏区老房翻新改造（客单价高）</li>
+          <li>太湖/阳澄湖度假别墅/第二居所</li>
+          <li>精装房软装设计（新趋势，门槛低）</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>💰 苏州设计费参考（2025-2026）</h4>
+        <ul>
+          <li>初级独立设计师：¥80-150/㎡</li>
+          <li>资深独立设计师：¥150-300/㎡</li>
+          <li>知名工作室：¥300-600/㎡</li>
+          <li>纯设计（不含施工）：约占总预算8-15%</li>
+          <li>设计+施工监理：设计费上浮30-50%</li>
+          <li>软装设计（精装房）：¥5,000-20,000/套</li>
+        </ul>
+      </div>
+    </div>
+    <div class="highlight-box" style="margin-top:14px;">
+      <h4>📊 漏斗优化的收入潜力——算一笔账</h4>
+      <p>假设你优化漏斗，签约数从 <strong>4单/月 → 8单/月</strong>（翻一倍）：<br>
+      月收入从 ¥40,000 → <strong>¥80,000</strong>（均单¥10,000计）<br>
+      年收入从 ¥480,000 → <strong>¥960,000</strong><br><br>
+      💡 实现路径：曝光→关注 1.6%→3% + 关注→咨询 6.3%→10% + 方案→签约 40%→55%<br>
+      三个环节各提升一档，<strong style="color:var(--accent);">不增加任何广告费</strong>，仅靠转化效率就实现收入翻倍。</p>
+    </div>
+  </div>
+
+  <!-- Slide 11: 30天行动清单 -->
+  <div class="slide" data-slide="11">
+    <h2>✅ 你的30天漏斗优化行动清单</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <h4>📅 第 1 周：建立追踪 + 优化首页</h4>
+        <p>① 创建你的漏斗追踪表（Excel/飞书），填入过去3个月的业主数据 ② 计算出当前的各阶段转化率基线 ③ <strong>优化小红书/公众号简介</strong>：明确写上"苏州独立家装设计师｜设计费¥XX-XX/㎡｜擅长XX风格｜私信预约量房"。</p>
+      </div>
+      <div class="timeline-item">
+        <h4>📅 第 2 周：定位瓶颈 + 内容升级</h4>
+        <p>① 用ICE评分法确定1-2个优先优化环节 ② 准备3条高质量"改造前后对比"内容（家装内容的流量密码！）③ 每条内容加CTA："喜欢这个风格？私信我帮你家出方案"。</p>
+      </div>
+      <div class="timeline-item">
+        <h4>📅 第 3 周：加速转化 + 模板化</h4>
+        <p>① 制作标准化的"业主需求问卷"（腾讯问卷/飞书），咨询第一时间发 ② 准备3套不同风格/价位的方案模板，提升出方案速度 ③ 所有私信2小时内首回。</p>
+      </div>
+      <div class="timeline-item">
+        <h4>📅 第 4 周：复盘迭代 + 转介绍启动</h4>
+        <p>① 对比优化前后的漏斗数据，计算收入变化 ② 联系3个老客户——"最近住得怎么样？顺手拍几张照片给我？" ③ 设计转介绍激励机制（推荐成功送软装搭配咨询/家居好物清单）。</p>
+      </div>
+    </div>
+    <div class="highlight-box" style="margin-top:14px;text-align:center;">
+      <h4>🎯 记住家装设计师的增长公式</h4>
+      <p style="font-size:18px;color:#fff;font-weight:700;">
+        年收入 = 曝光量 × 整体转化率 × 均单设计费 × 转介绍系数
+      </p>
+      <p>曝光靠内容，转化靠信任，客单价靠作品，<strong style="color:var(--accent);">转介绍靠交付体验</strong>。</p>
+    </div>
+  </div>
+
+</div><!-- /slide-container -->
+
+<div class="controls">
+  <button class="btn" onclick="prevSlide()" id="btnPrev">◀ 上一页</button>
+  <span class="page-indicator" id="pageIndicator">1 / 12</span>
+  <button class="btn primary" onclick="nextSlide()" id="btnNext">下一页 ▶</button>
+  <button class="btn" onclick="goToSlide(0)" style="margin-left:20px;">🏠</button>
+</div>
+
+<script>
+  const totalSlides = 12;
+  let currentSlide = 0;
+  function showSlide(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    const slide = document.querySelector(`[data-slide="${n}"]`);
+    if (slide) slide.classList.add('active');
+    document.getElementById('progressBar').style.width = ((n+1)/totalSlides*100)+'%';
+    document.getElementById('pageIndicator').textContent = `${n+1} / ${totalSlides}`;
+    document.getElementById('btnPrev').style.opacity = n === 0 ? '0.4' : '1';
+    document.getElementById('btnNext').textContent = n === totalSlides-1 ? '🎉 完成' : '下一页 ▶';
+    currentSlide = n;
+  }
+  function nextSlide() { if (currentSlide < totalSlides - 1) showSlide(currentSlide + 1); }
+  function prevSlide() { if (currentSlide > 0) showSlide(currentSlide - 1); }
+  function goToSlide(n) { showSlide(n); }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault(); nextSlide();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault(); prevSlide();
+    }
+  });
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 60) { diff > 0 ? nextSlide() : prevSlide(); }
+  });
+
+  function checkExercise() {
+    const input = parseFloat(document.getElementById('exInput').value);
+    const result = document.getElementById('exResult');
+    result.style.display = 'block';
+    if (isNaN(input)) {
+      result.innerHTML = '<span style="color:var(--red);">⚠️ 请输入一个数字（元）</span>';
+      return;
+    }
+    // Current: 曝光25000 → 关注400 (1.6%) → 咨询25 (6.3%) → 量房10 (40%) → 方案10 → 签约4 (40%)
+    // Optimized: 关注→咨询 10%: 关注400 → 咨询40 → 量房16 (40%) → 签约6.4 (40%)
+    // More deals: 2.4, avg ¥10,000 = ¥24,000 more
+    const correct = 24000;
+    const diff = Math.abs(input - correct);
+    const pct = diff / correct * 100;
+    if (pct < 10) {
+      result.innerHTML = `<span style="color:var(--green);">✅ 很接近！正确答案约 <strong>¥24,000</strong>。</span><br>
+      计算过程：优化后月签约 ≈ 25,000 × 1.6% × <strong>10%</strong> × 40% × 40% ≈ <strong>6.4单</strong><br>
+      比原来4单多了约2.4单，按均单¥10,000 ≈ <strong>月增收 ¥24,000</strong>（+60%）`;
+    } else {
+      result.innerHTML = `<span style="color:var(--gold);">🤔 正确答案约 <strong>¥24,000</strong>（多了约2.4单 × ¥10,000/单）</span><br>
+      计算过程：优化后月签约 ≈ 25,000 × 1.6% × <strong>10%</strong> × 40% × 40% ≈ <strong>6.4单</strong><br>比原来4单多了约2.4单，月增收约¥24,000（+60%）`;
+    }
+  }
+  function showAnswer() {
+    const result = document.getElementById('exResult');
+    result.style.display = 'block';
+    result.innerHTML = `<span style="color:var(--accent);">💡 正确答案：约 <strong>¥24,000</strong></span><br>
+    计算过程：<br>
+    当前：25,000 × 1.6% × 6.3% × 40% × 40% ≈ <strong>4.0单</strong> → ¥40,000<br>
+    优化后：25,000 × 1.6% × <strong>10%</strong> × 40% × 40% ≈ <strong>6.4单</strong> → ¥64,000<br>
+    增量 = <strong>+¥24,000/月（+60%）</strong><br><br>
+    🔑 只优化了一个环节（关注→咨询从6.3%到10%），每月多赚<strong>¥24,000</strong>，一年多赚<strong>¥288,000</strong>。这就是数据驱动的力量。`;
+  }
+  showSlide(0);
+</script>
+</body>
+</html>

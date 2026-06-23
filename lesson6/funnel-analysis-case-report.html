@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>漏斗分析案例项目 — 家装设计师生意诊断工具</title>
+<style>
+  :root {
+    --bg: #f8fafc; --card: #fff; --accent: #0284c7; --accent2: #7c3aed;
+    --gold: #f59e0b; --green: #10b981; --red: #ef4444; --text: #1e293b;
+    --muted: #64748b; --border: #e2e8f0;
+    --accent-light: #e0f2fe; --green-light: #d1fae5;
+    --red-light: #fee2e2; --gold-light: #fef3c7;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh;
+  }
+  .nav {
+    background: #fff; border-bottom: 1px solid var(--border); padding: 14px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .nav .brand { font-size: 19px; font-weight: 800; color: var(--accent); }
+  .nav .subtitle { font-size: 13px; color: var(--muted); }
+  .container { max-width: 1100px; margin: 0 auto; padding: 28px 22px; }
+  .card {
+    background: #fff; border: 1px solid var(--border); border-radius: 16px;
+    padding: 26px; margin-bottom: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 { font-size: 17px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .input-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .input-table th {
+    background: #f1f5f9; padding: 10px 14px; text-align: left; font-weight: 600;
+    font-size: 13px; color: var(--muted); border-bottom: 2px solid var(--border);
+  }
+  .input-table td { padding: 8px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .input-table .stage-name { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .input-table input {
+    width: 100px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 14px; text-align: center; font-family: "SF Mono","JetBrains Mono",monospace;
+    transition: border-color 0.2s;
+  }
+  .input-table input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(2,132,199,0.1); }
+  .input-table .auto-calc { color: var(--muted); font-size: 13px; font-family: "SF Mono","JetBrains Mono",monospace; text-align: center; }
+  .input-table .readonly-cell { background: #f8fafc; font-weight: 600; font-family: "SF Mono","JetBrains Mono",monospace; text-align: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px;
+    border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--border); background: #fff; color: var(--text);
+    transition: all 0.2s; font-family: inherit;
+  }
+  .btn:hover { border-color: var(--accent); background: var(--accent-light); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: #0369a1; }
+  .btn.danger { background: #fff; border-color: var(--red); color: var(--red); }
+  .btn.danger:hover { background: var(--red-light); }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+  .funnel-chart { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 16px 0; }
+  .funnel-bar {
+    height: 48px; display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 14px; border-radius: 8px;
+    position: relative; transition: all 0.4s ease; min-width: 100px; cursor: pointer;
+  }
+  .funnel-bar:hover { filter: brightness(1.15); transform: scaleX(1.02); }
+  .funnel-bar .bar-label { display: flex; flex-direction: column; align-items: center; }
+  .funnel-bar .bar-label small { font-weight: 400; font-size: 11px; opacity: 0.85; }
+
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .metric-box {
+    background: #fff; border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px; text-align: center; transition: all 0.2s;
+  }
+  .metric-box:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+  .metric-box .val { font-size: 30px; font-weight: 800; color: var(--accent); }
+  .metric-box .val.warn { color: var(--gold); }
+  .metric-box .val.good { color: var(--green); }
+  .metric-box .val.bad { color: var(--red); }
+  .metric-box .lbl { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  .alert {
+    border-radius: 12px; padding: 16px 20px; margin-top: 14px;
+    font-size: 14px; line-height: 1.7;
+  }
+  .alert-info { background: var(--accent-light); border-left: 4px solid var(--accent); color: #0c4a6e; }
+  .alert-warn { background: var(--gold-light); border-left: 4px solid var(--gold); color: #78350f; }
+  .alert-success { background: var(--green-light); border-left: 4px solid var(--green); color: #064e3b; }
+  .alert-danger { background: var(--red-light); border-left: 4px solid var(--red); color: #7f1d1d; }
+  .alert strong { color: inherit; }
+
+  .scenario-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .scenario-card {
+    background: #fff; border: 2px solid var(--border); border-radius: 14px;
+    padding: 16px; cursor: pointer; transition: all 0.2s; text-align: center;
+  }
+  .scenario-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(2,132,199,0.08); }
+  .scenario-card.selected { border-color: var(--accent); background: var(--accent-light); }
+  .scenario-card .emoji { font-size: 34px; margin-bottom: 6px; }
+  .scenario-card h4 { font-size: 14px; margin-bottom: 4px; }
+  .scenario-card p { font-size: 12px; color: var(--muted); }
+
+  .projection-bar { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+  .projection-bar .bar-label-text { width: 110px; font-size: 13px; font-weight: 600; text-align: right; flex-shrink: 0; }
+  .projection-bar .bar-track { flex: 1; background: #f1f5f9; border-radius: 20px; height: 28px; overflow: hidden; }
+  .projection-bar .bar-fill {
+    height: 100%; border-radius: 20px; display: flex; align-items: center;
+    padding-left: 12px; font-size: 13px; font-weight: 700; color: #fff; transition: width 0.6s ease;
+  }
+  .projection-bar .bar-amount { width: 100px; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+
+  .follower-highlight {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;
+  }
+  .follower-card {
+    background: linear-gradient(135deg, #fff, #f8fafc); border: 2px solid var(--border);
+    border-radius: 14px; padding: 18px; text-align: center;
+  }
+  .follower-card .platform { font-size: 24px; margin-bottom: 4px; }
+  .follower-card .count { font-size: 32px; font-weight: 800; color: var(--accent); }
+  .follower-card .name { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  @media (max-width: 768px) {
+    .container { padding: 14px; }
+    .input-table { font-size: 12px; }
+    .input-table input { width: 65px; padding: 6px; }
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .follower-highlight { grid-template-columns: repeat(3, 1fr); }
+    .nav { padding: 10px 14px; }
+  }
+  @media print {
+    body { background: #fff; }
+    .nav, .btn-row { display: none; }
+    .card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div><span class="brand">🏠 漏斗分析 · 案例项目</span></div>
+  <div class="subtitle">室内家装设计师专属 · 苏州 · 2026</div>
+</div>
+
+<div class="container">
+
+  <!-- ====== YOUR REAL DATA ====== -->
+  <div class="card" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:2px solid var(--accent);">
+    <h3>📊 示例：某苏州家装设计师社交媒体数据</h3>
+    <div class="follower-highlight">
+      <div class="follower-card">
+        <div class="platform">📕</div>
+        <div class="count">1,200</div>
+        <div class="name">小红书粉丝</div>
+      </div>
+      <div class="follower-card">
+        <div class="platform">📰</div>
+        <div class="count">1,800</div>
+        <div class="name">公众号粉丝</div>
+      </div>
+      <div class="follower-card">
+        <div class="platform">🎬</div>
+        <div class="count">400</div>
+        <div class="name">视频号粉丝</div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);text-align:center;">
+      合计粉丝池 <strong style="color:var(--accent);">3,400 人</strong> · 下面用漏斗分析帮你把这批粉丝变成签约客户
+    </p>
+  </div>
+
+  <!-- ====== SECTION 1: DATA INPUT ====== -->
+  <div class="card">
+    <h3>📋 第一步：输入或选择你的月度漏斗数据</h3>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">
+      填入各阶段业主数量。如果还没有精确数据，选择下方预设场景快速体验。
+    </p>
+
+    <div class="scenario-cards">
+      <div class="scenario-card selected" onclick="loadScenario('tina')" id="scn-tina">
+        <div class="emoji">🎯</div><h4>示例数据</h4><p>粉丝3,400人推算漏斗</p>
+      </div>
+      <div class="scenario-card" onclick="loadScenario('beginner')" id="scn-beginner">
+        <div class="emoji">🌱</div><h4>新手家装设计师</h4><p>起步期，粉丝<1,000</p>
+      </div>
+      <div class="scenario-card" onclick="loadScenario('mid')" id="scn-mid">
+        <div class="emoji">🚀</div><h4>成长家装设计师</h4><p>粉丝3,000-10,000</p>
+      </div>
+      <div class="scenario-card" onclick="loadScenario('senior')" id="scn-senior">
+        <div class="emoji">💎</div><h4>资深家装设计师</h4><p>粉丝10,000+，品牌化</p>
+      </div>
+      <div class="scenario-card" onclick="loadScenario('custom')" id="scn-custom">
+        <div class="emoji">✏️</div><h4>手动输入数据</h4><p>填入你自己的真实数据</p>
+      </div>
+    </div>
+
+    <table class="input-table">
+      <thead>
+        <tr><th>阶段</th><th>家装场景说明</th><th>人数/月</th><th>转化率</th><th>流失人数</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="stage-name"><span style="font-size:20px;">📱</span> 月度曝光</td>
+          <td style="color:var(--muted);">你的内容（笔记/视频/文章）被看到的总次数</td>
+          <td><input type="number" id="impressions" value="25000" min="1" onchange="recalc()" oninput="recalc()"></td>
+          <td class="auto-calc">—</td>
+          <td class="auto-calc">—</td>
+        </tr>
+        <tr>
+          <td class="stage-name"><span style="font-size:20px;">👀</span> 新增关注/收藏</td>
+          <td style="color:var(--muted);">关注你的账号或收藏你的作品</td>
+          <td><input type="number" id="followers" value="400" min="0" onchange="recalc()" oninput="recalc()"></td>
+          <td class="readonly-cell" id="rate-follow">1.6%</td>
+          <td class="readonly-cell" id="lost-follow">24,600</td>
+        </tr>
+        <tr>
+          <td class="stage-name"><span style="font-size:20px;">💬</span> 私信/微信咨询</td>
+          <td style="color:var(--muted);">业主主动联系你咨询设计事宜</td>
+          <td><input type="number" id="inquiries" value="25" min="0" onchange="recalc()" oninput="recalc()"></td>
+          <td class="readonly-cell" id="rate-inquiry">6.3%</td>
+          <td class="readonly-cell" id="lost-inquiry">375</td>
+        </tr>
+        <tr>
+          <td class="stage-name"><span style="font-size:20px;">📐</span> 量房/见面</td>
+          <td style="color:var(--muted);">上门量房、与业主面对面深度沟通</td>
+          <td><input type="number" id="proposals" value="10" min="0" onchange="recalc()" oninput="recalc()"></td>
+          <td class="readonly-cell" id="rate-proposal">40.0%</td>
+          <td class="readonly-cell" id="lost-proposal">15</td>
+        </tr>
+        <tr>
+          <td class="stage-name"><span style="font-size:20px;">📋</span> 方案+报价</td>
+          <td style="color:var(--muted);">出平面方案、效果图、设计报价</td>
+          <td><input type="number" id="quotes" value="10" min="0" onchange="recalc()" oninput="recalc()"></td>
+          <td class="readonly-cell" id="rate-quote">100.0%</td>
+          <td class="readonly-cell" id="lost-quote">0</td>
+        </tr>
+        <tr>
+          <td class="stage-name"><span style="font-size:20px;">✍️</span> 签约</td>
+          <td style="color:var(--muted);">签设计合同+付定金</td>
+          <td><input type="number" id="deals" value="4" min="0" onchange="recalc()" oninput="recalc()"></td>
+          <td class="readonly-cell" id="rate-deal">40.0%</td>
+          <td class="readonly-cell" id="lost-deal">6</td>
+        </tr>
+        <tr style="background:#f8fafc;">
+          <td class="stage-name"><span style="font-size:20px;">💎</span> 转介绍</td>
+          <td style="color:var(--muted);">完工业主推荐新客户给你</td>
+          <td><input type="number" id="referrals" value="1" min="0" onchange="recalc()" oninput="recalc()"></td>
+          <td class="readonly-cell" id="rate-referral">25.0%</td>
+          <td class="readonly-cell" id="lost-referral">3</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="btn-row">
+      <button class="btn primary" onclick="recalc()">🔄 重新计算</button>
+      <button class="btn" onclick="resetData()">↩ 恢复默认</button>
+      <button class="btn" onclick="exportReport()">📥 导出诊断报告</button>
+    </div>
+  </div>
+
+  <!-- ====== SECTION 2: FUNNEL VISUAL ====== -->
+  <div class="card">
+    <h3>📊 第二步：漏斗可视化</h3>
+    <div class="funnel-chart" id="funnelChart"></div>
+    <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:6px;">
+      💡 点击漏斗各层可查看该环节的详细诊断建议
+    </p>
+  </div>
+
+  <!-- ====== SECTION 3: KEY METRICS ====== -->
+  <div class="card">
+    <h3>📈 第三步：关键指标总览</h3>
+    <div class="metrics-grid" id="metricsGrid"></div>
+  </div>
+
+  <!-- ====== SECTION 4: DIAGNOSIS ====== -->
+  <div class="card">
+    <h3>🔬 第四步：智能诊断 & 优化建议</h3>
+    <div id="diagnosis"></div>
+  </div>
+
+  <!-- ====== SECTION 5: REVENUE SIM ====== -->
+  <div class="card">
+    <h3>💰 第五步：收入预测 & 优化模拟</h3>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:10px;">
+      调整滑块，模拟优化漏斗后对月收入的提升效果。
+    </p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+      <div>
+        <label style="font-weight:600;font-size:14px;">🏷️ 平均设计费/单 (¥)</label>
+        <input type="range" id="avgPriceSlider" min="3000" max="50000" value="10000" step="500"
+          oninput="document.getElementById('avgPriceVal').textContent='¥'+Number(this.value).toLocaleString();recalcProjection();"
+          style="width:100%;margin-top:8px;">
+        <div style="text-align:center;font-weight:700;color:var(--accent);font-size:20px;" id="avgPriceVal">¥10,000</div>
+      </div>
+      <div>
+        <label style="font-weight:600;font-size:14px;">🎯 关注→咨询 转化率优化目标</label>
+        <input type="range" id="optSlider" min="3" max="20" value="6.3" step="0.5"
+          oninput="document.getElementById('optVal').textContent=Number(this.value).toFixed(1)+'%';recalcProjection();"
+          style="width:100%;margin-top:8px;">
+        <div style="text-align:center;font-weight:700;color:var(--accent2);font-size:20px;" id="optVal">6.3%</div>
+      </div>
+    </div>
+
+    <h4 style="margin-bottom:10px;">📊 收入预测对比</h4>
+    <div id="projectionChart"></div>
+  </div>
+
+  <!-- ====== SECTION 6: ACTION PLAN ====== -->
+  <div class="card">
+    <h3>✅ 第六步：你的个性化行动清单</h3>
+    <div id="actionPlan"></div>
+  </div>
+
+  <!-- ====== SECTION 7: SUZHOU MARKET ====== -->
+  <div class="card">
+    <h3>🏙️ 苏州家装设计渠道分析</h3>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">
+      以三个主要平台为例（小红书1,200粉 / 公众号1,800粉 / 视频号400粉），各渠道优化建议：
+    </p>
+    <div class="metrics-grid">
+      <div class="metric-box">
+        <div style="font-size:32px;">📕</div>
+        <div class="val">1,200</div>
+        <div class="lbl">小红书 · 家装内容流量最大<br>
+          <span style="color:var(--accent);">建议：多发Before/After对比+改造日记</span></div>
+      </div>
+      <div class="metric-box">
+        <div style="font-size:32px;">📰</div>
+        <div class="val">1,800</div>
+        <div class="lbl">公众号 · 粉丝最多但互动弱<br>
+          <span style="color:var(--accent);">建议：发深度案例复盘+引导加微信</span></div>
+      </div>
+      <div class="metric-box">
+        <div style="font-size:32px;">🎬</div>
+        <div class="val">400</div>
+        <div class="lbl">视频号 · 增长潜力最大<br>
+          <span style="color:var(--accent);">建议：发工地vlog+完工roomtour</span></div>
+      </div>
+      <div class="metric-box">
+        <div style="font-size:32px;">🏘️</div>
+        <div class="val">3,400</div>
+        <div class="lbl">合计粉丝 · 苏州本地占比？<br>
+          <span style="color:var(--accent);">建议：内容加#苏州装修 #苏州设计师</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<div style="text-align:center;padding:32px;color:var(--muted);font-size:12px;">
+  漏斗分析案例项目 · 室内家装设计师专属 · 苏州 · 2026<br>
+  数据仅保存在浏览器本地，不会上传到任何服务器
+</div>
+
+<script>
+// ==================== DATA MODEL ====================
+// 7 stages: impressions → followers → inquiries → proposals(量房) → quotes(方案报价) → deals(签约) → referrals(转介绍)
+const stageIds = ['impressions','followers','inquiries','proposals','quotes','deals','referrals'];
+const stageNames = ['曝光','关注','咨询','量房','方案报价','签约','转介绍'];
+const stageIcons = ['📱','👀','💬','📐','📋','✍️','💎'];
+const stageColors = ['#0284c7','#0369a1','#075985','#0c4a6e','#0f3a54','#082f49','#061e2f'];
+
+// Diagnosis tips for each stage (click on funnel bar)
+const stageTips = [
+  '这是漏斗顶层——你的内容曝光量。家装行业扩曝光：① 小红书标题含"苏州+户型+风格"关键词 ② 视频号发工地vlog+完工roomtour ③ 公众号发完整案例深度解析 ④ 好好住/住小帮同步分发。',
+  '从曝光到关注。优化方向：① 封面图第一眼就要有"反差感"（改造前后对比是最强流量密码）② 标题戳痛点（"苏州89㎡老破小，改完邻居以为换了套房"）③ 个人简介写清楚"苏州独立设计师｜设计费XX/㎡｜擅长XX风格"。',
+  '从关注到主动咨询——家装设计师最关键的跳跃。优化：① 每条内容末尾加CTA（"喜欢这个风格？私信我帮你家看看"）② 个人简介明确写"私信预约量房" ③ 展示服务流程+设计费区间降低咨询门槛 ④ 私信设置自动回复（常见问题+引导留联系方式）。',
+  '从咨询到同意量房——关键信任节点。优化：① 私信回复速度（2小时内是底线）② 先发"同户型案例"建立专业感 ③ 首次沟通控制在20分钟内，目标是约到量房时间 ④ 准备标准化的"量房前业主准备清单"体现专业度。',
+  '从量房到出方案报价——专业能力展现。优化：① 量房后48小时内出第一版平面方案 ② 方案PPT包含"改造前后对比+设计理念+材料参考" ③ 准备3档报价（基础/标准/全案）让业主"选择"而非"接受或拒绝"。',
+  '从方案到签约——临门一脚。优化：① 方案讲解时强调"同小区/同户型我们做过XX套"增加信任 ② 报价单附"设计费价值分析"（你花¥20,000设计费，换来的是什么）③ 提供分期付款降低签约门槛 ④ 合同电子化+在线签约。',
+  '转介绍——家装设计师的"睡后收入"。优化：① 每个项目完工后赠送专业摄影（方便业主晒家=免费广告）② 建立转介绍激励机制（推荐成功送软装搭配咨询/家居好物）③ 入住后1个月/3个月/半年回访 ④ 装修过程让业主在小区群直播。',
+];
+
+const scenarios = {
+  tina: {
+    impressions: 25000, followers: 400, inquiries: 25, proposals: 10, quotes: 10, deals: 4, referrals: 1,
+    price: 10000,
+    desc: '示例：某苏州家装设计师（小红书1,200+公众号1,800+视频号400=3,400总粉丝）'
+  },
+  beginner: {
+    impressions: 8000, followers: 120, inquiries: 5, proposals: 2, quotes: 2, deals: 1, referrals: 0,
+    price: 5000,
+    desc: '刚起步的家装设计师，粉丝<1,000，月签约1单'
+  },
+  mid: {
+    impressions: 35000, followers: 700, inquiries: 50, proposals: 20, quotes: 19, deals: 10, referrals: 3,
+    price: 12000,
+    desc: '成长期设计师，粉丝3,000-10,000，月签约5-12单'
+  },
+  senior: {
+    impressions: 80000, followers: 2400, inquiries: 200, proposals: 80, quotes: 75, deals: 40, referrals: 12,
+    price: 20000,
+    desc: '资深设计师/小型工作室，品牌化运营'
+  },
+  custom: {
+    impressions: 5000, followers: 500, inquiries: 50, proposals: 20, quotes: 18, deals: 8, referrals: 2,
+    price: 8000,
+    desc: '手动修改各阶段数据'
+  },
+};
+
+function getData() {
+  const d = {};
+  stageIds.forEach(s => { d[s] = parseInt(document.getElementById(s).value) || 0; });
+  return d;
+}
+
+function calcRate(a, b) { if (!b || b === 0) return 0; return (a / b * 100); }
+
+// ==================== RECALC ====================
+function recalc() {
+  const d = getData();
+
+  const pairs = [
+    ['rate-follow','lost-follow','followers','impressions'],
+    ['rate-inquiry','lost-inquiry','inquiries','followers'],
+    ['rate-proposal','lost-proposal','proposals','inquiries'],
+    ['rate-quote','lost-quote','quotes','proposals'],
+    ['rate-deal','lost-deal','deals','quotes'],
+    ['rate-referral','lost-referral','referrals','deals'],
+  ];
+
+  pairs.forEach(([rateId, lostId, curr, prev]) => {
+    const rate = calcRate(d[curr], d[prev]);
+    const lost = Math.max(0, d[prev] - d[curr]);
+    document.getElementById(rateId).textContent = rate.toFixed(1) + '%';
+    document.getElementById(rateId).style.color = rate < 5 ? 'var(--red)' : rate < 15 ? 'var(--gold)' : 'var(--green)';
+    document.getElementById(lostId).textContent = lost.toLocaleString();
+  });
+
+  renderFunnel(d);
+  renderMetrics(d);
+  renderDiagnosis(d);
+  recalcProjection();
+  renderActionPlan(d);
+}
+
+// ==================== FUNNEL ====================
+function renderFunnel(d) {
+  const stages = [
+    {label:'曝光', icon:'📱', val:d.impressions},
+    {label:'关注', icon:'👀', val:d.followers},
+    {label:'咨询', icon:'💬', val:d.inquiries},
+    {label:'量房', icon:'📐', val:d.proposals},
+    {label:'方案报价', icon:'📋', val:d.quotes},
+    {label:'签约', icon:'✍️', val:d.deals},
+    {label:'转介绍', icon:'💎', val:d.referrals},
+  ];
+  const maxVal = d.impressions || 1;
+
+  let html = '';
+  stages.forEach((s,i) => {
+    const w = Math.max(12, (s.val / maxVal * 100));
+    html += `<div class="funnel-bar" style="width:${w}%;background:${stageColors[i]};"
+      onclick="alert('${s.icon} ${s.label}：${s.val.toLocaleString()} 人\\n\\n${stageTips[i]}')">
+      <span class="bar-label">${s.icon} ${s.label}：${s.val.toLocaleString()}</span>
+    </div>`;
+  });
+  document.getElementById('funnelChart').innerHTML = html;
+}
+
+// ==================== METRICS ====================
+function renderMetrics(d) {
+  const overallRate = calcRate(d.deals, d.impressions);
+  const inquiryToDeal = calcRate(d.deals, d.inquiries);
+  const avgPrice = parseInt(document.getElementById('avgPriceSlider').value) || 10000;
+  const monthlyRev = d.deals * avgPrice;
+
+  const rates = [
+    {name:'曝光→关注', val:calcRate(d.followers,d.impressions)},
+    {name:'关注→咨询', val:calcRate(d.inquiries,d.followers)},
+    {name:'咨询→量房', val:calcRate(d.proposals,d.inquiries)},
+    {name:'量房→方案', val:calcRate(d.quotes,d.proposals)},
+    {name:'方案→签约', val:calcRate(d.deals,d.quotes)},
+    {name:'签约→转介绍', val:calcRate(d.referrals,d.deals)},
+  ];
+  const bottleneck = rates.reduce((a,b) => a.val < b.val ? a : b);
+
+  document.getElementById('metricsGrid').innerHTML = `
+    <div class="metric-box">
+      <div class="val ${overallRate<0.02?'bad':overallRate<0.1?'warn':'good'}">${overallRate.toFixed(3)}%</div>
+      <div class="lbl">整体转化率（曝光→签约）</div>
+    </div>
+    <div class="metric-box">
+      <div class="val">${d.deals}</div>
+      <div class="lbl">本月签约单数</div>
+    </div>
+    <div class="metric-box">
+      <div class="val" style="color:var(--accent2);">¥${monthlyRev.toLocaleString()}</div>
+      <div class="lbl">预估月收入</div>
+    </div>
+    <div class="metric-box">
+      <div class="val ${inquiryToDeal<15?'bad':inquiryToDeal<30?'warn':'good'}">${inquiryToDeal.toFixed(1)}%</div>
+      <div class="lbl">咨询→签约转化率</div>
+    </div>
+    <div class="metric-box">
+      <div class="val bad">${bottleneck.name}</div>
+      <div class="lbl">最大瓶颈（${bottleneck.val.toFixed(1)}%）</div>
+    </div>
+    <div class="metric-box">
+      <div class="val">${d.impressions.toLocaleString()}</div>
+      <div class="lbl">月度总曝光量</div>
+    </div>
+  `;
+}
+
+// ==================== DIAGNOSIS ====================
+function renderDiagnosis(d) {
+  const r = {
+    f1: calcRate(d.followers, d.impressions),
+    f2: calcRate(d.inquiries, d.followers),
+    f3: calcRate(d.proposals, d.inquiries),
+    f4: calcRate(d.quotes, d.proposals),
+    f5: calcRate(d.deals, d.quotes),
+    f6: calcRate(d.referrals, d.deals),
+  };
+
+  let html = '';
+
+  // F1: 曝光→关注
+  if (r.f1 < 2) {
+    html += `<div class="alert alert-danger"><strong>🚨 曝光→关注 (${r.f1.toFixed(1)}%) 严重偏低</strong><br>
+    <strong>家装行业的流量密码是"反差感"。</strong>你的内容可能缺少让人"停下来看一眼"的冲击力。<br>
+    ① 首图策略：Before/After对比图 > 单张完工图 > 效果图（改造前后对比互动率通常高3-5倍）<br>
+    ② 标题公式："[苏州][户型面积㎡][风格]改造，[反差结果]"——例："苏州园区89㎡手枪户型，改完邻居以为换了套房"<br>
+    ③ 在苏州本地装修群/小区业主群分享你的内容（精准本地曝光）<br>
+    ④ 公众号文章转发到苏州本地生活社群。</div>`;
+  } else if (r.f1 < 5) {
+    html += `<div class="alert alert-warn"><strong>⚠️ 曝光→关注 (${r.f1.toFixed(1)}%) 有提升空间</strong><br>
+    建议：① 首图用Before/After拼图提升冲击力 ② 标题加入具体数字（"89㎡""30年老房""15万预算"）③ 封面统一用你最好的那套作品。</div>`;
+  } else {
+    html += `<div class="alert alert-success"><strong>✅ 曝光→关注 (${r.f1.toFixed(1)}%) 表现不错</strong><br>你的内容吸引力和封面设计做得好，继续保持。</div>`;
+  }
+
+  // F2: 关注→咨询 (KEY for interior designers)
+  if (r.f2 < 5) {
+    html += `<div class="alert alert-danger"><strong>🚨 关注→咨询 (${r.f2.toFixed(1)}%) 是你当前最大的收入卡点</strong><br>
+    关注你的人不少（${d.followers}人/月），但主动咨询的人太少（${d.inquiries}人/月）。<strong>这说明你的账号缺乏"行动引导"。</strong><br>
+    ① <strong>每条内容末尾加CTA：</strong>"喜欢这个风格？私信我帮你家看看户型怎么改"<br>
+    ② <strong>个人简介优化：</strong>"苏州独立设计师｜设计费¥XX-XX/㎡｜擅长XX风格｜私信预约免费量房咨询"——价格透明化能大幅降低咨询门槛<br>
+    ③ <strong>置顶笔记：</strong>"我的服务流程+设计费说明+常见问题FAQ"<br>
+    ④ <strong>私信自动回复设置：</strong>"你好！请告诉我：①小区/楼盘 ②户型面积 ③预算范围 ④喜欢的风格，我帮你初步分析~"<br>
+    ⑤ <strong>每周发1条"客户咨询问答"内容：</strong>把真实的咨询对话做成内容（脱敏），展示你的专业度。</div>`;
+  } else if (r.f2 < 10) {
+    html += `<div class="alert alert-warn"><strong>⚠️ 关注→咨询 (${r.f2.toFixed(1)}%) 可优化</strong><br>
+    建议：① 简介加入设计费参考区间 ② 定期发"互动话题"类内容引导评论 ③ 每条内容结尾加上明确的"下一步行动"引导。</div>`;
+  } else {
+    html += `<div class="alert alert-success"><strong>✅ 关注→咨询 (${r.f2.toFixed(1)}%) 表现好</strong><br>你的内容有效激发了业主的咨询欲望，继续保持。</div>`;
+  }
+
+  // F3: 咨询→量房
+  if (r.f3 < 25) {
+    html += `<div class="alert alert-danger"><strong>🚨 咨询→量房 (${r.f3.toFixed(1)}%) 流失严重</strong><br>
+    业主问了但不愿让你上门——说明信任还没建立。<br>
+    ① <strong>响应速度是关键：</strong>家装咨询的黄金响应窗口是<strong>30分钟内</strong>，超过2小时回复率断崖下降<br>
+    ② <strong>首次回复的策略：</strong>不要只回"你好"，直接发一段专业话术+同户型参考案例<br>
+    ③ <strong>降低量房心理门槛：</strong>"免费上门量房+出初步平面方案"——这是家装行业标配，如果你还没做，赶紧加上<br>
+    ④ <strong>展示"同小区/同户型"案例：</strong>这是最强的信任背书——"你们小区的XX栋XX户就是我设计的，要不要去看看？"</div>`;
+  } else if (r.f3 < 40) {
+    html += `<div class="alert alert-warn"><strong>⚠️ 咨询→量房 (${r.f3.toFixed(1)}%) 有流失</strong><br>
+    建议：① 准备标准话术模板应对不同咨询类型 ② 建立"量房预约日历"减少往返沟通 ③ 展示同户型案例增强专业信任。</div>`;
+  } else {
+    html += `<div class="alert alert-success"><strong>✅ 咨询→量房 (${r.f3.toFixed(1)}%) 转化优秀</strong><br>你的沟通能力和专业度能快速赢得业主信任。</div>`;
+  }
+
+  // F5: 方案→签约
+  if (r.f5 < 30) {
+    html += `<div class="alert alert-danger"><strong>🚨 方案→签约 (${r.f5.toFixed(1)}%) 偏低——临门一脚出问题了</strong><br>
+    方案都出了但业主不签。<strong>在家装行业，这通常意味着：</strong><br>
+    ① <strong>报价策略有误：</strong>是否给出了"对比参照"？建议给出2-3个方案档次（基础版/标准版/全案版），让业主"选择"而非"是否接受"<br>
+    ② <strong>价值呈现不够：</strong>不只是说"设计费¥XX"，要说"你花这个设计费，得到的是：空间利用率提升XX%、收纳增加XX%、动线优化帮你每天省下XX分钟"<br>
+    ③ <strong>没有制造合理紧迫感：</strong>"下个月我的档期已经排了3个工地了，如果你确定的话我优先排你的"<br>
+    ④ <strong>签约流程太复杂：</strong>是不是合同太长？收款方式太少？</div>`;
+  } else if (r.f5 < 50) {
+    html += `<div class="alert alert-warn"><strong>⚠️ 方案→签约 (${r.f5.toFixed(1)}%) 可优化</strong><br>
+    建议：① 方案汇报时加入同小区/同户型案例对比 ② 采用阶梯报价（2-3档） ③ 明确告知下一步流程降低决策焦虑。</div>`;
+  } else {
+    html += `<div class="alert alert-success"><strong>✅ 方案→签约 (${r.f5.toFixed(1)}%) 表现好</strong><br>你的方案能力和报价策略到位，成交能力强。</div>`;
+  }
+
+  // F6: 签约→转介绍
+  if (r.f6 < 15) {
+    html += `<div class="alert alert-warn"><strong>⚠️ 转介绍率 (${r.f6.toFixed(1)}%) 偏低——你正在浪费最便宜的获客渠道</strong><br>
+    家装行业转介绍是最优质、转化率最高（通常>60%）的获客方式。<br>
+    ① <strong>完工不是结束：</strong>入住后1周、1月、3月、半年分别回访一次——每次都是转介绍的机会窗口<br>
+    ② <strong>让业主帮你"晒家"：</strong>完工后送一次专业摄影（成本¥500-1,000），业主发朋友圈+小区群=你的免费广告<br>
+    ③ <strong>建立转介绍激励：</strong>"推荐朋友签约成功，送一次免费软装搭配咨询/一套全屋窗帘方案/¥500红包"<br>
+    ④ <strong>施工过程就让业主在小区群直播：</strong>"我家装修效果图出来了！这个设计师真不错"——从施工阶段就埋下推荐种子。</div>`;
+  } else {
+    html += `<div class="alert alert-success"><strong>✅ 转介绍率 (${r.f6.toFixed(1)}%) 不错</strong><br>你的交付体验和客户关系维护做得好，这是最可持续的增长引擎。</div>`;
+  }
+
+  document.getElementById('diagnosis').innerHTML = html || '<p style="color:var(--muted);">请先输入数据后再查看诊断。</p>';
+}
+
+// ==================== PROJECTION ====================
+function recalcProjection() {
+  const d = getData();
+  const avgPrice = parseInt(document.getElementById('avgPriceSlider').value) || 10000;
+  const optTarget = parseFloat(document.getElementById('optSlider').value) || 6.3;
+
+  const currentDeals = d.deals;
+  const currentRev = currentDeals * avgPrice;
+
+  const currentF2 = calcRate(d.inquiries, d.followers);
+  const optimizedInquiries = Math.round(d.followers * optTarget / 100);
+  const f3rate = d.inquiries > 0 ? d.proposals / d.inquiries : 0;
+  const f5rate = d.quotes > 0 ? d.deals / d.quotes : 0;
+  const optimizedDeals = Math.round(optimizedInquiries * f3rate * f5rate);
+  const optimizedRev = optimizedDeals * avgPrice;
+
+  const diffRev = optimizedRev - currentRev;
+  const maxRev = Math.max(currentRev, optimizedRev) * 1.3;
+
+  document.getElementById('projectionChart').innerHTML = `
+    <div class="projection-bar">
+      <span class="bar-label-text">当前月收入</span>
+      <span class="bar-track">
+        <span class="bar-fill" style="width:${currentRev/maxRev*100}%;background:var(--accent);">${currentDeals}单</span>
+      </span>
+      <span class="bar-amount">¥${currentRev.toLocaleString()}</span>
+    </div>
+    <div class="projection-bar">
+      <span class="bar-label-text">优化后月收入</span>
+      <span class="bar-track">
+        <span class="bar-fill" style="width:${optimizedRev/maxRev*100}%;background:var(--accent2);">${optimizedDeals}单</span>
+      </span>
+      <span class="bar-amount" style="color:var(--accent2);font-weight:700;">¥${optimizedRev.toLocaleString()}</span>
+    </div>
+    <div style="margin-top:14px;text-align:center;padding:14px;background:${diffRev>0?'var(--accent-light)':'#f9fafb'};border-radius:10px;">
+      <strong style="color:${diffRev>0?'var(--accent)':'var(--muted)'};font-size:17px;">
+        ${diffRev>0?'📈 预计月增收：':'😐 变化：'} ¥${Math.abs(diffRev).toLocaleString()}
+        ${diffRev>0?`（+${(diffRev/currentRev*100).toFixed(0)}%）`:''}
+      </strong><br>
+      <span style="font-size:13px;color:var(--muted);">
+        仅优化"关注→咨询"从 ${currentF2.toFixed(1)}% → ${optTarget.toFixed(1)}%<br>
+        <strong>年化增收约 ¥${(diffRev*12).toLocaleString()}</strong>
+      </span>
+    </div>
+  `;
+}
+
+// ==================== ACTION PLAN ====================
+function renderActionPlan(d) {
+  const rates = {
+    f1: {name:'曝光→关注', val:calcRate(d.followers,d.impressions)},
+    f2: {name:'关注→咨询', val:calcRate(d.inquiries,d.followers)},
+    f3: {name:'咨询→量房', val:calcRate(d.proposals,d.inquiries)},
+    f4: {name:'量房→方案', val:calcRate(d.quotes,d.proposals)},
+    f5: {name:'方案→签约', val:calcRate(d.deals,d.quotes)},
+    f6: {name:'签约→转介绍', val:calcRate(d.referrals,d.deals)},
+  };
+  const minEntry = Object.entries(rates).sort((a,b)=>a[1].val-b[1].val)[0];
+  const minKey = minEntry[0];
+
+  const actionMap = {
+    f1: { title:'提升内容吸引力（曝光→关注）', tasks:[
+      '本周：整理5个你最好的完工案例，做成Before/After对比图',
+      '本周：每篇笔记标题改成"苏州+户型+面积+风格+反差结果"公式',
+      '下周：制定内容日历，每周一/三/五固定发布（让算法认识你）',
+      '持续：在苏州本地装修群/小区业主群分享你的内容',
+    ]},
+    f2: { title:'激发业主主动咨询（关注→咨询）', tasks:[
+      '今天：优化所有平台个人简介——加上"苏州独立家装设计师｜设计费¥XX-XX/㎡｜私信预约免费量房咨询"',
+      '今天：设置小红书/公众号私信自动回复（FAQ+引导留联系方式）',
+      '本周：每条内容末尾加CTA——"喜欢这个风格？私信我帮你家看看"',
+      '下周：发布一篇置顶笔记——"我的设计服务全流程+价格说明"',
+    ]},
+    f3: { title:'提高咨询→量房转化率', tasks:[
+      '今天：准备3套标准化首次回复话术（针对不同户型/预算的业主）',
+      '本周：制作"量房前业主准备清单"和"量房当天流程说明"体现专业度',
+      '下周：设定响应SLA——所有咨询30分钟内首回，2小时内确认量房时间',
+      '持续：每次咨询记录业主的"顾虑点"，每月归类分析',
+    ]},
+    f4: { title:'确保量房后快速出方案', tasks:[
+      '本周：建立方案模板库（平面方案模板+效果图参考+材料建议）',
+      '下周：量房后48小时内出第一版平面方案（速度是竞争力）',
+      '持续：记录不同户型/风格方案的耗时，不断优化效率',
+    ]},
+    f5: { title:'提升方案→签约成交率', tasks:[
+      '本周：制作"设计费价值分析"模板（你的设计为业主带来的具体价值）',
+      '本周：设计3档报价体系——基础版（纯设计）/标准版（设计+施工监理）/全案版（设计+施工+软装）',
+      '下周：签约流程电子化——电子合同+在线支付，降低签约阻力',
+      '持续：每个未成交的业主记录原因，每月复盘',
+    ]},
+    f6: { title:'建立转介绍增长引擎', tasks:[
+      '本周：梳理过去1年所有成交业主名单，发一条问候信息',
+      '本周：设计转介绍激励方案（推荐成功送软装搭配+家居好物清单+红包）',
+      '下周：每个完工项目赠送专业摄影服务（方便业主晒家）',
+      '持续：建立客户维护日历——入住后1月/3月/半年定期回访',
+    ]},
+  };
+
+  const action = actionMap[minKey];
+  if (!action) return;
+
+  document.getElementById('actionPlan').innerHTML = `
+    <p style="color:var(--muted);margin-bottom:10px;">
+      🔍 你的漏斗数据显示，<strong style="color:var(--red);">"${rates[minKey].name}"（${minEntry[1].val.toFixed(1)}%）</strong>
+      是当前转化率最低的环节，优先攻克这里。
+    </p>
+    <div class="alert alert-info">
+      <strong>🎯 30天聚焦行动：${action.title}</strong>
+      <ol style="margin-top:6px;padding-left:18px;">
+        ${action.tasks.map(t=>`<li style="margin-bottom:5px;">${t}</li>`).join('')}
+      </ol>
+    </div>
+    <p style="margin-top:10px;color:var(--muted);font-size:13px;">
+      💡 每次只攻克一个环节，30天后重新评估漏斗数据，再确定下一个优化目标。<br>
+      🏠 家装行业特别提醒：<strong>转介绍是最终极的增长引擎</strong>——一个满意的业主在苏州一个小区平均能带来2-3个新客户。
+    </p>
+  `;
+}
+
+// ==================== SCENARIO ====================
+function loadScenario(name) {
+  document.querySelectorAll('.scenario-card').forEach(c=>c.classList.remove('selected'));
+  const scnEl = document.getElementById('scn-'+name);
+  if (scnEl) scnEl.classList.add('selected');
+
+  const s = scenarios[name];
+  if (!s) return;
+
+  document.getElementById('impressions').value = s.impressions;
+  document.getElementById('followers').value = s.followers;
+  document.getElementById('inquiries').value = s.inquiries;
+  document.getElementById('proposals').value = s.proposals;
+  document.getElementById('quotes').value = s.quotes;
+  document.getElementById('deals').value = s.deals;
+  document.getElementById('referrals').value = s.referrals;
+  document.getElementById('avgPriceSlider').value = s.price;
+  document.getElementById('avgPriceVal').textContent = '¥' + s.price.toLocaleString();
+  document.getElementById('optSlider').value = calcRate(s.inquiries, s.followers).toFixed(1);
+  document.getElementById('optVal').textContent = calcRate(s.inquiries, s.followers).toFixed(1) + '%';
+
+  recalc();
+}
+
+function resetData() { loadScenario('tina'); }
+
+// ==================== EXPORT ====================
+function exportReport() {
+  const d = getData();
+  const avgPrice = parseInt(document.getElementById('avgPriceSlider').value) || 10000;
+  const monthlyRev = d.deals * avgPrice;
+  const overallRate = calcRate(d.deals, d.impressions);
+
+  const report = `
+========================================
+  漏斗分析报告 — 家装设计师业务诊断
+  日期：${new Date().toLocaleDateString('zh-CN')}
+  粉丝：小红书1,200 / 公众号1,800 / 视频号400（示例数据）
+========================================
+
+【漏斗数据（月度）】
+  曝光：${d.impressions.toLocaleString()}
+  新增关注：${d.followers.toLocaleString()}（${calcRate(d.followers,d.impressions).toFixed(1)}%）
+  咨询：${d.inquiries.toLocaleString()}（${calcRate(d.inquiries,d.followers).toFixed(1)}%）
+  量房：${d.proposals.toLocaleString()}（${calcRate(d.proposals,d.inquiries).toFixed(1)}%）
+  方案报价：${d.quotes.toLocaleString()}（${calcRate(d.quotes,d.proposals).toFixed(1)}%）
+  签约：${d.deals.toLocaleString()}（${calcRate(d.deals,d.quotes).toFixed(1)}%）
+  转介绍：${d.referrals.toLocaleString()}（${calcRate(d.referrals,d.deals).toFixed(1)}%）
+
+【关键指标】
+  整体转化率：${overallRate.toFixed(3)}%
+  月签约单数：${d.deals}
+  平均设计费：¥${avgPrice.toLocaleString()}
+  预估月收入：¥${monthlyRev.toLocaleString()}
+  预估年收入：¥${(monthlyRev*12).toLocaleString()}
+
+【下一步】
+  1. 确定最大瓶颈环节
+  2. 制定30天优化计划（只改一个变量）
+  3. 一个月后重新评估数据
+  4. 循环迭代优化
+
+生成自：漏斗分析案例项目 · 室内家装设计师版
+========================================
+  `.trim();
+
+  const blob = new Blob([report], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `家装设计师漏斗分析报告_${new Date().toISOString().slice(0,10)}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ==================== INIT ====================
+loadScenario('tina');
+</script>
+
+</body>
+</html>
